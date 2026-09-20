@@ -1,59 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" content="#06100c">
-  <title>Cricket 26 Mobile — Visual Showcase</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#06100c">
+<title>Cricket 26 Mobile — Visual Showcase</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <canvas id="scene"></canvas>
-
-    <div class="cinematic-vignette"></div>
-
-    <header class="hud top">
-      <div class="brand">
-        <span class="eyebrow">PHASE 01 · VISUALS</span>
-        <strong>CRICKET 26 <em>MOBILE</em></strong>
-        <span class="micro">3D STADIUM SHOWCASE</span>
-      </div>
-      <div class="status">
-        <span class="live-dot"></span>
-        <span>VISUAL DEMO</span>
-      </div>
-    </header>
-
-    <section class="intro" id="intro">
-      <div class="intro-card">
-        <span class="eyebrow">MATCH DAY</span>
-        <h1>The ground<br><span>comes alive.</span></h1>
-        <p>Original WebGL visuals inspired by the reference style: realistic cricket ground, broadcast atmosphere, floodlights, crowd and 3D players.</p>
-        <button id="enterBtn" class="primary">ENTER STADIUM</button>
-      </div>
-    </section>
-
-    <div class="hud bottom">
-      <div class="camera-panel">
-        <span class="label">CAMERA</span>
-        <div class="camera-buttons">
-          <button data-camera="broadcast" class="camera active">BROADCAST</button>
-          <button data-camera="batter" class="camera">BATTER</button>
-          <button data-camera="bowler" class="camera">BOWLER</button>
-          <button data-camera="wide" class="camera">WIDE</button>
-          <button data-camera="cinematic" class="camera">CINEMATIC</button>
-        </div>
-      </div>
-      <div class="scene-readout">
-        <span>STADIUM</span><b id="sceneName">NIGHT TEST ARENA</b>
-        <span>RENDER</span><b>WEBGL · REALTIME</b>
-      </div>
-    </div>
-
-    <div class="hint" id="hint">Drag to look around · pinch/scroll to zoom</div>
-  </div>
-
-  <script type="module" src="game.js"></script>
+<div id="app">
+<canvas id="scene"></canvas>
+<div class="cinematic-vignette"></div>
+<header class="hud top">
+<div class="brand"><span class="eyebrow">PHASE 01 · VISUALS</span><strong>CRICKET 26 <em>MOBILE</em></strong><span class="micro">3D STADIUM SHOWCASE</span></div>
+<div class="status"><span class="live-dot"></span><span>VISUAL DEMO</span></div>
+</header>
+<section class="intro" id="intro">
+<div class="intro-card"><span class="eyebrow">MATCH DAY</span><h1>The ground<br><span>comes alive.</span></h1><p>Original WebGL visuals inspired by the reference style: realistic cricket ground, broadcast atmosphere, floodlights, crowd and 3D players.</p><button id="enterBtn" class="primary">ENTER STADIUM</button></div>
+</section>
+<div class="hud bottom">
+<div class="camera-panel"><span class="label">CAMERA</span><div class="camera-buttons">
+<button data-camera="broadcast" class="camera active">BROADCAST</button>
+<button data-camera="batter" class="camera">BATTER</button>
+<button data-camera="bowler" class="camera">BOWLER</button>
+<button data-camera="wide" class="camera">WIDE</button>
+<button data-camera="cinematic" class="camera">CINEMATIC</button>
+</div></div>
+<div class="scene-readout"><span>STADIUM</span><b id="sceneName">NIGHT TEST ARENA</b><span>RENDER</span><b>WEBGL · REALTIME</b></div>
+</div>
+<div class="hint" id="hint">Drag to look around · pinch/scroll to zoom</div>
+</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
+<script type="module" src="game.js"></script>
 </body>
 </html>
