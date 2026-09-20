@@ -1,6 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#06100c"><title>Cricket 26 Mobile — Visual Showcase</title><link rel="stylesheet" href="style.css"></head><body><div id="app"><canvas id="scene"></canvas><div class="cinematic-vignette"></div><button id="settingsFloat" class="settings-float" aria-label="Open settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 2.6h4.6l.55 2.05c.48.17.94.37 1.37.61l1.9-.98 3.25 3.25-.98 1.9c.24.43.44.89.61 1.37l2.05.55v4.6l-2.05.55c-.17.48-.37.94-.61 1.37l.98 1.9-3.25 3.25-1.9-.98c-.43.24-.89.44-1.37.61l-.55 2.05H9.7l-.55-2.05a9.8 9.8 0 0 1-1.37-.61l-1.9.98-3.25-3.25.98-1.9a9.8 9.8 0 0 1-.61-1.37L.95 15.95v-4.6L3 10.8c.17-.48.37-.94.61-1.37l-.98-1.9 3.25-3.25 1.9.98c.43-.24.89-.44 1.37-.61L9.7 2.6ZM12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/></svg></button>
-<header class="hud top"><div class="brand"><span class="eyebrow">PHASE 01 · VISUALS</span><strong>CRICKET 26 <em>MOBILE</em></strong><span class="micro">3D STADIUM SHOWCASE</span></div><div class="top-actions"><div class="status"><span class="live-dot"></span><span>VISUAL DEMO</span></div><button id="settingsBtn" class="gear" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 2.6h4.6l.55 2.05c.48.17.94.37 1.37.61l1.9-.98 3.25 3.25-.98 1.9c.24.43.44.89.61 1.37l2.05.55v4.6l-2.05.55c-.17.48-.37.94-.61 1.37l.98 1.9-3.25 3.25-1.9-.98c-.43.24-.89.44-1.37.61l-.55 2.05H9.7l-.55-2.05a9.8 9.8 0 0 1-1.37-.61l-1.9.98-3.25-3.25.98-1.9a9.8 9.8 0 0 1-.61-1.37L.95 15.95v-4.6L3 10.8c.17-.48.37-.94.61-1.37l-.98-1.9 3.25-3.25 1.9.98c.43-.24.89-.44 1.37-.61L9.7 2.6ZM12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/></svg></button></div></header>
-<section class="intro" id="intro"><div class="intro-card"><span class="eyebrow">MATCH DAY</span><h1>The ground<br><span>comes alive.</span></h1><p>Original realtime 3D visuals with richer materials, stadium atmosphere, player detail and country colour themes.</p><button id="enterBtn" class="primary">ENTER STADIUM</button></div></section>
-<section class="settings" id="settings"><div class="settings-card"><div class="settings-head"><div><span class="eyebrow">PRESENTATION</span><h2>Settings</h2></div><button id="closeSettings" class="close">×</button></div><div class="setting-block"><label>COUNTRY COLOUR THEME</label><p id="countryDesc">Australia · Green & Gold</p><div class="country-grid" id="countryGrid"></div></div><div class="setting-block"><label>VISUAL STYLE</label><div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST<br><small>Balanced</small></button><button class="style-choice" data-style="cinematic">CINEMATIC<br><small>Deeper contrast</small></button><button class="style-choice" data-style="bright">DAYLIGHT<br><small>Clear & bright</small></button></div></div></div></section>
-<div class="hud bottom"><div class="camera-panel"><span class="label">CAMERA</span><div class="camera-buttons"><button data-camera="broadcast" class="camera active">BROADCAST</button><button data-camera="batter" class="camera">BATTER</button><button data-camera="bowler" class="camera">BOWLER</button><button data-camera="wide" class="camera">WIDE</button><button data-camera="cinematic" class="camera">CINEMATIC</button></div></div><div class="scene-readout"><span>COUNTRY</span><b id="countryReadout">AUSTRALIA</b><span>RENDER</span><b>WEBGL · REALTIME</b></div></div><div class="hint" id="hint">Drag to look around · pinch/scroll to zoom</div></div>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script><script type="module" src="game.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#06100c">
+<title>Cricket 26 Mobile — Visual Showcase</title>
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<div id="app">
+<canvas id="scene"></canvas>
+
+<div class="ui-layer">
+<button id="settingsFloat" class="settings-float" aria-label="Settings">
+<svg viewBox="0 0 24 24"><path d="M9.7 2.6h4.6l.55 2.05c.48.17.94.37 1.37.61l1.9-.98 3.25 3.25-.98 1.9c.24.43.44.89.61 1.37l2.05.55v4.6l-2.05.55c-.17.48-.37.94-.61 1.37l.98 1.9-3.25 3.25-1.9-.98c-.43.24-.89.44-1.37.61l-.55 2.05H9.7l-.55-2.05a9.8 9.8 0 0 1-1.37-.61l-1.9.98-3.25-3.25.98-1.9a9.8 9.8 0 0 1-.61-1.37L.95 15.95v-4.6L3 10.8c.17-.48.37-.94.61-1.37l-.98-1.9 3.25-3.25 1.9.98c.43-.24.89-.44.61-.37L9.7 2.6ZM12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/></svg>
+</button>
+
+<header class="topbar">
+<div class="brand"><span>PHASE 01 · VISUALS</span><strong>CRICKET 26 <i>MOBILE</i></strong><small>3D STADIUM SHOWCASE</small></div>
+<div class="live">● VISUAL DEMO</div>
+</header>
+
+<div id="intro" class="intro">
+<div class="intro-card"><span>MATCH DAY</span><h1>The ground<br><b>comes alive.</b></h1><p>Original realtime 3D cricket visuals.</p><button id="enterBtn">ENTER STADIUM</button></div>
+</div>
+
+<div class="bottom-ui">
+<div><label>CAMERA</label><div class="camera-buttons">
+<button class="camera active" data-camera="broadcast">BROADCAST</button>
+<button class="camera" data-camera="batter">BATTER</button>
+<button class="camera" data-camera="bowler">BOWLER</button>
+<button class="camera" data-camera="wide">WIDE</button>
+<button class="camera" data-camera="cinematic">CINEMATIC</button>
+</div></div>
+<div class="readout"><small>COUNTRY</small><b id="countryReadout">AUSTRALIA</b></div>
+</div>
+
+<div id="settings" class="settings">
+<div class="settings-card">
+<div class="settings-head"><div><span>GAME PRESENTATION</span><h2>Settings</h2></div><button id="closeSettings">×</button></div>
+<label>COUNTRY COLOUR THEME</label><p id="countryDesc">Australia · Green & Gold</p>
+<div id="countryGrid" class="country-grid"></div>
+<label class="style-label">VISUAL STYLE</label>
+<div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST</button><button class="style-choice" data-style="cinematic">CINEMATIC</button><button class="style-choice" data-style="bright">DAYLIGHT</button></div>
+</div>
+</div>
+</div>
+</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
+<script type="module" src="game.js?v=4"></script>
+</body>
+</html>
