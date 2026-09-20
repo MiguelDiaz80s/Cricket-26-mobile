@@ -205,7 +205,7 @@ Object.entries(countries).forEach(([name,c])=>{
 });
 
 const settings=document.querySelector("#settings");
-document.querySelector("#settingsBtn").addEventListener("click",()=>settings.classList.add("open"));
+document.querySelector("#settingsFloat").addEventListener("click",()=>settings.classList.add("open"));
 document.querySelector("#closeSettings").addEventListener("click",()=>settings.classList.remove("open"));
 settings.addEventListener("click",e=>{if(e.target===settings)settings.classList.remove("open")});
 
