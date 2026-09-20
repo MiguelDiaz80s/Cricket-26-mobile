@@ -157,79 +157,142 @@ function limbBetween(a,b,r,mat){
  return o;
 }
 
-function player({team=0,role="fielder",x=0,z=0,scale=.95}={}){
- const g=new THREE.Group();g.position.set(x,.18,z);g.scale.setScalar(scale);
- // PLAYER-ONLY: connected, smooth human anatomy. Body parts overlap at joints so they read as one person.
- const shirtColor=team===0?theme.a:"#e8ece8", trimColor=team===0?theme.b:"#b8c1bd", pantsColor=team===0?theme.a:"#f2f3ed";
+function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
+ const g=new THREE.Group();
+ g.position.set(x,.18,z);
+ g.scale.setScalar(scale);
+
+ // PLAYER ONLY — human-shaped continuous silhouette. No ball-like body pieces.
+ const shirtColor=team===0?theme.a:"#e8ece8";
+ const trimColor=team===0?theme.b:"#b8c1bd";
+ const pantsColor=team===0?theme.a:"#f2f3ed";
  const skinColor=team===0?"#9b6849":"#8a573d";
- const shirt=material(shirtColor,.5),trim=material(trimColor,.42,.08),pants=material(pantsColor,.7),skin=material(skinColor,.78),hair=material("#241a15",.9),shoe=material("#111516",.3,.18);
- const helmet=material(team===0?theme.a:"#dce2df",.34,.3),seamMat=material(team===0?theme.b:"#bfc8c4",.38,.12);
- const add=(geo,mat,pos,sc=[1,1,1])=>{const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.scale.set(...sc);m.castShadow=true;m.receiveShadow=true;g.add(m);return m};
- const capsule=(r,len,mat,a,b)=>{const v=new THREE.Vector3().subVectors(b,a),mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.06,len-r*2),10,18),mat);m.position.copy(mid);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());m.castShadow=true;m.receiveShadow=true;g.add(m);return m};
- // A broad athletic torso with tapered shoulders and a defined waist.
- add(new THREE.CapsuleGeometry(.39,.72,12,24),shirt,[0,1.18,0],[1.02,1,.80]);
- add(new THREE.SphereGeometry(.32,24,18),shirt,[0,.83,0],[1.10,.58,.84]);
- // Neck joins deeply into the torso and head.
- add(new THREE.CapsuleGeometry(.12,.18,10,18),skin,[0,1.69,0],[1,1,1]);
- add(new THREE.SphereGeometry(.285,28,22),skin,[0,2.00,0],[.95,1.06,.96]);
- add(new THREE.SphereGeometry(.295,24,18,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.95,1,.96]);
- add(new THREE.SphereGeometry(.048,12,10),skin,[-.275,2.00,0]);
- add(new THREE.SphereGeometry(.048,12,10),skin,[.275,2.00,0]);
- // Shoulders are rounded and substantially thicker than before; upper/lower arms overlap.
- const shoulderL=new THREE.Vector3(-.39,1.43,0),shoulderR=new THREE.Vector3(.39,1.43,0);
- const elbowL=new THREE.Vector3(-.53,1.15,-.015),elbowR=new THREE.Vector3(.53,1.15,-.015);
- const handL=new THREE.Vector3(-.46,.91,-.055),handR=new THREE.Vector3(.46,.91,-.055);
- capsule(.145,.30,shirt,shoulderL,elbowL);
- capsule(.115,.27,skin,elbowL,handL);
- capsule(.145,.30,shirt,shoulderR,elbowR);
- capsule(.115,.27,skin,elbowR,handR);
- add(new THREE.SphereGeometry(.11,18,14),skin,handL.toArray(),[1,.9,.85]);
- add(new THREE.SphereGeometry(.11,18,14),skin,handR.toArray(),[1,.9,.85]);
- // Legs are thicker and overlap the hips/knees instead of looking like detached rods.
- const hipL=new THREE.Vector3(-.17,.82,0),hipR=new THREE.Vector3(.17,.82,0);
- const kneeL=new THREE.Vector3(-.20,.43,-.01),kneeR=new THREE.Vector3(.20,.43,-.01);
- const ankleL=new THREE.Vector3(-.20,.12,-.09),ankleR=new THREE.Vector3(.20,.12,-.09);
- capsule(.145,.36,pants,hipL,kneeL);capsule(.13,.31,pants,kneeL,ankleL);
- capsule(.145,.36,pants,hipR,kneeR);capsule(.13,.31,pants,kneeR,ankleR);
- add(new THREE.SphereGeometry(.155,18,14),shoe,[-.20,.09,-.15],[1.08,.48,1.7]);
- add(new THREE.SphereGeometry(.155,18,14),shoe,[.20,.09,-.15],[1.08,.48,1.7]);
- // Headgear is rounded, not blocky.
- if(role!=="keeper"){
-  add(new THREE.SphereGeometry(.38,28,18,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,1,.98]);
-  add(new THREE.CapsuleGeometry(.055,.34,8,14),helmet,[0,2.04,-.34],[1,.55,.7]).rotation.x=Math.PI/2;
- }else{
-  add(new THREE.SphereGeometry(.39,28,18,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,1,.98]);
-  [-.19,0,.19].forEach((xx,i)=>{const bar=add(new THREE.CapsuleGeometry(.02,.46,6,10),seamMat,[xx,1.99,-.35],[1,1,.7]);bar.rotation.z=(i-1)*.1});
- }
+
+ const shirt=material(shirtColor,.55);
+ const trim=material(trimColor,.48,.06);
+ const pants=material(pantsColor,.72);
+ const skin=material(skinColor,.8);
+ const hair=material("#241a15",.9);
+ const shoe=material("#111516",.3,.18);
+ const helmet=material(team===0?theme.a:"#dce2df",.34,.28);
+ const seamMat=material(team===0?theme.b:"#bfc8c4",.38,.1);
+
+ const mesh=(geometry,mat,pos,scale=[1,1,1])=>{
+  const m=new THREE.Mesh(geometry,mat);
+  m.position.set(...pos);m.scale.set(...scale);
+  m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
+ };
+ const segment=(a,b,r,mat)=>{
+  const v=new THREE.Vector3().subVectors(b,a);
+  const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
+  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),10,16),mat);
+  m.position.copy(mid);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());
+  m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
+ };
+
+ // --- Pose first: the batter's hands are placed around the bat handle BEFORE the arms are built.
+ let leftHand,rightHand;
  if(role==="batter"){
-  const pad=material("#e9e8df",.48),glove=material("#e6e1d0",.48);
-  // Pads hug the legs rather than floating beside them.
-  add(new THREE.CapsuleGeometry(.125,.50,10,18),pad,[-.20,.52,-.145],[1.12,1,.72]);
-  add(new THREE.CapsuleGeometry(.125,.50,10,18),pad,[.20,.52,-.145],[1.12,1,.72]);
-  add(new THREE.SphereGeometry(.145,18,14),glove,handL.toArray(),[1.05,.9,.85]);
-  add(new THREE.SphereGeometry(.145,18,14),glove,handR.toArray(),[1.05,.9,.85]);
-  // Bat is positioned into the hands, not beside them: both hands grip the handle.
-  const batGroup=new THREE.Group();batGroup.position.set(.43,.95,-.22);batGroup.rotation.z=-.16;batGroup.rotation.x=.05;
-  const blade=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.88,10,18),material("#c99b54",.45));blade.scale.set(1.15,1,.52);blade.position.y=.02;blade.castShadow=true;blade.receiveShadow=true;
-  const handle=new THREE.Mesh(new THREE.CapsuleGeometry(.052,.42,8,14),material("#4b3427",.7));handle.position.y=.62;handle.castShadow=true;handle.receiveShadow=true;
-  batGroup.add(blade,handle);g.add(batGroup);
-  // Move the hands onto the bat handle so the bat and arms visibly connect.
-  const gripTop=new THREE.Vector3(.43,.95,-.22).add(new THREE.Vector3(0,.83,0));
-  const gripBottom=new THREE.Vector3(.43,.95,-.22).add(new THREE.Vector3(0,.48,0));
-  handL.copy(gripBottom);handR.copy(gripTop);
-  // Overlay gloves exactly at the grip points.
-  add(new THREE.SphereGeometry(.145,18,14),glove,handL.toArray(),[1.05,.9,.85]);
-  add(new THREE.SphereGeometry(.145,18,14),glove,handR.toArray(),[1.05,.9,.85]);
- } else if(role==="keeper"){
-  const glove=material("#eeeadd",.48),pad=material("#e6e5dc",.52);
-  // Keeper gloves sit directly at the ends of the arms.
-  add(new THREE.SphereGeometry(.23,20,16),glove,[-.56,.95,-.10],[1.15,.9,.9]);
-  add(new THREE.SphereGeometry(.23,20,16),glove,[.56,.95,-.10],[1.15,.9,.9]);
-  add(new THREE.CapsuleGeometry(.125,.50,10,18),pad,[-.20,.52,-.16],[1.12,1,.72]);
-  add(new THREE.CapsuleGeometry(.125,.50,10,18),pad,[.20,.52,-.16],[1.12,1,.72]);
+  leftHand=new THREE.Vector3(.39,1.25,-.34);
+  rightHand=new THREE.Vector3(.39,1.48,-.34);
+ } else {
+  leftHand=new THREE.Vector3(-.47,.93,-.04);
+  rightHand=new THREE.Vector3(.47,.93,-.04);
  }
+
+ // Main silhouette: one tapered torso, chest/waist transition, and hips.
+ // The torso is deliberately larger than the limbs so the player reads as a human at distance.
+ mesh(new THREE.CapsuleGeometry(.40,.72,12,24),shirt,[0,1.18,0],[1.13,1,.76]);
+ mesh(new THREE.CapsuleGeometry(.32,.18,10,18),shirt,[0,.79,0],[1.18,1,.82]);
+
+ // Shoulder mass smoothly joins the torso instead of floating as separate balls.
+ mesh(new THREE.CapsuleGeometry(.30,.24,10,18),shirt,[-.28,1.40,0],[1,.95,.82]);
+ mesh(new THREE.CapsuleGeometry(.30,.24,10,18),shirt,[.28,1.40,0],[1,.95,.82]);
+
+ // Neck, head and hair.
+ mesh(new THREE.CapsuleGeometry(.115,.20,10,18),skin,[0,1.70,0],[1,1,1]);
+ mesh(new THREE.CapsuleGeometry(.29,.23,12,20),skin,[0,2.00,0],[.94,1.08,.94]);
+ mesh(new THREE.SphereGeometry(.30,24,18,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.94,1,.94]);
+ mesh(new THREE.SphereGeometry(.045,10,8),skin,[-.275,2.00,0]);
+ mesh(new THREE.SphereGeometry(.045,10,8),skin,[.275,2.00,0]);
+
+ // Arms are thick human limbs and actually terminate at the planned hand positions.
+ const shoulderL=new THREE.Vector3(-.39,1.43,0);
+ const shoulderR=new THREE.Vector3(.39,1.43,0);
+ const elbowL=role==="batter"?new THREE.Vector3(-.02,1.31,-.22):new THREE.Vector3(-.53,1.13,-.02);
+ const elbowR=role==="batter"?new THREE.Vector3(.10,1.38,-.27):new THREE.Vector3(.53,1.13,-.02);
+ segment(shoulderL,elbowL,.14,shirt);
+ segment(elbowL,leftHand,.115,skin);
+ segment(shoulderR,elbowR,.14,shirt);
+ segment(elbowR,rightHand,.115,skin);
+
+ // Hands are rounded but small enough that they don't turn into body spheres.
+ mesh(new THREE.CapsuleGeometry(.10,.10,8,12),skin,leftHand.toArray(),[1,.9,.82]);
+ mesh(new THREE.CapsuleGeometry(.10,.10,8,12),skin,rightHand.toArray(),[1,.9,.82]);
+
+ // Legs connect directly into the hips, with thick upper/lower sections and no gaps.
+ const hipL=new THREE.Vector3(-.19,.78,0), hipR=new THREE.Vector3(.19,.78,0);
+ const kneeL=new THREE.Vector3(-.21,.43,-.01), kneeR=new THREE.Vector3(.21,.43,-.01);
+ const ankleL=new THREE.Vector3(-.21,.13,-.09), ankleR=new THREE.Vector3(.21,.13,-.09);
+ segment(hipL,kneeL,.15,pants);
+ segment(kneeL,ankleL,.135,pants);
+ segment(hipR,kneeR,.15,pants);
+ segment(kneeR,ankleR,.135,pants);
+
+ // Rounded cricket shoes — attached to ankles, not floating.
+ mesh(new THREE.CapsuleGeometry(.12,.24,10,16),shoe,[-.21,.08,-.16],[1.25,.55,1.65]);
+ mesh(new THREE.CapsuleGeometry(.12,.24,10,16),shoe,[.21,.08,-.16],[1.25,.55,1.65]);
+
+ // Helmet/headgear.
+ if(role!=="keeper"){
+  mesh(new THREE.SphereGeometry(.38,28,18,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,.96,.98]);
+  const peak=mesh(new THREE.CapsuleGeometry(.055,.30,8,12),helmet,[0,2.06,-.33],[1,.65,.65]);
+  peak.rotation.x=Math.PI/2;
+ } else {
+  mesh(new THREE.SphereGeometry(.39,28,18,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,.98,.98]);
+  [-.18,0,.18].forEach((xx,i)=>{
+   const bar=mesh(new THREE.CapsuleGeometry(.022,.45,6,10),seamMat,[xx,1.99,-.35],[1,1,.7]);
+   bar.rotation.z=(i-1)*.08;
+  });
+ }
+
+ // Batting equipment follows the actual legs and hands.
+ if(role==="batter"){
+  const pad=material("#e9e8df",.48);
+  const glove=material("#e6e1d0",.48);
+
+  mesh(new THREE.CapsuleGeometry(.14,.48,10,18),pad,[-.21,.53,-.15],[1.15,1,.72]);
+  mesh(new THREE.CapsuleGeometry(.14,.48,10,18),pad,[.21,.53,-.15],[1.15,1,.72]);
+
+  // One continuous bat handle passes directly through BOTH hands.
+  const batBottom=new THREE.Vector3(.39,.98,-.34);
+  const batTop=new THREE.Vector3(.39,1.70,-.34);
+  const batBladeEnd=new THREE.Vector3(.39,.20,-.34);
+
+  const batMat=material("#c99b54",.45);
+  const gripMat=material("#4b3427",.7);
+
+  // Blade is a long rounded cricket-bat body.
+  segment(batBladeEnd,batBottom,.115,batMat);
+  // Handle overlaps the upper blade and reaches through both hands.
+  segment(batBottom,batTop,.052,gripMat);
+
+  // Gloves are placed exactly around the handle.
+  mesh(new THREE.CapsuleGeometry(.13,.13,8,12),glove,leftHand.toArray(),[1.12,.9,.9]);
+  mesh(new THREE.CapsuleGeometry(.13,.13,8,12),glove,rightHand.toArray(),[1.12,.9,.9]);
+ } else if(role==="keeper"){
+  const glove=material("#eeeadd",.48);
+  const pad=material("#e6e5dc",.52);
+  mesh(new THREE.CapsuleGeometry(.20,.18,10,14),glove,[-.57,.95,-.10],[1.25,.9,.9]);
+  mesh(new THREE.CapsuleGeometry(.20,.18,10,14),glove,[.57,.95,-.10],[1.25,.9,.9]);
+  mesh(new THREE.CapsuleGeometry(.14,.48,10,18),pad,[-.21,.53,-.16],[1.15,1,.72]);
+  mesh(new THREE.CapsuleGeometry(.14,.48,10,18),pad,[.21,.53,-.16],[1.15,1,.72]);
+ }
+
  g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
- stadium.add(g);return g;
+ stadium.add(g);
+ return g;
 }
 
 const batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
