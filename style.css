@@ -83,3 +83,98 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr;gap:7px}
 body.phone-portrait .hit-joystick{width:118px;height:118px}
 body.phone-portrait .joystick-wrap{display:flex;align-items:center;gap:10px;text-align:left}.device-pc .match-controls .hit-joystick{width:105px;height:105px}
 @media(max-width:650px){.device-options{grid-template-columns:1fr}.device-card{padding:18px}.device-options button{padding:13px}.batting-layout{grid-template-columns:125px 1fr;gap:8px}.hit-joystick{width:112px;height:112px}.joystick-stick{width:36px;height:36px;margin:-18px}.shot-three button,.foot-four button{font-size:6px;min-height:35px}.control-foot span:nth-child(1){display:none}}
+
+/* =========================================================
+   COMPACT BATTER CONTROLS — landscape friendly
+   ========================================================= */
+.match-controls{
+  width:min(700px,88vw)!important;
+  max-width:700px!important;
+  left:50%!important;
+  right:auto!important;
+  transform:translateX(-50%)!important;
+  bottom:max(12px,env(safe-area-inset-bottom))!important;
+  padding:8px 10px!important;
+  border-radius:14px!important;
+  background:#030a07dd!important;
+  backdrop-filter:blur(10px)!important;
+}
+.match-controls .control-head{margin-bottom:3px!important;font-size:6px!important}
+.match-controls .recommendation-text{display:none!important}
+.match-controls .timing-meter{height:7px!important;margin:3px 0 6px!important}
+.match-controls .delivery-status{margin-bottom:3px!important}
+.batting-layout{grid-template-columns:150px 1fr!important;gap:10px!important}
+.joystick-wrap{position:relative}
+.joystick-title{font-size:6px!important;margin-bottom:3px!important}
+.hit-joystick{
+  width:128px!important;height:128px!important;
+  border:2px solid #fff4!important;
+  box-shadow:inset 0 0 0 9px #fff1,0 8px 22px #0008!important;
+}
+.joystick-rings{inset:25%!important}
+.joystick-stick{width:34px!important;height:34px!important;margin:-17px!important}
+.hit-joystick .j-up,.hit-joystick .j-down,.hit-joystick .j-left,.hit-joystick .j-right{display:none!important}
+.joystick-tick{
+  position:absolute!important;
+  left:50%!important;top:50%!important;
+  width:3px!important;height:10px!important;
+  margin:-5px -1.5px!important;
+  border-radius:99px!important;
+  background:#ffffff55!important;
+  transform-origin:1.5px 5px!important;
+  box-shadow:none!important;
+  pointer-events:none!important;
+}
+.joystick-tick.recommended{
+  width:5px!important;height:17px!important;
+  margin:-8.5px -2.5px!important;
+  background:var(--accent)!important;
+  box-shadow:0 0 7px var(--accent),0 0 15px var(--accent)!important;
+}
+.joystick-tick-label{
+  position:absolute!important;
+  left:50%!important;top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  font-size:5px!important;font-weight:950!important;
+  color:#fff!important;opacity:0!important;
+  pointer-events:none!important;
+}
+.batting-buttons{min-width:0!important}
+.shot-three{gap:4px!important}
+.foot-four{gap:4px!important;margin-top:4px!important}
+.shot-three button,.foot-four button{
+  min-height:30px!important;
+  height:30px!important;
+  padding:4px 3px!important;
+  border-radius:6px!important;
+  font-size:6px!important;
+  letter-spacing:.02em!important;
+}
+.shot-three button.recommended,.foot-four button.recommended{
+  border-color:var(--accent)!important;
+  color:var(--accent)!important;
+  box-shadow:inset 0 0 0 1px var(--accent),0 0 9px color-mix(in srgb,var(--accent) 35%,transparent)!important;
+  background:#ffffff08!important;
+}
+.shot-three .shot-main.recommended{
+  color:#111!important;background:var(--accent)!important;
+}
+.delivery-btn{
+  min-height:29px!important;height:29px!important;
+  margin-top:5px!important;padding:4px 12px!important;
+  border-radius:6px!important;font-size:6px!important;
+}
+.match-controls .control-foot{margin-top:4px!important;font-size:5px!important}
+@media(max-width:900px){
+  .match-controls{width:min(650px,90vw)!important}
+}
+@media(max-width:650px){
+  .match-controls{width:94vw!important;bottom:max(8px,env(safe-area-inset-bottom))!important;padding:7px 8px!important}
+  .batting-layout{grid-template-columns:120px 1fr!important;gap:7px!important}
+  .hit-joystick{width:105px!important;height:105px!important}
+  .joystick-tick{height:8px!important;margin:-4px -1.5px!important}
+  .joystick-tick.recommended{height:14px!important;margin:-7px -2.5px!important}
+  .shot-three button,.foot-four button{min-height:27px!important;height:27px!important;font-size:5.5px!important}
+}
+body.phone-portrait .match-controls{width:94vw!important}
+body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
