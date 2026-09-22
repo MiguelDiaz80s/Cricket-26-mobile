@@ -455,7 +455,7 @@ function calculateTiming(progress){
 
 function resolveWicket(reason){
  deliveryActive=false;shotFlightActive=false;ballHit=true;
- inningsWickets++;inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;
+ inningsWickets++;inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++; if(window.Cricket26Advanced){Cricket26Advanced.commentary.event({wicket:true,score:inningsRuns,balls:inningsBalls});Cricket26Advanced.audio.wicket();Cricket26Advanced.save();}
  lastOutcome="WICKET · "+reason;setDeliveryStatus("WICKET · "+reason);
  timingLabel.textContent=reason;showToast("WICKET · "+reason);updateScoreboard();
  setTimeout(()=>{
@@ -466,13 +466,13 @@ function resolveWicket(reason){
 
 function resolveDot(){
  deliveryActive=false;shotFlightActive=false;ballHit=false;
- inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;
+ inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++; if(window.Cricket26Advanced){Cricket26Advanced.commentary.event({runs:0,dots:Cricket26Advanced.state.pattern.dots,score:inningsRuns,balls:inningsBalls});Cricket26Advanced.audio.tone(120,.05);Cricket26Advanced.save();}
  lastOutcome="DOT BALL";setDeliveryStatus("DOT BALL");showToast("DOT BALL");updateScoreboard();
  setTimeout(resetDelivery,650);
 }
 
 function finishRuns(runs,label){
- inningsRuns+=runs;inningsBalls++;ballsInOver=inningsBalls%6;strikerRuns+=runs;strikerBalls++;
+ inningsRuns+=runs;inningsBalls++;ballsInOver=inningsBalls%6;strikerRuns+=runs;strikerBalls++; if(window.Cricket26Advanced){Cricket26Advanced.tactics.record(hitDirection.x<-.25?"off":hitDirection.x>.25?"leg":"straight",runs);Cricket26Advanced.commentary.event({runs,score:inningsRuns,balls:inningsBalls,dots:Cricket26Advanced.state.pattern.dots});runs>=4?Cricket26Advanced.audio.boundary():Cricket26Advanced.audio.hit();Cricket26Advanced.save();}
  lastOutcome=label||String(runs)+" RUNS";updateScoreboard();
  if(label)showToast(label);
 }
@@ -517,6 +517,7 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
 function playShot(shot){
  if(!deliveryActive||matchPhase!=="FLIGHT"||ballHit)return;
  selectedShot=shot;
+ if(window.Cricket26Advanced){Cricket26Advanced.net.send({type:"shot",shot,aim:hitDirection,foot:selectedFoot,t:performance.now()});Cricket26Advanced.audio.init();}
  const progress=Math.max(0,Math.min(1,(performance.now()-deliveryStart)/deliveryDuration));
  if(progress<.56)return;
  const timing=calculateTiming(progress);
@@ -583,11 +584,11 @@ continueFromToss.addEventListener("click",()=>{
  inningsRuns=0;inningsBalls=0;inningsWickets=0;strikerRuns=0;strikerBalls=0;ballsInOver=0;
  totalOvers=selectedFormat==="T20"?20:selectedFormat==="ODI"?50:9999;
  hudTeam.textContent=battingFirst.toUpperCase();document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
- setCamera("broadcast");resetFielders();resetDelivery();showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER RUN-UP");
+ setCamera("broadcast");resetFielders();resetDelivery();showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER RUN-UP"); if(window.Cricket26Advanced){Cricket26Advanced.audio.init();Cricket26Advanced.commentary.say("pressure","New innings underway.");}
 });
 
 deliveryBtn.addEventListener("click",startDelivery);
-function liveBallLoop(now){if(deliveryActive)updateRunUpAndDelivery(now);requestAnimationFrame(liveBallLoop);}
+function liveBallLoop(now){if(deliveryActive)updateRunUpAndDelivery(now);if(window.Cricket26Advanced){Cricket26Advanced.weather.tick(.016);}requestAnimationFrame(liveBallLoop);}
 requestAnimationFrame(liveBallLoop);
 
 startMatchBtn.addEventListener("click",()=>{setTimeout(()=>{preMatch.classList.remove("open");openCoinToss();},80);});
