@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#020604"/><stop offset=".55" stop-color="#0b2519"/><stop offset="1" stop-color="#1b4d2d"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#f7cf3b" stop-opacity=".75"/><stop offset="1" stop-color="#f7cf3b" stop-opacity="0"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f7d44b"/><stop offset="1" stop-color="#a87900"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
+ <filter id="shadow"><feDropShadow dx="0" dy="24" stdDeviation="18" flood-opacity=".7"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1190" cy="250" r="330" fill="url(#sun)" filter="url(#blur)"/>
+<path d="M0 650 Q430 510 820 650 T1600 600 V900 H0Z" fill="#07150d"/>
+<ellipse cx="1120" cy="720" rx="610" ry="150" fill="#244d2c"/>
+<rect x="850" y="575" width="180" height="24" rx="12" fill="#c5a26a"/>
+<g opacity=".8" stroke="#e7d7ad" stroke-width="5"><path d="M850 575v120M1030 575v120M870 610h140M870 675h140"/></g>
+<g filter="url(#shadow)" transform="translate(1080 185)">
+ <path d="M0 170 Q-115 210 -140 410 L-95 585 L-20 570 L15 425 L55 570 L135 585 L165 410 Q145 215 35 170Z" fill="#0b6b3a"/>
+ <path d="M-78 300 Q0 255 78 300 L60 415 Q0 445 -60 415Z" fill="#07502d"/>
+ <path d="M-42 570 L-10 730 L55 730 L55 570Z" fill="#0a5d34"/><path d="M62 570 L95 730 L160 730 L135 565Z" fill="#0a5d34"/>
+ <path d="M-8 725h68l-2 42h-82Z M95 725h68l16 42h-84Z" fill="#111716"/>
+ <circle cx="12" cy="110" r="86" fill="#9b6849"/><path d="M-75 95 Q10 -10 92 92 Q50 58 -75 95Z" fill="#211813"/>
+ <path d="M-30 245 L10 190 L55 250 L30 310 L-25 300Z" fill="#f5c400"/>
+ <path d="M72 260 L210 170 L228 205 L95 305Z" fill="#c99b54"/>
+ <circle cx="79" cy="263" r="27" fill="#eee4d0"/><circle cx="92" cy="281" r="27" fill="#eee4d0"/>
+</g>
+<g fill="#fff" opacity=".7"><circle cx="150" cy="160" r="2"/><circle cx="310" cy="260" r="3"/><circle cx="520" cy="130" r="2"/><circle cx="700" cy="300" r="2"/><circle cx="1380" cy="120" r="3"/><circle cx="1510" cy="330" r="2"/></g>
+<text x="90" y="190" fill="#f7cf3b" font-family="Arial,sans-serif" font-size="30" font-weight="900" letter-spacing="10">THE NEXT GENERATION OF CRICKET</text>
+<text x="80" y="360" fill="white" font-family="Arial,sans-serif" font-size="180" font-weight="900" letter-spacing="-8">CRICKET</text>
+<text x="90" y="510" fill="url(#gold)" font-family="Arial,sans-serif" font-size="180" font-weight="300">26</text>
+<text x="95" y="565" fill="white" font-family="Arial,sans-serif" font-size="42" letter-spacing="28">MOBILE</text>
+<text x="100" y="820" fill="#b7c4bc" font-family="Arial,sans-serif" font-size="22" letter-spacing="8">PLAY THE GAME. OWN THE MOMENT.</text>
+</svg>
