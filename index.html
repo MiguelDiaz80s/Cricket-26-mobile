@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#03100a">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 <div id="app">
@@ -67,6 +67,22 @@
     <span>VISUAL BUILD 0.9555</span>
     <span>WEBGL / WASM</span>
     <span>© 2026 ORIGINAL PROJECT</span>
+  </div>
+</div>
+
+<!-- DEVICE SETUP -->
+<div id="deviceSetup" class="device-setup open">
+  <div class="device-backdrop"></div>
+  <div class="device-card">
+    <span>FIRST-TIME SETUP</span>
+    <h2>WHAT ARE YOU PLAYING ON?</h2>
+    <p>We'll space the batting controls for your screen.</p>
+    <div class="device-options">
+      <button data-device="phone"><b>📱</b><strong>PHONE</strong><small>Landscape controls</small></button>
+      <button data-device="tablet"><b>▣</b><strong>iPAD / TABLET</strong><small>Wide controls</small></button>
+      <button data-device="pc"><b>⌨</b><strong>PC / LAPTOP</strong><small>Keyboard + mouse</small></button>
+    </div>
+    <p class="device-note">You can change this later in Settings.</p>
   </div>
 </div>
 
@@ -158,12 +174,17 @@
     <div id="countryGrid" class="country-grid"></div>
     <label class="style-label">VISUAL STYLE</label>
     <div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST</button><button class="style-choice" data-style="cinematic">CINEMATIC</button><button class="style-choice" data-style="bright">DAYLIGHT</button></div>
+    <label class="style-label">BATTER HELP</label>
+    <div class="style-grid"><button id="recommendationsToggle" class="style-choice active">RECOMMENDATIONS ON</button><button id="recommendationsOff" class="style-choice">RECOMMENDATIONS OFF</button></div>
+    <label class="style-label">PHONE ORIENTATION</label>
+    <div class="style-grid"><button id="landscapeChoice" class="style-choice active">LANDSCAPE</button><button id="portraitChoice" class="style-choice">PORTRAIT</button></div>
+    <p class="settings-hint">Phone defaults to landscape for more batting space. Portrait is available whenever you want the original upright layout.</p>
     <div class="settings-status"><i></i><span>REALTIME 3D RENDERER ONLINE</span><b>WEBGL</b></div>
   </div>
 </div>
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=21"></script>
+<script type="module" src="game.js?v=22"></script>
 </body>
 </html>
