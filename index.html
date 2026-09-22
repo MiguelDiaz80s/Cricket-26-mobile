@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#03100a">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
 <div id="app">
@@ -138,16 +138,17 @@
 <div id="matchControls" class="match-controls hidden">
   <div class="delivery-status"><i></i><span id="deliveryText">WAITING FOR BOWLER</span><b id="ballSpeed">-- KPH</b></div>
   <div class="control-head"><span>BATTER CONTROL</span><b id="controlDevice">CHOOSE DEVICE</b><b id="timingLabel">WAIT FOR THE BALL</b></div>
-  <div id="recommendationText" class="recommendation-text">RECOMMENDED: WAITING FOR DELIVERY</div>
+  
   <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
   <div class="batting-layout">
     <div class="joystick-wrap">
       <span class="joystick-title">WHERE TO HIT</span>
       <div id="hitJoystick" class="hit-joystick">
-        <div class="joystick-rings"></div>
-        <div id="joystickStick" class="joystick-stick"></div>
-        <span class="j-up">FRONT</span><span class="j-down">BACK</span><span class="j-left">OFF</span><span class="j-right">LEG</span>
-      </div>
+  <div class="joystick-rings"></div>
+  <div class="joystick-ticks" aria-hidden="true"></div>
+  <div id="joystickStick" class="joystick-stick"></div>
+  <span class="j-up">FRONT</span><span class="j-down">BACK</span><span class="j-left">OFF</span><span class="j-right">LEG</span>
+</div>
       <small>Drag to aim your shot</small>
     </div>
     <div class="batting-buttons">
@@ -210,6 +211,6 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=23"></script>
+<script type="module" src="game.js?v=24"></script>
 </body>
 </html>
