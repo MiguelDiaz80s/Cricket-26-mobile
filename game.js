@@ -377,7 +377,7 @@ function setJoystick(clientX,clientY){
  if(mag>max){dx=dx/mag*max;dy=dy/mag*max;}
  hitDirection.x=dx/max;hitDirection.y=-dy/max;
  joystickStick.style.transform="translate("+dx+"px,"+dy+"px)";
- if(recommendations) document.querySelector("#recommendationText").textContent="TARGET: "+directionName(hitDirection);
+ if(recommendations){ const r=document.querySelector("#recommendationText"); if(r) r.textContent="TARGET: "+directionName(hitDirection); }
 }
 function resetJoystick(){joystickPointer=false;hitDirection={x:0,y:0};joystickStick.style.transform="translate(0,0)"}
 function directionName(d){
@@ -408,7 +408,7 @@ function showRecommendations(){
   return;
  }
 
- const options=chooseRecommendationSet();
+ const options=recommendationForDelivery();
  currentRecommendation=options[0]||null;
 
  // Compact visual recommendations only — no text panel.
