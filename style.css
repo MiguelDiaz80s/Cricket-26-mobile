@@ -178,3 +178,42 @@ body.phone-portrait .joystick-wrap{display:flex;align-items:center;gap:10px;text
 }
 body.phone-portrait .match-controls{width:94vw!important}
 body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
+
+
+/* FINAL BATTER CONTROL PASS — compact buttons, visual-only recommendations */
+.match-controls .recommendation-text{display:none!important;width:0!important;height:0!important;overflow:hidden!important}
+.match-controls .batting-buttons{display:flex!important;flex-direction:column!important;justify-content:center!important;min-width:0!important}
+.match-controls .shot-three,.match-controls .foot-four{display:grid!important;gap:4px!important}
+.match-controls .shot-three{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.match-controls .foot-four{grid-template-columns:repeat(4,minmax(0,1fr))!important;margin-top:4px!important}
+.match-controls .shot-three button,.match-controls .foot-four button{
+ min-width:0!important;width:100%!important;height:32px!important;min-height:32px!important;
+ padding:3px 4px!important;border-radius:5px!important;font-size:6.5px!important;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;
+}
+.match-controls .shot-three button.recommended,.match-controls .foot-four button.recommended{
+ border-color:var(--accent)!important;
+ box-shadow:inset 0 0 0 1px var(--accent),0 0 10px #f5c40044!important;
+}
+.match-controls .shot-three button.recommended::before,.match-controls .foot-four button.recommended::before{
+ content:"";display:inline-block;width:4px;height:4px;margin-right:3px;border-radius:50%;
+ background:var(--accent);box-shadow:0 0 7px var(--accent);vertical-align:middle;
+}
+.match-controls .shot-three .shot-main.recommended{background:var(--accent)!important;color:#111!important}
+.match-controls .hit-joystick{overflow:visible!important}
+.match-controls .joystick-ticks{position:absolute!important;inset:0!important;pointer-events:none!important}
+.match-controls .joystick-tick{
+ position:absolute!important;left:50%!important;top:50%!important;
+ width:2px!important;height:9px!important;margin:-4.5px -1px!important;
+ border-radius:99px!important;background:#ffffff48!important;
+ transform-origin:1px 4.5px!important;
+ transition:background .15s,box-shadow .15s,width .15s,height .15s!important;
+}
+.match-controls .joystick-tick.recommended{
+ width:4px!important;height:15px!important;margin:-7.5px -2px!important;
+ background:var(--accent)!important;
+ box-shadow:0 0 7px var(--accent),0 0 14px var(--accent)!important;
+}
+@media(max-width:650px){
+ .match-controls .shot-three button,.match-controls .foot-four button{height:29px!important;min-height:29px!important;font-size:6px!important;padding:2px!important}
+}
