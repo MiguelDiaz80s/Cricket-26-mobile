@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#03100a">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 <div id="app">
@@ -23,11 +23,11 @@
 <div id="intro" class="cover">
   <div class="cover-noise"></div>
   <div class="cover-vignette"></div>
-  <div class="cover-lines"></div>
+  <div class="cover-lines"></div><div class="cover-grid"></div><div class="cover-scan"></div><div class="cover-orbit orbit-a"></div><div class="cover-orbit orbit-b"></div><div class="cover-glow"></div>
 
   <div class="cover-content">
     <div class="season-row"><span class="season-badge">2026</span><span>WORLD CRICKET</span><span class="dot"></span><span>SEASON ONE</span></div>
-    <div class="cover-kicker">THE NEXT GENERATION OF CRICKET</div>
+    <div class="cover-kicker"><span>THE NEXT GENERATION OF CRICKET</span><b>WORLD PREMIERE BUILD</b></div>
     <div class="cover-title">CRICKET <em>26</em></div>
     <div class="cover-sub">MOBILE</div>
     <div class="cover-divider"></div>
@@ -37,6 +37,8 @@
       <button id="enterBtn" class="primary-action"><span>▶</span> PLAY NOW</button>
       <button id="showVisuals" class="secondary-action"><span>◉</span> ENTER STADIUM</button>
     </div>
+
+    <div class="cover-scoreline"><span>FEATURED FIXTURE</span><b>AUSTRALIA</b><i>VS</i><b>INDIA</b><small>MCG · NIGHT SESSION · BUILD 0.9</small></div>
 
     <div class="cover-features">
       <div><b>3D</b><span>REALTIME<br>STADIUM</span></div>
@@ -67,6 +69,30 @@
     <span>© 2026 ORIGINAL PROJECT</span>
   </div>
 </div>
+
+<!-- NEXT-GEN PRESENTATION LAYER -->
+<div id="preMatch" class="prematch">
+  <div class="prematch-backdrop"></div>
+  <div class="prematch-card">
+    <div class="prematch-top"><span>QUICK MATCH / SETUP</span><button id="preMatchClose">×</button></div>
+    <h1>SET THE STAGE.</h1><p>Choose the format, teams and match atmosphere.</p>
+    <div class="setup-block"><label>FORMAT</label><div class="choice-row" id="formatChoices"><button class="setup-choice active" data-format="T20">T20</button><button class="setup-choice" data-format="ODI">ODI</button><button class="setup-choice" data-format="TEST">TEST</button></div></div>
+    <div class="setup-block"><label>HOME TEAM</label><div class="team-strip" id="homeTeamStrip"><button class="team-choice active" data-team="Australia"><b>🇦🇺</b><span>AUSTRALIA</span></button><button class="team-choice" data-team="India"><b>🇮🇳</b><span>INDIA</span></button><button class="team-choice" data-team="England"><b>🏴</b><span>ENGLAND</span></button><button class="team-choice" data-team="South Africa"><b>🇿🇦</b><span>SOUTH AFRICA</span></button></div></div>
+    <div class="setup-block"><label>AWAY TEAM</label><div class="team-strip" id="awayTeamStrip"><button class="team-choice active" data-team="India"><b>🇮🇳</b><span>INDIA</span></button><button class="team-choice" data-team="Australia"><b>🇦🇺</b><span>AUSTRALIA</span></button><button class="team-choice" data-team="England"><b>🏴</b><span>ENGLAND</span></button><button class="team-choice" data-team="Pakistan"><b>🇵🇰</b><span>PAKISTAN</span></button></div></div>
+    <div class="setup-summary"><div><small>VENUE</small><strong>WORLD CRICKET STADIUM</strong></div><div><small>CONDITIONS</small><strong id="conditionText">DAYLIGHT · FRESH PITCH</strong></div><div><small>DIFFICULTY</small><strong>PRO</strong></div></div>
+    <button id="startMatchBtn" class="launch-match">START MATCH <span>→</span></button>
+  </div>
+</div>
+
+<div id="playerHub" class="player-hub">
+  <div class="hub-backdrop"></div><div class="hub-card"><button id="playerHubClose">×</button>
+    <span>MY CRICKETER / 01</span><h2>BUILD YOUR PLAYER</h2><p>The creator is coming online. Your custom cricketer will own the career mode.</p>
+    <div class="player-preview"><div class="player-glow"></div><div class="player-silhouette"></div><div><b>OLIVER</b><small>RIGHT ARM FAST · ALL ROUND ATHLETE</small><em>PLAYER CREATOR / LOCKED FOR NEXT BUILD</em></div></div>
+    <div class="stat-row"><div><b>86</b><small>PACE</small></div><div><b>82</b><small>POWER</small></div><div><b>79</b><small>REFLEX</small></div><div><b>88</b><small>MENTAL</small></div></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"><i></i><span>READY</span></div>
 
 <div id="hud" class="hud hidden">
   <div class="score-card"><div><span id="hudTeam">AUSTRALIA</span><b id="scoreValue">0 / 0</b></div><strong id="oversValue">0.0 OVERS</strong></div>
@@ -113,6 +139,6 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=12"></script>
+<script type="module" src="game.js?v=20"></script>
 </body>
 </html>
