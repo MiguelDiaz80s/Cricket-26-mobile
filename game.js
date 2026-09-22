@@ -361,7 +361,7 @@ function updateRecommendationUI(){
  recommendations=!!recommendations;
  localStorage.setItem("cricket26-recommendations",recommendations?"on":"off");
  recOn.classList.toggle("active",recommendations);recOff.classList.toggle("active",!recommendations);
- const r=document.querySelector("#recommendationText"); if(r) r.style.display=recommendations?"block":"none";
+ const r=document.querySelector("#recommendationText"); if(r) r.style.display="none"; showRecommendations();
 }
 recOn.addEventListener("click",()=>{recommendations=true;updateRecommendationUI()});
 recOff.addEventListener("click",()=>{recommendations=false;updateRecommendationUI()});
@@ -400,304 +400,30 @@ function recommendationForDelivery(){
  return options;
 }
 function showRecommendations(){
- if(!recommendations)return;
- const options=recommendationForDelivery();currentRecommendation=options[Math.floor(Math.random()*options.length)];
- document.querySelector("#recommendationText").textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot.toLowerCase().replace("foot"," foot")+" · "+o.shot).join("  OR  ");
-}
-
-const settings=document.querySelector("#settings");
-document.querySelector("#settingsFloat").addEventListener("click",()=>settings.classList.add("open"));
-document.querySelector("#closeSettings").addEventListener("click",()=>settings.classList.remove("open"));
-settings.addEventListener("click",e=>{if(e.target===settings)settings.classList.remove("open")});
-
-document.querySelectorAll(".style-choice").forEach(b=>b.addEventListener("click",()=>{
- visualStyle=b.dataset.style;document.querySelectorAll(".style-choice").forEach(x=>x.classList.toggle("active",x===b));
- if(visualStyle==="bright"){renderer.toneMappingExposure=1.3;scene.fog.color.set(0x52786f);scene.fog.density=.004;sun.intensity=4;hemi.intensity=1.7}
- else if(visualStyle==="cinematic"){renderer.toneMappingExposure=.98;scene.fog.color.set(0x050a09);scene.fog.density=.009;sun.intensity=2.3;hemi.intensity=1.05}
- else{renderer.toneMappingExposure=1.12;scene.fog.color.set(0x07120f);scene.fog.density=.0068;sun.intensity=3;hemi.intensity=1.25}
-}));
-
-const cameras={
- broadcast:{pos:[28,11.5,29],target:[0,2,2]},
- batter:{pos:[5.8,4.2,17.8],target:[0,1.7,1]},
- bowler:{pos:[4.8,4,-25],target:[0,1.7,4]},
- wide:{pos:[65,29,68],target:[0,3,0]},
- cinematic:{pos:[-54,14,48],target:[0,4,0]}
-};
-let cameraMode="broadcast",cinematicTime=0,started=false;
-function setCamera(name){cameraMode=name;document.querySelectorAll(".camera").forEach(b=>b.classList.toggle("active",b.dataset.camera===name));const c=cameras[name];camera.position.set(...c.pos);controls.target.set(...c.target);controls.update()}
-document.querySelectorAll(".camera").forEach(b=>b.addEventListener("click",()=>setCamera(b.dataset.camera)));
-const cover=document.querySelector("#intro");
-const menuPanel=document.querySelector("#menuPanel");
-const hud=document.querySelector("#hud");
-const hudTeam=document.querySelector("#hudTeam");
-document.querySelector("#enterBtn").addEventListener("click",()=>{
- cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true;
- setCamera("cinematic"); setTimeout(()=>setCamera("broadcast"),4200);
-});
-document.querySelector("#showVisuals").addEventListener("click",()=>{
- cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true; setCamera("cinematic");
-});
-document.querySelector("#backHome").addEventListener("click",()=>{ menuPanel.classList.add("open"); });
-document.querySelector("#menuClose").addEventListener("click",()=>menuPanel.classList.remove("open"));
-document.querySelector("#menuSettings").addEventListener("click",()=>{menuPanel.classList.remove("open");settings.classList.add("open")});
-document.querySelector("#cameraHud").addEventListener("click",()=>{
- menuPanel.classList.remove("open"); document.querySelector(".bottom-ui").scrollIntoView?.({block:"nearest"});
-});
-menuPanel.addEventListener("click",e=>{
- const card=e.target.closest(".mode-card");
- if(card){document.querySelectorAll(".mode-card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");}
- const b=e.target.closest(".menu-grid button");
- if(b && b.textContent==="SETTINGS"){menuPanel.classList.remove("open");settings.classList.add("open");}
-});
-
-
-setCountry("Australia");
-let last=performance.now(); let displayRuns=0; let displayBalls=0; let displayWickets=0;
-function animate(now){
- requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;controls.update();const t=now*.001;
- batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
- fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
- crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
- document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
- document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
- lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*3:115+Math.sin(t*1.3+i)*4);
- if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;controls.target.lerp(new THREE.Vector3(0,3,0),.025)}
- renderer.render(scene,camera);
-}
-requestAnimationFrame(animate);
-addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.65))});
-
-/* =========================================================
-   NEXT-GEN UI CONTROLLER
-   ========================================================= */
-const preMatch=document.querySelector("#preMatch");
-const preMatchClose=document.querySelector("#preMatchClose");
-const startMatchBtn=document.querySelector("#startMatchBtn");
-const playerHub=document.querySelector("#playerHub");
-const playerHubClose=document.querySelector("#playerHubClose");
-const toast=document.querySelector("#toast");
-let selectedFormat="T20";
-let homeTeam="Australia";
-let awayTeam="India";
-
-function showToast(message){
- const t=toast.querySelector("span");
- t.textContent=message;
- toast.classList.add("show");
- clearTimeout(window.__toastTimer);
- window.__toastTimer=setTimeout(()=>toast.classList.remove("show"),1800);
-}
-function openPreMatch(){preMatch.classList.add("open")}
-function closePreMatch(){preMatch.classList.remove("open")}
-
-// Capture phase owns PLAY NOW so the old showcase action cannot skip setup.
-document.querySelector("#enterBtn").addEventListener("click",e=>{
- e.preventDefault();e.stopImmediatePropagation();openPreMatch();
-},{capture:true});
-
-document.querySelectorAll("#formatChoices .setup-choice").forEach(b=>b.addEventListener("click",()=>{
- selectedFormat=b.dataset.format;
- document.querySelectorAll("#formatChoices .setup-choice").forEach(x=>x.classList.toggle("active",x===b));
- document.querySelector("#conditionText").textContent=selectedFormat==="TEST"?"DAYLIGHT · FRESH PITCH":selectedFormat==="ODI"?"DAYLIGHT · HARD SURFACE":"NIGHT · FRESH PITCH";
- showToast(selectedFormat+" FORMAT SELECTED");
-}));
-
-document.querySelectorAll(".team-choice").forEach(b=>b.addEventListener("click",()=>{
- const strip=b.parentElement.id;
- if(strip==="homeTeamStrip")homeTeam=b.dataset.team;else awayTeam=b.dataset.team;
- b.parentElement.querySelectorAll(".team-choice").forEach(x=>x.classList.toggle("active",x===b));
- showToast((strip==="homeTeamStrip"?"HOME: ":"AWAY: ")+b.dataset.team.toUpperCase());
-}));
-
-preMatchClose.addEventListener("click",closePreMatch);
-preMatch.addEventListener("click",e=>{if(e.target===preMatch)closePreMatch()});
-
-startMatchBtn.addEventListener("click",()=>{
- closePreMatch();
- cover.classList.add("hidden");
- hud.classList.remove("hidden");
- started=true;
- selectedCountry=homeTeam;
- if(countries[homeTeam])setCountry(homeTeam);
- hudTeam.textContent=homeTeam.toUpperCase();
- document.querySelector(".match-pill span").textContent=selectedFormat+" MATCH";
- document.querySelector(".match-pill b").textContent=selectedFormat==="TEST"?"DAY 1":"INNINGS 1";
- setCamera("cinematic");
- setTimeout(()=>setCamera("broadcast"),3600);
- showToast(homeTeam.toUpperCase()+" VS "+awayTeam.toUpperCase()+" · MATCH LIVE");
-});
-
-// Navigation is now functional rather than decorative.
-document.querySelectorAll(".top-nav span").forEach(item=>item.addEventListener("click",()=>{
- const name=item.textContent.trim();
- if(name==="HOME"){cover.classList.remove("hidden");hud.classList.add("hidden");preMatch.classList.remove("open");showToast("HOME")}
- else if(name==="CAREER"){playerHub.classList.add("open");showToast("CAREER HUB")}
- else if(name==="PLAY"){openPreMatch()}
- else if(name==="MY CRICKETER"){playerHub.classList.add("open");showToast("MY CRICKETER")}
-}));
-
-document.querySelectorAll(".mode-card").forEach(card=>card.addEventListener("click",()=>{
- const title=card.querySelector("strong")?.textContent||"MODE";
- if(title==="QUICK MATCH")openPreMatch();
- if(title==="CREATE PLAYER"||title==="CAREER")playerHub.classList.add("open");
- if(title==="TOURNAMENTS")showToast("TOURNAMENT HUB · COMING NEXT");
-}));
-playerHubClose.addEventListener("click",()=>playerHub.classList.remove("open"));
-playerHub.addEventListener("click",e=>{if(e.target===playerHub)playerHub.classList.remove("open")});
-
-// Give the cover a living broadcast feel while it is visible.
-const coverBall=document.querySelector(".art-ball");
-const coverBat=document.querySelector(".art-bat");
-const coverRings=document.querySelectorAll(".cover-orbit");
-let coverMotion=0;
-function animateCoverPresentation(dt){
- if(!cover.classList.contains("hidden")){
-  coverMotion+=dt;
-  if(coverBall)coverBall.style.transform="translate3d("+(Math.sin(coverMotion*1.7)*10)+"px,"+(Math.cos(coverMotion*1.2)*8)+"px,0)";
-  if(coverBat)coverBat.style.transform="rotate("+(21+Math.sin(coverMotion)*2)+"deg) translateY("+(Math.sin(coverMotion*.8)*3)+"px)";
-  coverRings.forEach((r,i)=>r.style.transform="rotateX("+(68+i*2)+"deg) rotateZ("+((i?18:-20)+coverMotion*(i?1.8:-1.2))+"deg)");
- }
-}
-let uiClock=performance.now();
-function presentationLoop(now){
- const dt=Math.min((now-uiClock)/1000,.05);uiClock=now;
- animateCoverPresentation(dt);
- requestAnimationFrame(presentationLoop);
-}
-requestAnimationFrame(presentationLoop);
-
-
-/* Batter HUD: live delivery controls are installed below. */
-/* =========================================================
-   FULL BALL-BY-BALL MATCH ENGINE
-   bowler run-up -> release -> physics -> bounce -> timing ->
-   shot -> flight -> fielders -> catches/boundaries -> score
-   ========================================================= */
-const coinToss=document.querySelector("#coinToss");
-const coin=document.querySelector("#coin");
-const tossPrompt=document.querySelector("#tossPrompt");
-const tossResult=document.querySelector("#tossResult");
-const continueFromToss=document.querySelector("#continueFromToss");
-const tossChoices=document.querySelectorAll(".toss-choice");
-const deliveryBtn=document.querySelector("#deliveryBtn");
-const deliveryText=document.querySelector("#deliveryText");
-const ballSpeed=document.querySelector("#ballSpeed");
-
-let tossWinner="",tossComplete=false,battingFirst="";
-let matchPhase="IDLE",deliveryActive=false,shotFlightActive=false,ballHit=false;
-let deliveryStart=0,deliveryDuration=1450,deliverySpeed=0;
-let deliveryLine="ON_STUMPS",deliveryLength="FULL";
-let inningsBalls=0,inningsRuns=0,inningsWickets=0,totalOvers=20,ballsInOver=0;
-let strikerRuns=0,strikerBalls=0,lastOutcome="";
-
-const releasePoint=new THREE.Vector3(0,1.95,-16);
-const bouncePoint=new THREE.Vector3(0,.24,7.8);
-const runUpStart=new THREE.Vector3(0,.18,-25.5);
-const bowlerRelease=new THREE.Vector3(0,.18,-16.0);
-
-function updateScoreboard(){
- displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
- const score=document.querySelector("#scoreValue"),overs=document.querySelector("#oversValue");
- if(score)score.textContent=inningsRuns+" / "+inningsWickets;
- if(overs)overs.textContent=Math.floor(inningsBalls/6)+"."+(inningsBalls%6)+" OVERS";
- const readout=document.querySelector("#inningsReadout");
- if(readout)readout.textContent=Math.floor(inningsBalls/6)+"."+ballsInOver+" OVERS · "+inningsRuns+" / "+inningsWickets;
-}
-
-function setDeliveryStatus(text){if(deliveryText)deliveryText.textContent=text;}
-
-function resetFielders(){
- fielders.forEach(p=>{
-  if(!p.userData.base)p.userData.base=p.position.clone();
-  p.position.copy(p.userData.base);p.userData.target=null;p.userData.running=false;
- });
-}
-
-function moveFieldersToBall(ballPos,dt){
- fielders.forEach((p,i)=>{
-  if(!p.userData.base)p.userData.base=p.position.clone();
-  const base=p.userData.base;
-  const target=ballPos.clone();target.y=.18;
-  const dist=Math.hypot(target.x-base.x,target.z-base.z);
-  if(dist>2.8){
-   const speed=.035+(i%3)*.009;
-   p.position.x+=(target.x-p.position.x)*Math.min(1,dt*speed*28);
-   p.position.z+=(target.z-p.position.z)*Math.min(1,dt*speed*28);
-   p.userData.running=true;
-  }else{
-   p.position.x+=(base.x-p.position.x)*Math.min(1,dt*2);
-   p.position.z+=(base.z-p.position.z)*Math.min(1,dt*2);
-   p.userData.running=false;
-  }
- });
-}
-
-function resetDelivery(){
- deliveryActive=false;shotFlightActive=false;ballHit=false;matchPhase="READY";
- ball.position.set(0,.63,6.5);ball.visible=true;
- setDeliveryStatus("BOWLER READY");ballSpeed.textContent="-- KPH";
- timingLabel.textContent="WAIT FOR THE BALL";timingBar.style.width="0%";
- matchControls.classList.remove("ball-live","contact-window");
- document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=true);
- document.querySelectorAll("[data-foot]").forEach(b=>b.classList.remove("selected"));
- deliveryBtn.disabled=false;deliveryBtn.textContent="DELIVER";
- resetJoystick();selectedFoot="";selectedShot="STROKE";currentRecommendation=null;
- resetFielders();updateScoreboard();showRecommendations();
-}
-
-function startDelivery(){
- if(deliveryActive||shotFlightActive||inningsWickets>=10)return;
- deliveryActive=true;ballHit=false;shotFlightActive=false;deliveryStart=performance.now();
- deliveryDuration=1350+Math.random()*280;deliverySpeed=118+Math.random()*29;
- deliveryLine=["ON_STUMPS","OUTSIDE_OFF","LEG"][Math.floor(Math.random()*3)];
- deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
- matchPhase="RUN_UP";setDeliveryStatus("BOWLER RUN-UP");
- ballSpeed.textContent=Math.round(deliverySpeed)+" KPH";deliveryBtn.disabled=true;
- document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=true);
- matchControls.classList.add("ball-live");showRecommendations();
-}
-
-function chooseRecommendationSet(){
- const options=[];
- if(deliveryLength==="FULL"){
-  options.push({dir:{x:0,y:.82},shot:"STROKE",foot:"FRONT"});
-  if(deliveryLine==="OUTSIDE_OFF")options.push({dir:{x:-.72,y:.36},shot:"STROKE",foot:"FRONT"});
- }
- if(deliveryLength==="GOOD"){
-  options.push({dir:{x:0,y:.58},shot:"PUSH",foot:"FRONT"});
-  if(deliveryLine==="OUTSIDE_OFF")options.push({dir:{x:-.78,y:.12},shot:"STROKE",foot:"BACK"});
- }
- if(deliveryLength==="SHORT"){
-  options.push({dir:{x:.70,y:.05},shot:"STROKE",foot:"BACK"});
-  if(deliveryLine==="LEG")options.push({dir:{x:.82,y:.15},shot:"LOFT",foot:"BACK"});
- }
- if(deliveryLine==="LEG"&&deliveryLength!=="SHORT")options.push({dir:{x:.82,y:.22},shot:"LOFT",foot:"FRONT"});
- if(!options.length)options.push({dir:{x:0,y:.6},shot:"STROKE",foot:"FRONT"});
- return options;
-}
-
-function showRecommendations(){
  if(!recommendations){
   currentRecommendation=null;
-  document.querySelectorAll(".joystick-tick").forEach(t=>t.classList.remove("recommended"));
+  const tickWrap=document.querySelector(".joystick-ticks");
+  if(tickWrap)tickWrap.innerHTML="";
   document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.classList.remove("recommended"));
   return;
  }
- const options=chooseRecommendationSet();
- currentRecommendation=options[Math.floor(Math.random()*options.length)];
 
- // Eight small clock-like aim ticks. Every valid recommendation can light one.
+ const options=chooseRecommendationSet();
+ currentRecommendation=options[0]||null;
+
+ // Compact visual recommendations only — no text panel.
  const tickWrap=document.querySelector(".joystick-ticks");
  if(tickWrap){
-  const dirs=[
-   {x:0,y:1},{x:.707,y:.707},{x:1,y:0},{x:.707,y:-.707},
-   {x:0,y:-1},{x:-.707,y:-.707},{x:-1,y:0},{x:-.707,y:.707}
-  ];
+  const tickCount=10;
+  const dirs=Array.from({length:tickCount},(_,i)=>{
+   const a=(i/tickCount)*Math.PI*2;
+   return {x:Math.sin(a),y:Math.cos(a)};
+  });
   tickWrap.innerHTML=dirs.map((d,i)=>{
-   const angle=i*45;
+   const angle=i*(360/tickCount);
    return '<i class="joystick-tick" data-tick="'+i+'" style="transform:rotate('+angle+'deg) translateY(-48px)"></i>';
   }).join("");
+
   options.forEach(o=>{
    let best=0,bestDot=-999;
    dirs.forEach((d,i)=>{
@@ -708,6 +434,7 @@ function showRecommendations(){
   });
  }
 
+ // Every recommended shot/foot option lights up; multiple recommendations can light multiple controls.
  document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.classList.remove("recommended"));
  options.forEach(o=>{
   document.querySelector('[data-shot="'+o.shot+'"]')?.classList.add("recommended");
