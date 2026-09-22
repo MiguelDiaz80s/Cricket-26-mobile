@@ -137,10 +137,35 @@
 
 <div id="matchControls" class="match-controls hidden">
   <div class="delivery-status"><i></i><span id="deliveryText">WAITING FOR BOWLER</span><b id="ballSpeed">-- KPH</b></div>
-  <div class="control-head"><span>BATTER CONTROL</span><b id="timingLabel">WAIT FOR THE BALL</b></div>
+  <div class="control-head"><span>BATTER CONTROL</span><b id="controlDevice">CHOOSE DEVICE</b><b id="timingLabel">WAIT FOR THE BALL</b></div>
+  <div id="recommendationText" class="recommendation-text">RECOMMENDED: WAITING FOR DELIVERY</div>
   <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
-  <div class="shot-row"><button id="deliveryBtn" class="delivery-btn">DELIVER</button><button data-shot="DEFENCE">DEFENCE</button><button data-shot="DRIVE" class="shot-main">DRIVE</button><button data-shot="CUT">CUT</button><button data-shot="PULL">PULL</button><button data-shot="LOFT">LOFT</button></div>
-  <div class="control-foot"><span>← SWIPE / MOVE</span><span>POWER <b id="powerValue">72%</b></span><span>TAP SHOT AS BALL ARRIVES</span><span>MOVE →</span></div>
+  <div class="batting-layout">
+    <div class="joystick-wrap">
+      <span class="joystick-title">WHERE TO HIT</span>
+      <div id="hitJoystick" class="hit-joystick">
+        <div class="joystick-rings"></div>
+        <div id="joystickStick" class="joystick-stick"></div>
+        <span class="j-up">FRONT</span><span class="j-down">BACK</span><span class="j-left">OFF</span><span class="j-right">LEG</span>
+      </div>
+      <small>Drag to aim your shot</small>
+    </div>
+    <div class="batting-buttons">
+      <div class="shot-three">
+        <button data-shot="LOFT">LOFT STROKE</button>
+        <button data-shot="STROKE" class="shot-main">STROKE</button>
+        <button data-shot="PUSH">PUSH</button>
+      </div>
+      <div class="foot-four">
+        <button data-foot="FRONT">FRONT FOOT</button>
+        <button data-foot="BACK">BACK FOOT</button>
+        <button data-foot="LEAVE">LEAVE</button>
+        <button data-foot="SPECIAL">SPECIAL</button>
+      </div>
+      <button id="deliveryBtn" class="delivery-btn">DELIVER</button>
+    </div>
+  </div>
+  <div class="control-foot"><span>DRAG JOYSTICK</span><span>POWER <b id="powerValue">72%</b></span><span>TAP SHOT AT CONTACT</span><span id="inningsReadout">0 BALLS · 0 RUNS</span></div>
 </div>
 \n<div class="bottom-ui">
   <div><label>CAMERA ANGLES</label><div class="camera-buttons">
@@ -185,6 +210,6 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=22"></script>
+<script type="module" src="game.js?v=23"></script>
 </body>
 </html>
