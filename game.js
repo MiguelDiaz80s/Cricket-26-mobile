@@ -314,6 +314,7 @@ function setCountry(name){
  document.documentElement.style.setProperty("--accent",theme.b);
  document.documentElement.style.setProperty("--accent2",theme.a);
  document.querySelector("#countryReadout").textContent=name.toUpperCase();
+ if(hudTeam) hudTeam.textContent=name.toUpperCase();
  document.querySelector("#countryDesc").textContent=name+" · "+theme.desc;
  document.querySelectorAll(".country").forEach(b=>b.classList.toggle("active",b.dataset.country===name));
  playerShirts.forEach(m=>m.color.set(theme.a));
@@ -352,6 +353,7 @@ document.querySelectorAll(".camera").forEach(b=>b.addEventListener("click",()=>s
 const cover=document.querySelector("#intro");
 const menuPanel=document.querySelector("#menuPanel");
 const hud=document.querySelector("#hud");
+const hudTeam=document.querySelector("#hudTeam");
 document.querySelector("#enterBtn").addEventListener("click",()=>{
  cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true;
  setCamera("cinematic"); setTimeout(()=>setCamera("broadcast"),4200);
@@ -359,9 +361,9 @@ document.querySelector("#enterBtn").addEventListener("click",()=>{
 document.querySelector("#showVisuals").addEventListener("click",()=>{
  cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true; setCamera("cinematic");
 });
-document.querySelector("#backHome").addEventListener("click",()=>{
- menuPanel.classList.add("open");
-});
+document.querySelector("#backHome").addEventListener("click",()=>{ menuPanel.classList.add("open"); });
+document.querySelector("#menuClose").addEventListener("click",()=>menuPanel.classList.remove("open"));
+document.querySelector("#menuSettings").addEventListener("click",()=>{menuPanel.classList.remove("open");settings.classList.add("open")});
 document.querySelector("#cameraHud").addEventListener("click",()=>{
  menuPanel.classList.remove("open"); document.querySelector(".bottom-ui").scrollIntoView?.({block:"nearest"});
 });
