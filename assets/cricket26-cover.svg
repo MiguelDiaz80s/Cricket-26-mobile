@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#183c28"/><stop offset=".55" stop-color="#06130c"/><stop offset="1" stop-color="#010504"/></radialGradient>
+ <linearGradient id="gold"><stop stop-color="#fff1a1"/><stop offset=".35" stop-color="#f5c400"/><stop offset="1" stop-color="#8d6500"/></linearGradient>
+ <linearGradient id="green"><stop stop-color="#15965a"/><stop offset="1" stop-color="#043b25"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1150" cy="390" r="310" fill="#f5c400" opacity=".12" filter="url(#glow)"/>
+<ellipse cx="1120" cy="500" rx="420" ry="210" fill="none" stroke="#f5c400" stroke-opacity=".25" stroke-width="3"/>
+<ellipse cx="1120" cy="500" rx="330" ry="165" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="2"/>
+<path d="M0 720 Q430 600 800 720 T1600 680 V900 H0Z" fill="#041a10"/>
+<g opacity=".75" fill="#d6d6cc">
+ <circle cx="180" cy="675" r="6"/><circle cx="275" cy="675" r="6"/><circle cx="370" cy="675" r="6"/><circle cx="465" cy="675" r="6"/><circle cx="560" cy="675" r="6"/><circle cx="655" cy="675" r="6"/><circle cx="750" cy="675" r="6"/><circle cx="845" cy="675" r="6"/><circle cx="940" cy="675" r="6"/><circle cx="1035" cy="675" r="6"/><circle cx="1130" cy="675" r="6"/><circle cx="1225" cy="675" r="6"/><circle cx="1320" cy="675" r="6"/><circle cx="1415" cy="675" r="6"/><circle cx="180" cy="713" r="6"/><circle cx="275" cy="713" r="6"/><circle cx="370" cy="713" r="6"/><circle cx="465" cy="713" r="6"/><circle cx="560" cy="713" r="6"/><circle cx="655" cy="713" r="6"/><circle cx="750" cy="713" r="6"/><circle cx="845" cy="713" r="6"/><circle cx="940" cy="713" r="6"/><circle cx="1035" cy="713" r="6"/><circle cx="1130" cy="713" r="6"/><circle cx="1225" cy="713" r="6"/><circle cx="1320" cy="713" r="6"/><circle cx="1415" cy="713" r="6"/><circle cx="180" cy="751" r="6"/><circle cx="275" cy="751" r="6"/><circle cx="370" cy="751" r="6"/><circle cx="465" cy="751" r="6"/><circle cx="560" cy="751" r="6"/><circle cx="655" cy="751" r="6"/><circle cx="750" cy="751" r="6"/><circle cx="845" cy="751" r="6"/><circle cx="940" cy="751" r="6"/><circle cx="1035" cy="751" r="6"/><circle cx="1130" cy="751" r="6"/><circle cx="1225" cy="751" r="6"/><circle cx="1320" cy="751" r="6"/><circle cx="1415" cy="751" r="6"/>
+</g>
+<g transform="translate(1040 190)">
+ <path d="M120 140 C85 135 65 175 70 225 L90 395 C95 450 130 485 190 490 C250 485 285 450 290 395 L310 225 C315 175 295 135 260 140 C225 110 155 110 120 140Z" fill="url(#green)"/>
+ <circle cx="190" cy="88" r="65" fill="#9b6849"/>
+ <path d="M125 82 Q190 10 255 82 L262 115 Q190 90 118 115Z" fill="#0b6b3a" stroke="#f5c400" stroke-width="8"/>
+ <path d="M105 190 Q190 155 275 190" stroke="#f5c400" stroke-width="14" fill="none"/>
+ <path d="M135 465 L120 690 M245 465 L260 690" stroke="#0b6b3a" stroke-width="62" stroke-linecap="round"/>
+ <path d="M120 685 L82 760 M260 685 L300 760" stroke="#111" stroke-width="35" stroke-linecap="round"/>
+ <path d="M95 280 Q20 230 5 145 M280 280 Q355 230 390 140" stroke="#0b6b3a" stroke-width="55" stroke-linecap="round" fill="none"/>
+ <path d="M5 145 L-35 45" stroke="#c99b54" stroke-width="25" stroke-linecap="round"/>
+</g>
+<text x="90" y="150" fill="#f5c400" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="12">WORLD CRICKET</text>
+<text x="80" y="360" fill="#fff" font-family="Arial,sans-serif" font-size="150" font-weight="900" letter-spacing="-10">CRICKET</text>
+<text x="78" y="500" fill="url(#gold)" font-family="Arial,sans-serif" font-size="190" font-weight="300">26</text>
+<text x="90" y="570" fill="#fff" font-family="Arial,sans-serif" font-size="34" letter-spacing="22">MOBILE</text>
+<rect x="90" y="620" width="390" height="3" fill="#f5c400"/>
+<text x="90" y="665" fill="#b8c4bd" font-family="Arial,sans-serif" font-size="18" letter-spacing="6">THE NEXT GENERATION OF CRICKET</text>
+<text x="90" y="825" fill="#74827a" font-family="Arial,sans-serif" font-size="15" letter-spacing="4">ORIGINAL WEBGL / C++ PROJECT · 2026</text>
+</svg>
