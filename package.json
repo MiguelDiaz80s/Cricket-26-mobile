@@ -1,10 +1,7 @@
 {
-  "name": "cricket-26-mobile",
-  "private": true,
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.2"
-  }
+  "name":"cricket-26-mobile",
+  "private":true,
+  "scripts":{"typecheck":"tsc --noEmit","signaling":"node server/signaling.mjs"},
+  "dependencies":{"ws":"^8.18.3"},
+  "devDependencies":{"typescript":"^5.9.2"}
 }
