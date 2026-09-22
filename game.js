@@ -678,11 +678,41 @@ function chooseRecommendationSet(){
 }
 
 function showRecommendations(){
- if(!recommendations)return;
+ if(!recommendations){
+  currentRecommendation=null;
+  document.querySelectorAll(".joystick-tick").forEach(t=>t.classList.remove("recommended"));
+  document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.classList.remove("recommended"));
+  return;
+ }
  const options=chooseRecommendationSet();
  currentRecommendation=options[Math.floor(Math.random()*options.length)];
- const el=document.querySelector("#recommendationText");
- if(el)el.textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot+" · "+o.shot).join("  OR  ");
+
+ // Eight small clock-like aim ticks. Every valid recommendation can light one.
+ const tickWrap=document.querySelector(".joystick-ticks");
+ if(tickWrap){
+  const dirs=[
+   {x:0,y:1},{x:.707,y:.707},{x:1,y:0},{x:.707,y:-.707},
+   {x:0,y:-1},{x:-.707,y:-.707},{x:-1,y:0},{x:-.707,y:.707}
+  ];
+  tickWrap.innerHTML=dirs.map((d,i)=>{
+   const angle=i*45;
+   return '<i class="joystick-tick" data-tick="'+i+'" style="transform:rotate('+angle+'deg) translateY(-48px)"></i>';
+  }).join("");
+  options.forEach(o=>{
+   let best=0,bestDot=-999;
+   dirs.forEach((d,i)=>{
+    const dot=d.x*o.dir.x+d.y*o.dir.y;
+    if(dot>bestDot){bestDot=dot;best=i;}
+   });
+   tickWrap.querySelector('[data-tick="'+best+'"]')?.classList.add("recommended");
+  });
+ }
+
+ document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.classList.remove("recommended"));
+ options.forEach(o=>{
+  document.querySelector('[data-shot="'+o.shot+'"]')?.classList.add("recommended");
+  document.querySelector('[data-foot="'+o.foot+'"]')?.classList.add("recommended");
+ });
 }
 
 function footChoice(foot){
