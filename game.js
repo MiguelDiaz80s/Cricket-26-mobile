@@ -328,6 +328,83 @@ Object.entries(countries).forEach(([name,c])=>{
  b.addEventListener("click",()=>setCountry(name));grid.appendChild(b);
 });
 
+
+// DEVICE / BATTER CONTROL SETTINGS
+const deviceSetup=document.querySelector("#deviceSetup");
+let deviceType=localStorage.getItem("cricket26-device")||"";
+let phoneLandscape=localStorage.getItem("cricket26-phone-orientation")!=="portrait";
+let recommendations=localStorage.getItem("cricket26-recommendations")!=="off";
+let hitDirection={x:0,y:0};
+let selectedShot="STROKE";
+let selectedFoot="";
+let currentRecommendation=null;
+function applyDeviceMode(){
+ document.body.classList.toggle("device-phone",deviceType==="phone");
+ document.body.classList.toggle("device-tablet",deviceType==="tablet");
+ document.body.classList.toggle("device-pc",deviceType==="pc");
+ document.body.classList.toggle("phone-portrait",deviceType==="phone"&&!phoneLandscape);
+ document.body.classList.toggle("phone-landscape",deviceType==="phone"&&phoneLandscape);
+ const cd=document.querySelector("#controlDevice"); if(cd) cd.textContent=(deviceType==="phone"?(phoneLandscape?"PHONE · LANDSCAPE":"PHONE · PORTRAIT"):deviceType==="tablet"?"IPAD · WIDE":"PC · KEYBOARD");
+ if(deviceType==="phone"&&phoneLandscape&&screen.orientation?.lock){screen.orientation.lock("landscape").catch(()=>{});}
+ if(deviceType==="phone"&&!phoneLandscape&&screen.orientation?.unlock)screen.orientation.unlock();
+}
+function chooseDevice(type){
+ deviceType=type;localStorage.setItem("cricket26-device",type);applyDeviceMode();
+ deviceSetup.classList.remove("open");
+ showToast(type==="phone"?"PHONE MODE · LANDSCAPE":"CONTROL LAYOUT · "+type.toUpperCase());
+}
+deviceSetup.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>chooseDevice(b.dataset.device)));
+if(deviceType) deviceSetup.classList.remove("open"); else applyDeviceMode();
+
+const recOn=document.querySelector("#recommendationsToggle"),recOff=document.querySelector("#recommendationsOff");
+function updateRecommendationUI(){
+ recommendations=!!recommendations;
+ localStorage.setItem("cricket26-recommendations",recommendations?"on":"off");
+ recOn.classList.toggle("active",recommendations);recOff.classList.toggle("active",!recommendations);
+ const r=document.querySelector("#recommendationText"); if(r) r.style.display=recommendations?"block":"none";
+}
+recOn.addEventListener("click",()=>{recommendations=true;updateRecommendationUI()});
+recOff.addEventListener("click",()=>{recommendations=false;updateRecommendationUI()});
+document.querySelector("#landscapeChoice").addEventListener("click",()=>{phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");applyDeviceMode();document.querySelector("#landscapeChoice").classList.add("active");document.querySelector("#portraitChoice").classList.remove("active")});
+document.querySelector("#portraitChoice").addEventListener("click",()=>{phoneLandscape=false;localStorage.setItem("cricket26-phone-orientation","portrait");applyDeviceMode();document.querySelector("#portraitChoice").classList.add("active");document.querySelector("#landscapeChoice").classList.remove("active")});
+updateRecommendationUI();
+
+const hitJoystick=document.querySelector("#hitJoystick"), joystickStick=document.querySelector("#joystickStick");
+let joystickPointer=false;
+function setJoystick(clientX,clientY){
+ const r=hitJoystick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+ let dx=clientX-cx,dy=clientY-cy,max=r.width*.30,mag=Math.hypot(dx,dy)||1;
+ if(mag>max){dx=dx/mag*max;dy=dy/mag*max;}
+ hitDirection.x=dx/max;hitDirection.y=-dy/max;
+ joystickStick.style.transform="translate("+dx+"px,"+dy+"px)";
+ if(recommendations) document.querySelector("#recommendationText").textContent="TARGET: "+directionName(hitDirection);
+}
+function resetJoystick(){joystickPointer=false;hitDirection={x:0,y:0};joystickStick.style.transform="translate(0,0)"}
+function directionName(d){
+ if(Math.abs(d.x)<.25&&Math.abs(d.y)<.25)return "STRAIGHT";
+ if(Math.abs(d.x)>.55)return d.x<0?"OFF SIDE":"LEG SIDE";
+ if(d.y>.55)return "FRONT / STRAIGHT";
+ return "SQUARE / BACK";
+}
+["pointerdown","pointermove"].forEach(type=>hitJoystick.addEventListener(type,e=>{if(type==="pointerdown")joystickPointer=true;if(joystickPointer){e.preventDefault();setJoystick(e.clientX,e.clientY)}}));
+hitJoystick.addEventListener("pointerup",resetJoystick);hitJoystick.addEventListener("pointercancel",resetJoystick);
+
+function recommendationForDelivery(){
+ const options=[];
+ if(deliveryLength==="FULL") options.push({dir:{x:0,y:.85},shot:"STROKE",foot:"FRONT"});
+ if(deliveryLength==="SHORT") options.push({dir:{x:.7,y:.05},shot:"STROKE",foot:"BACK"});
+ if(deliveryLine==="OUTSIDE_OFF") options.push({dir:{x:-.8,y:.35},shot:"STROKE",foot:"FRONT"});
+ if(deliveryLine==="ON_STUMPS") options.push({dir:{x:0,y:.7},shot:"PUSH",foot:"FRONT"});
+ if(deliveryLine==="LEG") options.push({dir:{x:.8,y:.2},shot:"LOFT",foot:"FRONT"});
+ if(!options.length) options.push({dir:{x:0,y:.6},shot:"STROKE",foot:"FRONT"});
+ return options;
+}
+function showRecommendations(){
+ if(!recommendations)return;
+ const options=recommendationForDelivery();currentRecommendation=options[Math.floor(Math.random()*options.length)];
+ document.querySelector("#recommendationText").textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot.toLowerCase().replace("foot"," foot")+" · "+o.shot).join("  OR  ");
+}
+
 const settings=document.querySelector("#settings");
 document.querySelector("#settingsFloat").addEventListener("click",()=>settings.classList.add("open"));
 document.querySelector("#closeSettings").addEventListener("click",()=>settings.classList.remove("open"));
@@ -491,31 +568,7 @@ function presentationLoop(now){
 requestAnimationFrame(presentationLoop);
 
 
-/* Batter HUD preview layer */
-const matchControls=document.querySelector("#matchControls");
-const timingBar=document.querySelector("#timingBar");
-const timingLabel=document.querySelector("#timingLabel");
-const powerValue=document.querySelector("#powerValue");
-let power=72;
-let timingPulse=0;
-function showMatchControls(){matchControls.classList.remove("hidden")}
-function hideMatchControls(){matchControls.classList.add("hidden")}
-startMatchBtn.addEventListener("click",()=>showMatchControls());
-document.querySelector("#backHome").addEventListener("click",()=>hideMatchControls());
-document.querySelector("#menuClose").addEventListener("click",()=>hideMatchControls());
-document.querySelectorAll(".shot-row button").forEach(btn=>btn.addEventListener("click",()=>{
- const shot=btn.dataset.shot;
- timingPulse=0;
- const quality=Math.max(0,Math.min(1,.52+Math.random()*.48));
- timingBar.style.width=(quality*100)+"%";
- timingLabel.textContent=quality>.86?"TIMING · PERFECT":quality>.68?"TIMING · GOOD":quality>.42?"TIMING · OK":"TIMING · LATE";
- power=Math.max(35,Math.min(100,power+(Math.random()*18-9)));powerValue.textContent=Math.round(power)+"%";
- matchControls.classList.remove("flash");void matchControls.offsetWidth;matchControls.classList.add("flash");
- showToast(shot+" · "+timingLabel.textContent.replace("TIMING · ",""));
- if(quality>.9){displayRuns+=shot==="LOFT"?6:shot==="DRIVE"?4:shot==="CUT"?4:shot==="PULL"?4:1;displayBalls++;}
- else {displayBalls++;if(quality>.62)displayRuns+=1;}
-}));
-
+/* Batter HUD: live delivery controls are installed below. */
 /* =========================================================
    LIVE DELIVERY ENGINE — ball-in-motion batting
    ========================================================= */
@@ -529,168 +582,91 @@ const deliveryBtn=document.querySelector("#deliveryBtn");
 const deliveryText=document.querySelector("#deliveryText");
 const ballSpeed=document.querySelector("#ballSpeed");
 const timingMarker=document.querySelector("#timingMarker");
+let tossWinner="",tossComplete=false,battingFirst="";
+let deliveryActive=false,deliveryStart=0,deliveryDuration=1850;
+let deliveryOrigin=new THREE.Vector3(0,1.35,-19.8),deliveryEnd=new THREE.Vector3(.8,.72,9.65);
+let ballHit=false,inningsBalls=0,inningsRuns=0;
+let deliveryLine="ON_STUMPS",deliveryLength="FULL";
 
-let tossWinner="";
-let tossComplete=false;
-let battingFirst="";
-let deliveryActive=false;
-let deliveryStart=0;
-let deliveryDuration=1850;
-let deliveryOrigin=new THREE.Vector3(0,1.35,-19.8);
-let deliveryEnd=new THREE.Vector3(.8,.72,9.65);
-let lastContactDistance=99;
-let ballHit=false;
-let inningsBalls=0;
-let inningsRuns=0;
-
-function openCoinToss(){
-  coinToss.classList.add("open");
-  tossPrompt.textContent="Choose HEADS or TAILS.";
-  tossResult.textContent="WAITING FOR CALL";
-  tossResult.classList.remove("winner");
-  continueFromToss.disabled=true;
-  tossComplete=false;
-  tossChoices.forEach(b=>b.disabled=false);
-}
+function openCoinToss(){coinToss.classList.add("open");tossPrompt.textContent="Choose HEADS or TAILS.";tossResult.textContent="WAITING FOR CALL";tossResult.classList.remove("winner");continueFromToss.disabled=true;tossComplete=false;tossChoices.forEach(b=>b.disabled=false)}
 function closeCoinToss(){coinToss.classList.remove("open")}
-
 tossChoices.forEach(btn=>btn.addEventListener("click",()=>{
-  if(tossComplete)return;
-  tossChoices.forEach(b=>b.disabled=true);
-  const call=btn.dataset.call;
-  const outcome=Math.random()<.5?"HEADS":"TAILS";
-  const homeWins=outcome===call;
-  tossWinner=homeWins?homeTeam:awayTeam;
-  battingFirst=tossWinner;
-  coin.classList.remove("flipping"); void coin.offsetWidth; coin.classList.add("flipping");
-  tossPrompt.textContent="THE COIN IS IN THE AIR...";
-  setTimeout(()=>{
-    tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" BATS FIRST";
-    tossResult.classList.add("winner");
-    tossPrompt.textContent=tossWinner.toUpperCase()+" WON THE TOSS.";
-    continueFromToss.disabled=false;
-    tossComplete=true;
-  },1150);
+ if(tossComplete)return;tossChoices.forEach(b=>b.disabled=true);
+ const call=btn.dataset.call,outcome=Math.random()<.5?"HEADS":"TAILS";
+ tossWinner=outcome===call?homeTeam:awayTeam;battingFirst=tossWinner;
+ coin.classList.remove("flipping");void coin.offsetWidth;coin.classList.add("flipping");
+ tossPrompt.textContent="THE COIN IS IN THE AIR...";
+ setTimeout(()=>{tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" BATS FIRST";tossResult.classList.add("winner");tossPrompt.textContent=tossWinner.toUpperCase()+" WON THE TOSS.";continueFromToss.disabled=false;tossComplete=true},1150);
 }));
-
 continueFromToss.addEventListener("click",()=>{
-  closeCoinToss();
-  cover.classList.add("hidden");
-  hud.classList.remove("hidden");
-  matchControls.classList.remove("hidden");
-  started=true;
-  hudTeam.textContent=battingFirst.toUpperCase();
-  document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
-  showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER READY");
-  setCamera("broadcast");
-  resetDelivery();
+ closeCoinToss();cover.classList.add("hidden");hud.classList.remove("hidden");matchControls.classList.remove("hidden");started=true;
+ hudTeam.textContent=battingFirst.toUpperCase();document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
+ showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER READY");setCamera("broadcast");resetDelivery();
 });
 
 function resetDelivery(){
-  deliveryActive=false;ballHit=false;lastContactDistance=99;
-  ball.position.copy(deliveryOrigin);
-  ball.visible=true;
-  deliveryText.textContent="BOWLER READY";
-  ballSpeed.textContent="-- KPH";
-  document.querySelector("#timingLabel").textContent="WAIT FOR THE BALL";
-  document.querySelector("#timingBar").style.width="0%";
-  matchControls.classList.remove("ball-live","contact-window");
-  document.querySelectorAll(".shot-row button").forEach(b=>b.disabled=true);
-  deliveryBtn.disabled=false;
-  deliveryBtn.textContent="DELIVER";
+ deliveryActive=false;ballHit=false;ball.position.copy(deliveryOrigin);ball.visible=true;
+ deliveryText.textContent="BOWLER READY";ballSpeed.textContent="-- KPH";timingLabel.textContent="WAIT FOR THE BALL";
+ timingBar.style.width="0%";matchControls.classList.remove("ball-live","contact-window");
+ document.querySelectorAll(".shot-row button").forEach(b=>b.disabled=true);deliveryBtn.disabled=false;deliveryBtn.textContent="DELIVER";
+ resetJoystick();selectedFoot="";selectedShot="STROKE";showRecommendations();
 }
 function startDelivery(){
-  if(deliveryActive)return;
-  deliveryActive=true;ballHit=false;deliveryStart=performance.now();
-  deliveryDuration=1650+Math.random()*380;
-  const speed=128+Math.random()*18;
-  ballSpeed.textContent=Math.round(speed)+" KPH";
-  deliveryText.textContent="BALL IN FLIGHT";
-  matchControls.classList.add("ball-live");
-  deliveryBtn.disabled=true;
-  document.querySelectorAll(".shot-row button").forEach(b=>b.disabled=false);
+ if(deliveryActive)return;
+ deliveryActive=true;ballHit=false;deliveryStart=performance.now();deliveryDuration=1650+Math.random()*380;
+ const speed=128+Math.random()*18;ballSpeed.textContent=Math.round(speed)+" KPH";deliveryText.textContent="BALL IN FLIGHT";
+ deliveryLine=["ON_STUMPS","OUTSIDE_OFF","LEG"][Math.floor(Math.random()*3)];
+ deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
+ matchControls.classList.add("ball-live");deliveryBtn.disabled=true;
+ document.querySelectorAll(".shot-row button").forEach(b=>b.disabled=false);showRecommendations();
 }
 deliveryBtn.addEventListener("click",startDelivery);
 
-function playShot(shot){
-  if(!deliveryActive || ballHit)return;
-  const now=performance.now();
-  const progress=Math.max(0,Math.min(1,(now-deliveryStart)/deliveryDuration));
-  const distanceToContact=Math.abs(progress-.78);
-  lastContactDistance=distanceToContact;
-  ballHit=true;
-  inningsBalls++;
-  displayBalls=inningsBalls;
-  const timing=Math.max(0,1-distanceToContact/0.28);
-  const quality=timing>.82?"PERFECT":timing>.58?"GOOD":timing>.32?"OK":"LATE";
-  document.querySelector("#timingLabel").textContent="TIMING · "+quality;
-  document.querySelector("#timingBar").style.width=(timing*100)+"%";
-  let runs=0;
-  if(timing>.82) runs=shot==="LOFT"?6:["DRIVE","CUT","PULL"].includes(shot)?4:2;
-  else if(timing>.55) runs=["DRIVE","CUT","PULL"].includes(shot)?2:1;
-  else runs=0;
-  inningsRuns+=runs;displayRuns=inningsRuns;
-  document.querySelector("#deliveryText").textContent=runs?("SHOT PLAYED · "+runs+" RUN"+(runs===1?"":"S")):"DOT BALL";
-  showToast(shot+" · "+quality+(runs?" · "+runs+" RUNS":""));
-  // Kick the ball away from the batter; the next frame loop carries it.
-  ball.userData.hitAt=performance.now();
-  ball.userData.hitOrigin=ball.position.clone();
-  ball.userData.hitDir=new THREE.Vector3(
-    (shot==="CUT"?-1:shot==="PULL"?1:(Math.random()-.5)*.7),
-    shot==="LOFT"?.9:shot==="DRIVE"?.45:.2,
-    shot==="DEFENCE"?-1:-.35
-  ).normalize();
-  ball.userData.hitSpeed=3.5+runs*1.5;
+function footChoice(foot){
+ if(!deliveryActive||ballHit)return;
+ selectedFoot=foot;
+ document.querySelectorAll("[data-foot]").forEach(b=>b.classList.toggle("selected",b.dataset.foot===foot));
+ if(recommendations)showToast(foot+" selected");
 }
+document.querySelectorAll("[data-foot]").forEach(b=>b.addEventListener("click",()=>footChoice(b.dataset.foot)));
 
-document.querySelectorAll(".shot-row button[data-shot]").forEach(btn=>{
-  btn.addEventListener("click",()=>playShot(btn.dataset.shot));
-});
-
-// Replace the showcase's floating ball with a real delivery trajectory.
-const originalAnimate=animate;
+function playShot(shot){
+ if(!deliveryActive||ballHit)return;
+ selectedShot=shot;const now=performance.now(),progress=Math.max(0,Math.min(1,(now-deliveryStart)/deliveryDuration));
+ const distance=Math.abs(progress-.78);const timing=Math.max(0,1-distance/.28);
+ ballHit=true;inningsBalls++;displayBalls=inningsBalls;
+ const quality=timing>.82?"PERFECT":timing>.58?"GOOD":timing>.32?"OK":"LATE";
+ let runs=0;
+ const specialWrong=selectedFoot==="SPECIAL" && !currentRecommendation?.foot?.includes("FRONT");
+ if(selectedFoot==="LEAVE"){runs=0}
+ else if(specialWrong){timingLabel.textContent="SPECIAL · WRONG DELIVERY";deliveryText.textContent="WICKET · SPECIAL MISTIMED";showToast("SPECIAL · WRONG DELIVERY · OUT");ball.userData.hitSpeed=0;setTimeout(resetDelivery,850);return}
+ else if(timing>.82) runs=shot==="LOFT"?6:shot==="STROKE"?4:2;
+ else if(timing>.55) runs=shot==="STROKE"?2:1;
+ timingLabel.textContent="TIMING · "+quality;timingBar.style.width=(timing*100)+"%";inningsRuns+=runs;displayRuns=inningsRuns;
+ deliveryText.textContent=runs?"SHOT PLAYED · "+runs+" RUN"+(runs===1?"":"S"):"DOT BALL";
+ showToast(shot+" · "+(selectedFoot||"NO FOOTWORK")+" · "+quality+(runs?" · "+runs+" RUNS":""));
+ ball.userData.hitAt=performance.now();ball.userData.hitOrigin=ball.position.clone();
+ const d=new THREE.Vector3(hitDirection.x*.95,shot==="LOFT"?.9:shot==="STROKE"?.45:.22,hitDirection.y<-.25?.65:-.45).normalize();
+ ball.userData.hitDir=d;ball.userData.hitSpeed=3.5+runs*1.5;
+}
+document.querySelectorAll(".shot-row button[data-shot]").forEach(btn=>btn.addEventListener("click",()=>playShot(btn.dataset.shot)));
 
 function liveBallLoop(now){
-  const t=performance.now();
-  if(deliveryActive && !ballHit){
-    const p=Math.max(0,Math.min(1,(t-deliveryStart)/deliveryDuration));
-    const eased=p*p*(3-2*p);
-    const pos=new THREE.Vector3().lerpVectors(deliveryOrigin,deliveryEnd,eased);
-    // Natural cricket flight: small dip toward the pitch and lateral seam movement.
-    pos.y += Math.sin(p*Math.PI)*1.05;
-    pos.x += Math.sin(p*10.5)*.035;
-    ball.position.copy(pos);
-    ball.rotation.x+=.16;ball.rotation.y+=.23;
-    const meter=Math.round(p*100);
-    document.querySelector("#timingBar").style.width=meter+"%";
-    if(p>.68){matchControls.classList.add("contact-window");document.querySelector("#timingLabel").textContent="CONTACT WINDOW";}
-    if(p>=1){
-      deliveryActive=false;
-      inningsBalls++;
-      displayBalls=inningsBalls;
-      deliveryText.textContent="DOT BALL · RESET";
-      document.querySelector("#timingLabel").textContent="TIMING · MISSED";
-      showToast("MISSED · DOT BALL");
-      setTimeout(resetDelivery,650);
-    }
-  } else if(ballHit){
-    const elapsed=(t-(ball.userData.hitAt||t))/1000;
-    if(elapsed<1.35){
-      const p=elapsed/1.35;
-      const o=ball.userData.hitOrigin||ball.position;
-      const d=ball.userData.hitDir||new THREE.Vector3(0,.3,-1);
-      const s=ball.userData.hitSpeed||4;
-      ball.position.copy(o).addScaledVector(d,s*elapsed*3);
-      ball.position.y=Math.max(.28,o.y+d.y*s*elapsed*2.2+1.8*elapsed*(1-elapsed));
-      ball.rotation.x+=.28;ball.rotation.y+=.34;
-    }else{
-      resetDelivery();
-    }
-  }
-  requestAnimationFrame(liveBallLoop);
+ const t=performance.now();
+ if(deliveryActive&&!ballHit){
+  const p=Math.max(0,Math.min(1,(t-deliveryStart)/deliveryDuration)),eased=p*p*(3-2*p);
+  const pos=new THREE.Vector3().lerpVectors(deliveryOrigin,deliveryEnd,eased);pos.y+=Math.sin(p*Math.PI)*1.05;pos.x+=Math.sin(p*10.5)*.035;ball.position.copy(pos);
+  ball.rotation.x+=.16;ball.rotation.y+=.23;timingBar.style.width=Math.round(p*100)+"%";
+  if(p>.68){matchControls.classList.add("contact-window");timingLabel.textContent="CONTACT WINDOW"}
+  if(p>=1){deliveryActive=false;inningsBalls++;displayBalls=inningsBalls;deliveryText.textContent="DOT BALL · MISSED";timingLabel.textContent="TIMING · MISSED";showToast("MISSED · DOT BALL");setTimeout(resetDelivery,650)}
+ }else if(ballHit){
+  const elapsed=(t-(ball.userData.hitAt||t))/1000;
+  if(elapsed<1.35){const p=elapsed/1.35,o=ball.userData.hitOrigin||ball.position,d=ball.userData.hitDir||new THREE.Vector3(0,.3,-1),s=ball.userData.hitSpeed||4;ball.position.copy(o).addScaledVector(d,s*elapsed*3);ball.position.y=Math.max(.28,o.y+d.y*s*elapsed*2.2+1.8*elapsed*(1-elapsed));ball.rotation.x+=.28;ball.rotation.y+=.34}
+  else resetDelivery();
+ }
+ requestAnimationFrame(liveBallLoop);
 }
 requestAnimationFrame(liveBallLoop);
-
 // Start the toss after the user presses START MATCH in the existing setup flow.
 startMatchBtn.addEventListener("click",()=>{
   setTimeout(()=>{
