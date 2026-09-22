@@ -10,6 +10,14 @@
 - 3D stadium showcase with broadcast, batter, bowler, wide and cinematic cameras
 - Separate player-only realistic 3D silhouette work
 
+### Multi-language gameplay architecture
+- **TypeScript**: strict typed contracts for UI, match state, deliveries and batting input; this is the safer layer for future gameplay migration.
+- **Python**: high-level cricket AI decisions, tactical recommendations and bowling plans.
+- **Rust**: small hot-loop module for fast deterministic ball calculations; can later compile to WebAssembly.
+- **C++**: existing native physics/match foundation remains responsible for heavier native simulation and its WebAssembly bridge.
+
+The languages are deliberately separated rather than mixing everything into one runtime: TypeScript owns contracts/UI, Python owns high-level AI, Rust handles selected performance-critical loops, and C++ remains the native simulation core.
+
 ### Native engine
 - C++17 cricket physics foundation
 - Delivery aerodynamics, swing/seam, bounce and contact quality
