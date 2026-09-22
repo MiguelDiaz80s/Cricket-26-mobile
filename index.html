@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#03100a">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 <div id="app">
@@ -84,6 +84,23 @@
   </div>
 </div>
 
+
+<div id="coinToss" class="coin-toss">
+  <div class="toss-backdrop"></div>
+  <div class="toss-card">
+    <span>PRE-MATCH / COIN TOSS</span>
+    <h2>WHO BATS FIRST?</h2>
+    <p id="tossPrompt">Call the toss.</p>
+    <div class="coin-wrap"><div id="coin" class="coin"><b>HEADS</b><i>TAILS</i></div></div>
+    <div class="toss-actions">
+      <button class="toss-choice" data-call="HEADS">HEADS</button>
+      <button class="toss-choice" data-call="TAILS">TAILS</button>
+    </div>
+    <div id="tossResult" class="toss-result">WAITING FOR CALL</div>
+    <button id="continueFromToss" class="launch-match toss-continue" disabled>CONTINUE <span>→</span></button>
+  </div>
+</div>
+
 <div id="playerHub" class="player-hub">
   <div class="hub-backdrop"></div><div class="hub-card"><button id="playerHubClose">×</button>
     <span>MY CRICKETER / 01</span><h2>BUILD YOUR PLAYER</h2><p>The creator is coming online. Your custom cricketer will own the career mode.</p>
@@ -103,10 +120,11 @@
 
 
 <div id="matchControls" class="match-controls hidden">
-  <div class="control-head"><span>BATTER CONTROL</span><b id="timingLabel">TIMING · READY</b></div>
-  <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b></div>
-  <div class="shot-row"><button data-shot="DEFENCE">DEFENCE</button><button data-shot="DRIVE" class="shot-main">DRIVE</button><button data-shot="CUT">CUT</button><button data-shot="PULL">PULL</button><button data-shot="LOFT">LOFT</button></div>
-  <div class="control-foot"><span>← MOVE</span><span>POWER <b id="powerValue">72%</b></span><span>TAP AT CONTACT</span><span>MOVE →</span></div>
+  <div class="delivery-status"><i></i><span id="deliveryText">WAITING FOR BOWLER</span><b id="ballSpeed">-- KPH</b></div>
+  <div class="control-head"><span>BATTER CONTROL</span><b id="timingLabel">WAIT FOR THE BALL</b></div>
+  <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
+  <div class="shot-row"><button id="deliveryBtn" class="delivery-btn">DELIVER</button><button data-shot="DEFENCE">DEFENCE</button><button data-shot="DRIVE" class="shot-main">DRIVE</button><button data-shot="CUT">CUT</button><button data-shot="PULL">PULL</button><button data-shot="LOFT">LOFT</button></div>
+  <div class="control-foot"><span>← SWIPE / MOVE</span><span>POWER <b id="powerValue">72%</b></span><span>TAP SHOT AS BALL ARRIVES</span><span>MOVE →</span></div>
 </div>
 \n<div class="bottom-ui">
   <div><label>CAMERA ANGLES</label><div class="camera-buttons">
@@ -146,6 +164,6 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=20"></script>
+<script type="module" src="game.js?v=21"></script>
 </body>
 </html>
