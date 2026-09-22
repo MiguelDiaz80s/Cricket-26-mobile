@@ -52,16 +52,16 @@ C.net={
   this.pc.onicecandidate=e=>{if(e.candidate)this.signal({type:"ice",candidate:e.candidate})};
   this.pc.onconnectionstatechange=()=>{const s=this.pc.connectionState;C.state.network.connected=s==="connected"||s==="completed";if(s==="failed")this.disconnect()};
   this.pc.ondatachannel=e=>this.attachChannel(e.channel);
-  this.signal=new WebSocket(this.signalUrl);
-  this.signal.onmessage=async e=>{let m;try{m=JSON.parse(e.data)}catch{return}await this.handleSignal(m)};
-  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error("Signaling timeout")),8000);this.signal.onopen=()=>{clearTimeout(timer);resolve()};this.signal.onerror=()=>{clearTimeout(timer);reject(Error("Signaling connection failed"))}}).catch(()=>false);
-  if(this.signal.readyState!==WebSocket.OPEN){this.disconnect();return false}
+  this.signalSocket=new WebSocket(this.signalUrl);
+  this.signalSocket.onmessage=async e=>{let m;try{m=JSON.parse(e.data)}catch{return}await this.handleSignal(m)};
+  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error("Signaling timeout")),8000);this.signalSocket.onopen=()=>{clearTimeout(timer);resolve()};this.signalSocket.onerror=()=>{clearTimeout(timer);reject(Error("Signaling connection failed"))}}).catch(()=>false);
+  if(this.signalSocket.readyState!==WebSocket.OPEN){this.disconnect();return false}
   this.signal({type:"join",room:this.room});
   C.state.network.role="waiting";
   return true;
  },
  attachChannel(ch){this.channel=ch;this.channel.onopen=()=>{C.state.network.connected=true;C.state.network.role=this.role};this.channel.onclose=()=>{C.state.network.connected=false}},
- signal(msg){if(this.signal?.readyState===WebSocket.OPEN)this.signal.send(JSON.stringify(msg))},
+ signal(msg){if(this.signalSocket?.readyState===WebSocket.OPEN)this.signalSocket.send(JSON.stringify(msg))},
  async handleSignal(msg){
   if(msg.type==="joined"){if(msg.peers===2){this.role="guest";C.state.network.role="guest"}}
   if(msg.type==="peer-joined"&&!this.pc.localDescription){this.role="host";C.state.network.role="host";this.channel=this.pc.createDataChannel("cricket26");this.attachChannel(this.channel);const offer=await this.pc.createOffer();await this.pc.setLocalDescription(offer);this.signal({type:"offer",sdp:offer})}
@@ -70,7 +70,7 @@ C.net={
   if(msg.type==="ice"&&msg.candidate)try{await this.pc.addIceCandidate(msg.candidate)}catch{}
   if(msg.type==="peer-left"){C.state.network.connected=false;C.state.network.role="waiting"}
  },
- disconnect(){try{this.channel?.close()}catch{}try{this.pc?.close()}catch{}try{this.signal?.close()}catch{}this.channel=null;this.pc=null;this.signal=null;C.state.network.connected=false;C.state.network.role="offline"},
+ disconnect(){try{this.channel?.close()}catch{}try{this.pc?.close()}catch{}try{this.signalSocket?.close()}catch{}this.channel=null;this.pc=null;this.signal=null;C.state.network.connected=false;C.state.network.role="offline"},
  send(input){if(this.channel?.readyState==="open")this.channel.send(JSON.stringify({t:performance.now(),input}))}
 };
 
