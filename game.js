@@ -360,13 +360,13 @@ const recOn=document.querySelector("#recommendationsToggle"),recOff=document.que
 function updateRecommendationUI(){
  recommendations=!!recommendations;
  localStorage.setItem("cricket26-recommendations",recommendations?"on":"off");
- recOn?.classList.toggle("active",recommendations);recOff?.classList.toggle("active",!recommendations);
- const r=document.querySelector("#recommendationText"); if(r) r.style.display="none";
+ recOn.classList.toggle("active",recommendations);recOff.classList.toggle("active",!recommendations);
+ const r=document.querySelector("#recommendationText"); if(r) r.style.display=recommendations?"block":"none";
 }
-recOn?.addEventListener("click",()=>{recommendations=true;updateRecommendationUI()});
-recOff?.addEventListener("click",()=>{recommendations=false;updateRecommendationUI()});
-document.querySelector("#landscapeChoice")?.addEventListener("click",()=>{phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");applyDeviceMode();document.querySelector("#landscapeChoice").classList.add("active");document.querySelector("#portraitChoice").classList.remove("active")});
-document.querySelector("#portraitChoice")?.addEventListener("click",()=>{phoneLandscape=false;localStorage.setItem("cricket26-phone-orientation","portrait");applyDeviceMode();document.querySelector("#portraitChoice").classList.add("active");document.querySelector("#landscapeChoice").classList.remove("active")});
+recOn.addEventListener("click",()=>{recommendations=true;updateRecommendationUI()});
+recOff.addEventListener("click",()=>{recommendations=false;updateRecommendationUI()});
+document.querySelector("#landscapeChoice").addEventListener("click",()=>{phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");applyDeviceMode();document.querySelector("#landscapeChoice").classList.add("active");document.querySelector("#portraitChoice").classList.remove("active")});
+document.querySelector("#portraitChoice").addEventListener("click",()=>{phoneLandscape=false;localStorage.setItem("cricket26-phone-orientation","portrait");applyDeviceMode();document.querySelector("#portraitChoice").classList.add("active");document.querySelector("#landscapeChoice").classList.remove("active")});
 updateRecommendationUI();
 
 const hitJoystick=document.querySelector("#hitJoystick"), joystickStick=document.querySelector("#joystickStick");
@@ -377,7 +377,7 @@ function setJoystick(clientX,clientY){
  if(mag>max){dx=dx/mag*max;dy=dy/mag*max;}
  hitDirection.x=dx/max;hitDirection.y=-dy/max;
  joystickStick.style.transform="translate("+dx+"px,"+dy+"px)";
- if(recommendations){const r=document.querySelector("#recommendationText");if(r)r.textContent="TARGET: "+directionName(hitDirection);}
+ if(recommendations) document.querySelector("#recommendationText").textContent="TARGET: "+directionName(hitDirection);
 }
 function resetJoystick(){joystickPointer=false;hitDirection={x:0,y:0};joystickStick.style.transform="translate(0,0)"}
 function directionName(d){
@@ -400,41 +400,14 @@ function recommendationForDelivery(){
  return options;
 }
 function showRecommendations(){
- const tickWrap=document.querySelector(".joystick-ticks");
- document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.classList.remove("recommended"));
- if(!recommendations){
-  currentRecommendation=null;
-  if(tickWrap)tickWrap.innerHTML="";
-  return;
- }
- const options=recommendationForDelivery();
- currentRecommendation=options[Math.floor(Math.random()*options.length)]||null;
- if(tickWrap){
-  const count=10;
-  const dirs=Array.from({length:count},(_,i)=>{
-   const a=(i/count)*Math.PI*2;
-   return {x:Math.sin(a),y:Math.cos(a)};
-  });
-  tickWrap.innerHTML=dirs.map((d,i)=>{
-   const angle=i*(360/count);
-   return '<i class="joystick-tick" data-tick="'+i+'" style="transform:rotate('+angle+'deg) translateY(-48px)"></i>';
-  }).join("");
-  options.forEach(o=>{
-   let best=0,bestDot=-999;
-   dirs.forEach((d,i)=>{const dot=d.x*o.dir.x+d.y*o.dir.y;if(dot>bestDot){bestDot=dot;best=i;}});
-   tickWrap.querySelector('[data-tick="'+best+'"]')?.classList.add("recommended");
-  });
- }
- options.forEach(o=>{
-  document.querySelector('[data-shot="'+o.shot+'"]')?.classList.add("recommended");
-  document.querySelector('[data-foot="'+o.foot+'"]')?.classList.add("recommended");
- });
- const r=document.querySelector("#recommendationText"); if(r) r.textContent="";
+ if(!recommendations)return;
+ const options=recommendationForDelivery();currentRecommendation=options[Math.floor(Math.random()*options.length)];
+ document.querySelector("#recommendationText").textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot.toLowerCase().replace("foot"," foot")+" · "+o.shot).join("  OR  ");
 }
 
 const settings=document.querySelector("#settings");
-document.querySelector("#settingsFloat")?.addEventListener("click",()=>settings.classList.add("open"));
-document.querySelector("#closeSettings")?.addEventListener("click",()=>settings.classList.remove("open"));
+document.querySelector("#settingsFloat").addEventListener("click",()=>settings.classList.add("open"));
+document.querySelector("#closeSettings").addEventListener("click",()=>settings.classList.remove("open"));
 settings.addEventListener("click",e=>{if(e.target===settings)settings.classList.remove("open")});
 
 document.querySelectorAll(".style-choice").forEach(b=>b.addEventListener("click",()=>{
@@ -458,17 +431,17 @@ const cover=document.querySelector("#intro");
 const menuPanel=document.querySelector("#menuPanel");
 const hud=document.querySelector("#hud");
 const hudTeam=document.querySelector("#hudTeam");
-document.querySelector("#enterBtn")?.addEventListener("click",()=>{
+document.querySelector("#enterBtn").addEventListener("click",()=>{
  cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true;
  setCamera("cinematic"); setTimeout(()=>setCamera("broadcast"),4200);
 });
 document.querySelector("#showVisuals").addEventListener("click",()=>{
  cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true; setCamera("cinematic");
 });
-document.querySelector("#backHome")?.addEventListener("click",()=>{ menuPanel.classList.add("open"); });
-document.querySelector("#menuClose")?.addEventListener("click",()=>menuPanel.classList.remove("open"));
-document.querySelector("#menuSettings")?.addEventListener("click",()=>{menuPanel.classList.remove("open");settings.classList.add("open")});
-document.querySelector("#cameraHud")?.addEventListener("click",()=>{
+document.querySelector("#backHome").addEventListener("click",()=>{ menuPanel.classList.add("open"); });
+document.querySelector("#menuClose").addEventListener("click",()=>menuPanel.classList.remove("open"));
+document.querySelector("#menuSettings").addEventListener("click",()=>{menuPanel.classList.remove("open");settings.classList.add("open")});
+document.querySelector("#cameraHud").addEventListener("click",()=>{
  menuPanel.classList.remove("open"); document.querySelector(".bottom-ui").scrollIntoView?.({block:"nearest"});
 });
 menuPanel.addEventListener("click",e=>{
@@ -519,7 +492,7 @@ function openPreMatch(){preMatch.classList.add("open")}
 function closePreMatch(){preMatch.classList.remove("open")}
 
 // Capture phase owns PLAY NOW so the old showcase action cannot skip setup.
-document.querySelector("#enterBtn")?.addEventListener("click",e=>{
+document.querySelector("#enterBtn").addEventListener("click",e=>{
  e.preventDefault();e.stopImmediatePropagation();openPreMatch();
 },{capture:true});
 
