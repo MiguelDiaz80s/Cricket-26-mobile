@@ -212,8 +212,20 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script src="web/advanced-systems.js"></script>
-<script src="web/shaders.js"></script>
-<script type="module" src="game.js?v=28"></script>
+<script>
+window.addEventListener("error",function(e){
+  const box=document.getElementById("bootError"); if(!box)return;
+  box.hidden=false; box.querySelector("b").textContent="GAME STARTUP ERROR";
+  box.querySelector("span").textContent=(e.message||"Unknown JavaScript error")+" · line "+(e.lineno||"?");
+});
+window.addEventListener("unhandledrejection",function(e){
+  const box=document.getElementById("bootError"); if(!box)return;
+  box.hidden=false; box.querySelector("b").textContent="GAME STARTUP ERROR";
+  box.querySelector("span").textContent=String(e.reason?.message||e.reason||"Promise error");
+});
+</script>
+<div id="bootError" hidden style="position:fixed;inset:0;z-index:9999999;background:#050807;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui">
+<div style="max-width:520px;text-align:center"><b style="display:block;font-size:22px;margin-bottom:10px"></b><span style="display:block;color:#b9c2bd"></span><button onclick="location.reload()" style="margin-top:18px;padding:12px 18px;border:0;border-radius:10px">RELOAD</button></div></div>
+<script type="module" src="game.js?v=29"></script>
 </body>
 </html>
