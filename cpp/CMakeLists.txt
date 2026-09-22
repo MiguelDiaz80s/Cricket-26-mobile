@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(cricket26_engine LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_library(cricket26_engine STATIC cricket_engine.cpp)
+add_executable(cricket26_engine_demo demo.cpp)
+target_link_libraries(cricket26_engine_demo PRIVATE cricket26_engine)
