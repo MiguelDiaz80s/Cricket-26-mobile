@@ -1,0 +1,35 @@
+name: C++ Cricket Engine
+on:
+  push:
+    paths: ["engine/**","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
+  pull_request:
+    paths: ["engine/**","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
+jobs:
+  native-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -j2
+      - name: Run physics smoke test
+        run: ./build/engine/cricket_engine_test
+  wasm-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+      - name: Build WebAssembly module
+        run: |
+          em++ -std=c++17 -O3 engine/CricketPhysics.cpp engine/CricketCAPI.cpp -Iengine -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_FUNCTIONS='["_cricket_reset","_cricket_start_delivery","_cricket_update","_cricket_ball_active","_cricket_ball_x","_cricket_ball_y","_cricket_ball_z","_cricket_strike","_cricket_last_quality","_cricket_result","_cricket_score","_cricket_wickets","_cricket_legal_balls"]' -o engine/cricket_engine.js
+      - name: Upload WASM build
+        uses: actions/upload-artifact@v4
+        with:
+          name: cricket-engine-wasm
+          path: |
+            engine/cricket_engine.js
+            engine/cricket_engine.wasm
