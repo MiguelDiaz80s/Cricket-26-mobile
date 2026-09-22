@@ -390,3 +390,102 @@ function animate(now){
 }
 requestAnimationFrame(animate);
 addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.65))});
+
+/* =========================================================
+   NEXT-GEN UI CONTROLLER
+   ========================================================= */
+const preMatch=document.querySelector("#preMatch");
+const preMatchClose=document.querySelector("#preMatchClose");
+const startMatchBtn=document.querySelector("#startMatchBtn");
+const playerHub=document.querySelector("#playerHub");
+const playerHubClose=document.querySelector("#playerHubClose");
+const toast=document.querySelector("#toast");
+let selectedFormat="T20";
+let homeTeam="Australia";
+let awayTeam="India";
+
+function showToast(message){
+ const t=toast.querySelector("span");
+ t.textContent=message;
+ toast.classList.add("show");
+ clearTimeout(window.__toastTimer);
+ window.__toastTimer=setTimeout(()=>toast.classList.remove("show"),1800);
+}
+function openPreMatch(){preMatch.classList.add("open")}
+function closePreMatch(){preMatch.classList.remove("open")}
+
+// Capture phase owns PLAY NOW so the old showcase action cannot skip setup.
+document.querySelector("#enterBtn").addEventListener("click",e=>{
+ e.preventDefault();e.stopImmediatePropagation();openPreMatch();
+},{capture:true});
+
+document.querySelectorAll("#formatChoices .setup-choice").forEach(b=>b.addEventListener("click",()=>{
+ selectedFormat=b.dataset.format;
+ document.querySelectorAll("#formatChoices .setup-choice").forEach(x=>x.classList.toggle("active",x===b));
+ document.querySelector("#conditionText").textContent=selectedFormat==="TEST"?"DAYLIGHT · FRESH PITCH":selectedFormat==="ODI"?"DAYLIGHT · HARD SURFACE":"NIGHT · FRESH PITCH";
+ showToast(selectedFormat+" FORMAT SELECTED");
+}));
+
+document.querySelectorAll(".team-choice").forEach(b=>b.addEventListener("click",()=>{
+ const strip=b.parentElement.id;
+ if(strip==="homeTeamStrip")homeTeam=b.dataset.team;else awayTeam=b.dataset.team;
+ b.parentElement.querySelectorAll(".team-choice").forEach(x=>x.classList.toggle("active",x===b));
+ showToast((strip==="homeTeamStrip"?"HOME: ":"AWAY: ")+b.dataset.team.toUpperCase());
+}));
+
+preMatchClose.addEventListener("click",closePreMatch);
+preMatch.addEventListener("click",e=>{if(e.target===preMatch)closePreMatch()});
+
+startMatchBtn.addEventListener("click",()=>{
+ closePreMatch();
+ cover.classList.add("hidden");
+ hud.classList.remove("hidden");
+ started=true;
+ selectedCountry=homeTeam;
+ if(countries[homeTeam])setCountry(homeTeam);
+ hudTeam.textContent=homeTeam.toUpperCase();
+ document.querySelector(".match-pill span").textContent=selectedFormat+" MATCH";
+ document.querySelector(".match-pill b").textContent=selectedFormat==="TEST"?"DAY 1":"INNINGS 1";
+ setCamera("cinematic");
+ setTimeout(()=>setCamera("broadcast"),3600);
+ showToast(homeTeam.toUpperCase()+" VS "+awayTeam.toUpperCase()+" · MATCH LIVE");
+});
+
+// Navigation is now functional rather than decorative.
+document.querySelectorAll(".top-nav span").forEach(item=>item.addEventListener("click",()=>{
+ const name=item.textContent.trim();
+ if(name==="HOME"){cover.classList.remove("hidden");hud.classList.add("hidden");preMatch.classList.remove("open");showToast("HOME")}
+ else if(name==="CAREER"){playerHub.classList.add("open");showToast("CAREER HUB")}
+ else if(name==="PLAY"){openPreMatch()}
+ else if(name==="MY CRICKETER"){playerHub.classList.add("open");showToast("MY CRICKETER")}
+}));
+
+document.querySelectorAll(".mode-card").forEach(card=>card.addEventListener("click",()=>{
+ const title=card.querySelector("strong")?.textContent||"MODE";
+ if(title==="QUICK MATCH")openPreMatch();
+ if(title==="CREATE PLAYER"||title==="CAREER")playerHub.classList.add("open");
+ if(title==="TOURNAMENTS")showToast("TOURNAMENT HUB · COMING NEXT");
+}));
+playerHubClose.addEventListener("click",()=>playerHub.classList.remove("open"));
+playerHub.addEventListener("click",e=>{if(e.target===playerHub)playerHub.classList.remove("open")});
+
+// Give the cover a living broadcast feel while it is visible.
+const coverBall=document.querySelector(".art-ball");
+const coverBat=document.querySelector(".art-bat");
+const coverRings=document.querySelectorAll(".cover-orbit");
+let coverMotion=0;
+function animateCoverPresentation(dt){
+ if(!cover.classList.contains("hidden")){
+  coverMotion+=dt;
+  if(coverBall)coverBall.style.transform="translate3d("+(Math.sin(coverMotion*1.7)*10)+"px,"+(Math.cos(coverMotion*1.2)*8)+"px,0)";
+  if(coverBat)coverBat.style.transform="rotate("+(21+Math.sin(coverMotion)*2)+"deg) translateY("+(Math.sin(coverMotion*.8)*3)+"px)";
+  coverRings.forEach((r,i)=>r.style.transform="rotateX("+(68+i*2)+"deg) rotateZ("+((i?18:-20)+coverMotion*(i?1.8:-1.2))+"deg)");
+ }
+}
+let uiClock=performance.now();
+function presentationLoop(now){
+ const dt=Math.min((now-uiClock)/1000,.05);uiClock=now;
+ animateCoverPresentation(dt);
+ requestAnimationFrame(presentationLoop);
+}
+requestAnimationFrame(presentationLoop);
