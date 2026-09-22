@@ -4,50 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#06100c">
-<title>Cricket 26 Mobile — Visual Showcase</title>
-<link rel="stylesheet" href="style.css?v=4">
+<title>CRICKET 26 MOBILE</title>
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div id="app">
 <canvas id="scene"></canvas>
 
 <div class="ui-layer">
-<button id="settingsFloat" class="settings-float" aria-label="Settings">
-<svg viewBox="0 0 24 24"><path d="M9.7 2.6h4.6l.55 2.05c.48.17.94.37 1.37.61l1.9-.98 3.25 3.25-.98 1.9c.24.43.44.89.61 1.37l2.05.55v4.6l-2.05.55c-.17.48-.37.94-.61 1.37l.98 1.9-3.25 3.25-1.9-.98c-.43.24-.89.44-1.37.61l-.55 2.05H9.7l-.55-2.05a9.8 9.8 0 0 1-1.37-.61l-1.9.98-3.25-3.25.98-1.9a9.8 9.8 0 0 1-.61-1.37L.95 15.95v-4.6L3 10.8c.17-.48.37-.94.61-1.37l-.98-1.9 3.25-3.25 1.9.98c.43-.24.89-.44.61-.37L9.7 2.6ZM12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/></svg>
-</button>
+<button id="settingsFloat" class="settings-float" aria-label="Settings">⚙</button>
 
 <header class="topbar">
-<div class="brand"><span>PHASE 01 · VISUALS</span><strong>CRICKET 26 <i>MOBILE</i></strong><small>3D STADIUM SHOWCASE</small></div>
-<div class="live">● VISUAL DEMO</div>
+  <div class="brand"><span>CRICKET 26</span><strong>MOBILE</strong><small>THE NEXT GENERATION OF CRICKET</small></div>
+  <div class="live"><b>●</b> LIVE VISUAL BUILD</div>
 </header>
 
-<div id="intro" class="intro">
-<div class="intro-card"><span>MATCH DAY</span><h1>The ground<br><b>comes alive.</b></h1><p>Original realtime 3D cricket visuals.</p><button id="enterBtn">ENTER STADIUM</button></div>
+<div id="intro" class="cover">
+  <div class="cover-glow"></div>
+  <div class="cover-content">
+    <div class="cover-kicker">THE ULTIMATE CRICKET EXPERIENCE</div>
+    <div class="cover-title">CRICKET <em>26</em></div>
+    <div class="cover-sub">MOBILE</div>
+    <div class="cover-divider"></div>
+    <p class="cover-tag">PLAY THE GAME. OWN THE MOMENT.</p>
+    <div class="cover-actions">
+      <button id="enterBtn" class="primary-action">▶ PLAY NOW</button>
+      <button id="showVisuals" class="secondary-action">VIEW STADIUM</button>
+    </div>
+    <div class="cover-meta"><span>3D REALTIME</span><i></i><span>C++ PHYSICS</span><i></i><span>WASM ENGINE</span></div>
+  </div>
+  <div class="cover-player-card">
+    <div class="player-ring"></div>
+    <div class="player-silhouette">🏏</div>
+    <div class="player-caption"><b>YOUR GAME.</b><span>YOUR ERA.</span></div>
+  </div>
+  <div class="cover-bottom">PHASE 01 · VISUALS <span>BUILD 0.8</span></div>
+</div>
+
+<div id="hud" class="hud hidden">
+  <div class="score-card">
+    <div><span>AUSTRALIA</span><b id="scoreValue">0 / 0</b></div>
+    <strong id="oversValue">0.0 OVERS</strong>
+  </div>
+  <div class="match-pill"><span>TEST MATCH</span><b>DAY 1</b></div>
+  <div class="hud-right"><button class="hud-btn" id="cameraHud">CAMERA</button><button class="hud-btn" id="backHome">MENU</button></div>
 </div>
 
 <div class="bottom-ui">
-<div><label>CAMERA</label><div class="camera-buttons">
-<button class="camera active" data-camera="broadcast">BROADCAST</button>
-<button class="camera" data-camera="batter">BATTER</button>
-<button class="camera" data-camera="bowler">BOWLER</button>
-<button class="camera" data-camera="wide">WIDE</button>
-<button class="camera" data-camera="cinematic">CINEMATIC</button>
-</div></div>
-<div class="readout"><small>COUNTRY</small><b id="countryReadout">AUSTRALIA</b></div>
+  <div><label>CAMERA</label><div class="camera-buttons">
+    <button class="camera active" data-camera="broadcast">BROADCAST</button>
+    <button class="camera" data-camera="batter">BATTER</button>
+    <button class="camera" data-camera="bowler">BOWLER</button>
+    <button class="camera" data-camera="wide">WIDE</button>
+    <button class="camera" data-camera="cinematic">CINEMATIC</button>
+  </div></div>
+  <div class="readout"><small>COUNTRY</small><b id="countryReadout">AUSTRALIA</b></div>
+</div>
+
+<div id="menuPanel" class="menu-panel">
+  <div class="menu-inner">
+    <div class="menu-head"><span>MAIN MENU</span><b>CRICKET 26</b></div>
+    <button class="mode-card selected"><strong>QUICK MATCH</strong><small>Jump straight into the action</small><i>›</i></button>
+    <button class="mode-card"><strong>CAREER</strong><small>Build your cricket legacy</small><i>›</i></button>
+    <button class="mode-card"><strong>TOURNAMENTS</strong><small>Compete across the world</small><i>›</i></button>
+    <button class="mode-card"><strong>CREATE PLAYER</strong><small>Make your own cricketer</small><i>›</i></button>
+    <div class="menu-grid"><button>STADIUMS</button><button>TEAMS</button><button>SETTINGS</button><button>EXTRAS</button></div>
+  </div>
 </div>
 
 <div id="settings" class="settings">
-<div class="settings-card">
-<div class="settings-head"><div><span>GAME PRESENTATION</span><h2>Settings</h2></div><button id="closeSettings">×</button></div>
-<label>COUNTRY COLOUR THEME</label><p id="countryDesc">Australia · Green & Gold</p>
-<div id="countryGrid" class="country-grid"></div>
-<label class="style-label">VISUAL STYLE</label>
-<div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST</button><button class="style-choice" data-style="cinematic">CINEMATIC</button><button class="style-choice" data-style="bright">DAYLIGHT</button></div>
-</div>
-</div>
+  <div class="settings-card">
+    <div class="settings-head"><div><span>GAME PRESENTATION</span><h2>Settings</h2></div><button id="closeSettings">×</button></div>
+    <label>COUNTRY COLOUR THEME</label><p id="countryDesc">Australia · Green & Gold</p>
+    <div id="countryGrid" class="country-grid"></div>
+    <label class="style-label">VISUAL STYLE</label>
+    <div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST</button><button class="style-choice" data-style="cinematic">CINEMATIC</button><button class="style-choice" data-style="bright">DAYLIGHT</button></div>
+  </div>
 </div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=4"></script>
+<script type="module" src="game.js?v=8"></script>
 </body>
 </html>
