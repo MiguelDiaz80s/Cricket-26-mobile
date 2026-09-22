@@ -101,7 +101,14 @@
   <div class="hud-right"><button class="hud-btn" id="cameraHud">CAMERA</button><button class="hud-btn" id="backHome">MENU</button></div>
 </div>
 
-<div class="bottom-ui">
+
+<div id="matchControls" class="match-controls hidden">
+  <div class="control-head"><span>BATTER CONTROL</span><b id="timingLabel">TIMING · READY</b></div>
+  <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b></div>
+  <div class="shot-row"><button data-shot="DEFENCE">DEFENCE</button><button data-shot="DRIVE" class="shot-main">DRIVE</button><button data-shot="CUT">CUT</button><button data-shot="PULL">PULL</button><button data-shot="LOFT">LOFT</button></div>
+  <div class="control-foot"><span>← MOVE</span><span>POWER <b id="powerValue">72%</b></span><span>TAP AT CONTACT</span><span>MOVE →</span></div>
+</div>
+\n<div class="bottom-ui">
   <div><label>CAMERA ANGLES</label><div class="camera-buttons">
     <button class="camera active" data-camera="broadcast">BROADCAST</button>
     <button class="camera" data-camera="batter">BATTER</button>
