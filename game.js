@@ -489,3 +489,29 @@ function presentationLoop(now){
  requestAnimationFrame(presentationLoop);
 }
 requestAnimationFrame(presentationLoop);
+
+
+/* Batter HUD preview layer */
+const matchControls=document.querySelector("#matchControls");
+const timingBar=document.querySelector("#timingBar");
+const timingLabel=document.querySelector("#timingLabel");
+const powerValue=document.querySelector("#powerValue");
+let power=72;
+let timingPulse=0;
+function showMatchControls(){matchControls.classList.remove("hidden")}
+function hideMatchControls(){matchControls.classList.add("hidden")}
+startMatchBtn.addEventListener("click",()=>showMatchControls());
+document.querySelector("#backHome").addEventListener("click",()=>hideMatchControls());
+document.querySelector("#menuClose").addEventListener("click",()=>hideMatchControls());
+document.querySelectorAll(".shot-row button").forEach(btn=>btn.addEventListener("click",()=>{
+ const shot=btn.dataset.shot;
+ timingPulse=0;
+ const quality=Math.max(0,Math.min(1,.52+Math.random()*.48));
+ timingBar.style.width=(quality*100)+"%";
+ timingLabel.textContent=quality>.86?"TIMING · PERFECT":quality>.68?"TIMING · GOOD":quality>.42?"TIMING · OK":"TIMING · LATE";
+ power=Math.max(35,Math.min(100,power+(Math.random()*18-9)));powerValue.textContent=Math.round(power)+"%";
+ matchControls.classList.remove("flash");void matchControls.offsetWidth;matchControls.classList.add("flash");
+ showToast(shot+" · "+timingLabel.textContent.replace("TIMING · ",""));
+ if(quality>.9){displayRuns+=shot==="LOFT"?6:shot==="DRIVE"?4:shot==="CUT"?4:shot==="PULL"?4:1;displayBalls++;}
+ else {displayBalls++;if(quality>.62)displayRuns+=1;}
+}));
