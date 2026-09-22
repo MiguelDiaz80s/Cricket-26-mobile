@@ -168,8 +168,8 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  const pantsColor=team===0?theme.a:"#f2f3ed";
  const skinColor=team===0?"#9b6849":"#8a573d";
 
- const shirt=material(shirtColor,.55);
- const trim=material(trimColor,.48,.06);
+ const shirt=material(shirtColor,.55); playerShirts.push(shirt);
+ const trim=material(trimColor,.48,.06); playerTrim.push(trim);
  const pants=material(pantsColor,.72);
  const skin=material(skinColor,.8);
  const hair=material("#241a15",.9);
@@ -349,15 +349,39 @@ const cameras={
 let cameraMode="broadcast",cinematicTime=0,started=false;
 function setCamera(name){cameraMode=name;document.querySelectorAll(".camera").forEach(b=>b.classList.toggle("active",b.dataset.camera===name));const c=cameras[name];camera.position.set(...c.pos);controls.target.set(...c.target);controls.update()}
 document.querySelectorAll(".camera").forEach(b=>b.addEventListener("click",()=>setCamera(b.dataset.camera)));
-document.querySelector("#enterBtn").addEventListener("click",()=>{document.querySelector("#intro").classList.add("hidden");document.querySelector("#hint").classList.add("hide");started=true;setCamera("cinematic");setTimeout(()=>setCamera("broadcast"),4200)});
+const cover=document.querySelector("#intro");
+const menuPanel=document.querySelector("#menuPanel");
+const hud=document.querySelector("#hud");
+document.querySelector("#enterBtn").addEventListener("click",()=>{
+ cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true;
+ setCamera("cinematic"); setTimeout(()=>setCamera("broadcast"),4200);
+});
+document.querySelector("#showVisuals").addEventListener("click",()=>{
+ cover.classList.add("hidden"); hud.classList.remove("hidden"); started=true; setCamera("cinematic");
+});
+document.querySelector("#backHome").addEventListener("click",()=>{
+ menuPanel.classList.add("open");
+});
+document.querySelector("#cameraHud").addEventListener("click",()=>{
+ menuPanel.classList.remove("open"); document.querySelector(".bottom-ui").scrollIntoView?.({block:"nearest"});
+});
+menuPanel.addEventListener("click",e=>{
+ const card=e.target.closest(".mode-card");
+ if(card){document.querySelectorAll(".mode-card").forEach(x=>x.classList.remove("selected"));card.classList.add("selected");}
+ const b=e.target.closest(".menu-grid button");
+ if(b && b.textContent==="SETTINGS"){menuPanel.classList.remove("open");settings.classList.add("open");}
+});
+
 
 setCountry("Australia");
-let last=performance.now();
+let last=performance.now(); let displayRuns=0; let displayBalls=0;
 function animate(now){
  requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;controls.update();const t=now*.001;
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
  crowd.rotation.y+=dt*.0007;ball.position.y=.63+Math.sin(t*2.4)*.018;ball.rotation.y+=dt*1.8;
+ document.querySelector("#scoreValue").textContent=displayRuns+" / 0";
+ document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
  lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*3:115+Math.sin(t*1.3+i)*4);
  if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;controls.target.lerp(new THREE.Vector3(0,3,0),.025)}
  renderer.render(scene,camera);
