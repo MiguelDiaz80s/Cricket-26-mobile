@@ -187,9 +187,9 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .match-controls .shot-three{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .match-controls .foot-four{grid-template-columns:repeat(4,minmax(0,1fr))!important;margin-top:4px!important}
 .match-controls .shot-three button,.match-controls .foot-four button{
- min-width:0!important;width:100%!important;height:32px!important;min-height:32px!important;
- padding:3px 4px!important;border-radius:5px!important;font-size:6.5px!important;
- white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;
+ min-width:0!important;width:100%!important;height:38px!important;min-height:38px!important;
+ padding:4px 6px!important;border-radius:6px!important;font-size:10px!important;font-weight:800!important;
+ line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;
 }
 .match-controls .shot-three button.recommended,.match-controls .foot-four button.recommended{
  border-color:var(--accent)!important;
@@ -215,5 +215,5 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  box-shadow:0 0 7px var(--accent),0 0 14px var(--accent)!important;
 }
 @media(max-width:650px){
- .match-controls .shot-three button,.match-controls .foot-four button{height:29px!important;min-height:29px!important;font-size:6px!important;padding:2px!important}
+ .match-controls .shot-three button,.match-controls .foot-four button{height:34px!important;min-height:34px!important;font-size:9px!important;padding:3px 4px!important}
 }
