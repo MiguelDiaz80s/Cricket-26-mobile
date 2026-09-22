@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#06100c">
-<title>CRICKET 26 MOBILE</title>
-<link rel="stylesheet" href="style.css?v=8">
+<meta name="theme-color" content="#03100a">
+<title>CRICKET 26 MOBILE — Next Generation Cricket</title>
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <div id="app">
@@ -16,73 +16,103 @@
 
 <header class="topbar">
   <div class="brand"><span>CRICKET 26</span><strong>MOBILE</strong><small>THE NEXT GENERATION OF CRICKET</small></div>
-  <div class="live"><b>●</b> LIVE VISUAL BUILD</div>
+  <nav class="top-nav"><span class="nav-active">HOME</span><span>CAREER</span><span>PLAY</span><span>MY CRICKETER</span></nav>
+  <div class="build-pill"><i></i> BUILD 0.9 <b>3D</b></div>
 </header>
 
 <div id="intro" class="cover">
-  <div class="cover-glow"></div>
+  <div class="cover-noise"></div>
+  <div class="cover-vignette"></div>
+  <div class="cover-lines"></div>
+
   <div class="cover-content">
-    <div class="cover-kicker">THE ULTIMATE CRICKET EXPERIENCE</div>
+    <div class="season-row"><span class="season-badge">2026</span><span>WORLD CRICKET</span><span class="dot"></span><span>SEASON ONE</span></div>
+    <div class="cover-kicker">THE NEXT GENERATION OF CRICKET</div>
     <div class="cover-title">CRICKET <em>26</em></div>
     <div class="cover-sub">MOBILE</div>
     <div class="cover-divider"></div>
-    <p class="cover-tag">PLAY THE GAME. OWN THE MOMENT.</p>
+    <p class="cover-tag">REAL STADIUMS. REAL MOMENTS. YOUR GAME.</p>
+
     <div class="cover-actions">
-      <button id="enterBtn" class="primary-action">▶ PLAY NOW</button>
-      <button id="showVisuals" class="secondary-action">VIEW STADIUM</button>
+      <button id="enterBtn" class="primary-action"><span>▶</span> PLAY NOW</button>
+      <button id="showVisuals" class="secondary-action"><span>◉</span> ENTER STADIUM</button>
     </div>
-    <div class="cover-meta"><span>3D REALTIME</span><i></i><span>C++ PHYSICS</span><i></i><span>WASM ENGINE</span></div>
+
+    <div class="cover-features">
+      <div><b>3D</b><span>REALTIME<br>STADIUM</span></div>
+      <div><b>C++</b><span>CRICKET<br>PHYSICS</span></div>
+      <div><b>WASM</b><span>NATIVE<br>ENGINE</span></div>
+    </div>
   </div>
-  <div class="cover-player-card">
-    <div class="player-ring"></div>
-    <div class="player-silhouette">🏏</div>
-    <div class="player-caption"><b>YOUR GAME.</b><span>YOUR ERA.</span></div>
+
+  <div class="cover-art">
+    <div class="art-sun"></div>
+    <div class="art-ring r1"></div><div class="art-ring r2"></div>
+    <div class="art-stumps"><i></i><i></i><i></i><b></b><b></b></div>
+    <div class="art-bat"></div>
+    <div class="art-ball"></div>
+    <div class="art-label"><strong>THE GAME<br>IS YOURS.</strong><span>PHASE 01 / VISUAL SHOWCASE</span></div>
   </div>
-  <div class="cover-bottom">PHASE 01 · VISUALS <span>BUILD 0.8</span></div>
+
+  <div class="cover-side">
+    <span>FEATURED</span><b>AUSTRALIA</b><small>GREEN & GOLD</small>
+    <div class="side-stripe"></div>
+    <span>ENGINE</span><b>3D + C++</b><small>BUILT FOR MOBILE</small>
+  </div>
+
+  <div class="cover-bottom">
+    <span>CRICKET 26 MOBILE</span>
+    <span>VISUAL BUILD 0.9</span>
+    <span>WEBGL / WASM</span>
+    <span>© 2026 ORIGINAL PROJECT</span>
+  </div>
 </div>
 
 <div id="hud" class="hud hidden">
-  <div class="score-card">
-    <div><span>AUSTRALIA</span><b id="scoreValue">0 / 0</b></div>
-    <strong id="oversValue">0.0 OVERS</strong>
-  </div>
+  <div class="score-card"><div><span id="hudTeam">AUSTRALIA</span><b id="scoreValue">0 / 0</b></div><strong id="oversValue">0.0 OVERS</strong></div>
   <div class="match-pill"><span>TEST MATCH</span><b>DAY 1</b></div>
+  <div class="hud-status"><i></i><span>LIVE MATCH BUILD</span></div>
   <div class="hud-right"><button class="hud-btn" id="cameraHud">CAMERA</button><button class="hud-btn" id="backHome">MENU</button></div>
 </div>
 
 <div class="bottom-ui">
-  <div><label>CAMERA</label><div class="camera-buttons">
+  <div><label>CAMERA ANGLES</label><div class="camera-buttons">
     <button class="camera active" data-camera="broadcast">BROADCAST</button>
     <button class="camera" data-camera="batter">BATTER</button>
     <button class="camera" data-camera="bowler">BOWLER</button>
     <button class="camera" data-camera="wide">WIDE</button>
     <button class="camera" data-camera="cinematic">CINEMATIC</button>
   </div></div>
-  <div class="readout"><small>COUNTRY</small><b id="countryReadout">AUSTRALIA</b></div>
+  <div class="readout"><small>TEAM THEME</small><b id="countryReadout">AUSTRALIA</b></div>
 </div>
 
 <div id="menuPanel" class="menu-panel">
+  <div class="menu-backdrop"></div>
   <div class="menu-inner">
-    <div class="menu-head"><span>MAIN MENU</span><b>CRICKET 26</b></div>
-    <button class="mode-card selected"><strong>QUICK MATCH</strong><small>Jump straight into the action</small><i>›</i></button>
-    <button class="mode-card"><strong>CAREER</strong><small>Build your cricket legacy</small><i>›</i></button>
-    <button class="mode-card"><strong>TOURNAMENTS</strong><small>Compete across the world</small><i>›</i></button>
-    <button class="mode-card"><strong>CREATE PLAYER</strong><small>Make your own cricketer</small><i>›</i></button>
-    <div class="menu-grid"><button>STADIUMS</button><button>TEAMS</button><button>SETTINGS</button><button>EXTRAS</button></div>
+    <div class="menu-head"><span>MAIN MENU / 01</span><b>PLAY CRICKET</b><small>Choose your next mode</small></div>
+    <button class="mode-card selected"><span class="mode-number">01</span><div><strong>QUICK MATCH</strong><small>Jump straight into the action</small></div><i>›</i></button>
+    <button class="mode-card"><span class="mode-number">02</span><div><strong>CAREER</strong><small>Build a player, earn selection, own your era</small></div><i>›</i></button>
+    <button class="mode-card"><span class="mode-number">03</span><div><strong>TOURNAMENTS</strong><small>Test, ODI, T20 and world competitions</small></div><i>›</i></button>
+    <button class="mode-card"><span class="mode-number">04</span><div><strong>CREATE PLAYER</strong><small>Shape your own cricketer</small></div><i>›</i></button>
+    <div class="menu-section-title">EXPLORE</div>
+    <div class="menu-grid"><button>STADIUMS</button><button>TEAMS</button><button>MY CRICKETER</button><button id="menuSettings">SETTINGS</button></div>
+    <button id="menuClose" class="menu-close">CLOSE MENU</button>
   </div>
 </div>
 
 <div id="settings" class="settings">
   <div class="settings-card">
-    <div class="settings-head"><div><span>GAME PRESENTATION</span><h2>Settings</h2></div><button id="closeSettings">×</button></div>
+    <div class="settings-head"><div><span>GAME PRESENTATION</span><h2>Settings</h2><small>Make the stadium yours.</small></div><button id="closeSettings">×</button></div>
     <label>COUNTRY COLOUR THEME</label><p id="countryDesc">Australia · Green & Gold</p>
     <div id="countryGrid" class="country-grid"></div>
     <label class="style-label">VISUAL STYLE</label>
     <div class="style-grid"><button class="style-choice active" data-style="broadcast">BROADCAST</button><button class="style-choice" data-style="cinematic">CINEMATIC</button><button class="style-choice" data-style="bright">DAYLIGHT</button></div>
+    <div class="settings-status"><i></i><span>REALTIME 3D RENDERER ONLINE</span><b>WEBGL</b></div>
   </div>
 </div>
 </div>
+
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
-<script type="module" src="game.js?v=8"></script>
+<script type="module" src="game.js?v=12"></script>
 </body>
 </html>
