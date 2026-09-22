@@ -12,3 +12,5 @@ export function overLabel(state: MatchState): string {
 export function scoreboardLine(state: MatchState): string {
   return `${state.runs}/${state.wickets} · ${overLabel(state)} ov`;
 }
+
+export * from "./match-engine";
