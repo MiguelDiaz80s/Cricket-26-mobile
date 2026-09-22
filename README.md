@@ -27,3 +27,16 @@ The languages are deliberately separated rather than mixing everything into one 
 - Emscripten WebAssembly build pipeline
 
 \n- T20 / ODI / Test format selection\n- Pace and spin deliveries\n- Line, length, swing and speed variation\n- Timing-based batting\n- Multiple shot types\n- Wickets and scoring\n- Stamina and confidence\n- Bowling changes\n- Field aggression toggle\n- Innings break and chase\n- Mobile-first UI\n- GitHub Pages compatible\n\n## Roadmap\n1. Full bowling control and release meter\n2. Manual field placement\n3. Running between wickets\n4. Edges, catches, LBW, bowled and stumpings with separate outcomes\n5. AI batting and bowling\n6. Realistic fielding movement\n7. Match presentation and replay system\n8. Career / tournament systems\n9. Team and player database\n10. Advanced physics and difficulty sliders\n\n## Run\nOpen index.html or enable GitHub Pages for the repository.
+
+### Expanded gameplay foundation
+
+The current architecture now has several cooperating layers instead of one giant browser script:
+
+- **TypeScript match model**: format, phases, batters, bowlers, field presets, required run rate, batting input and AI contracts.
+- **Python cricket AI**: delivery recommendations, risk/confidence, bowling plans and field presets. Python is intended for tuning/training/offline or server-side decision generation rather than direct browser execution.
+- **Rust hot loop**: deterministic ball integration plus contact-quality/exit-speed calculations, with a C ABI ready for WebAssembly.
+- **C++ field simulation**: fielder positions, speed, interception estimates and boundary-threat checks.
+- **C++ match simulation**: innings scoring, wickets, batter statistics, chase progress and innings-end rules.
+- **Automated checks**: native C++, TypeScript, Python and Rust all have CI jobs, while the native engine still has a WebAssembly build.
+
+The browser can continue using the existing Three.js presentation while gameplay logic is moved into these typed/native layers incrementally. This avoids replacing the working visual build in one risky rewrite.
