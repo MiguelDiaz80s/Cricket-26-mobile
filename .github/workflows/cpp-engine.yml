@@ -1,7 +1,7 @@
 name: C++ Cricket Engine
 on:
   push:
-    paths: ["engine/**","rust/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
+    paths: ["engine/**","rust/**","server/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
   pull_request:
     paths: ["engine/**","rust/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
 jobs:
@@ -48,7 +48,7 @@ jobs:
           version: latest
       - name: Build WebAssembly module
         run: |
-          em++ -std=c++17 -O3 engine/CricketPhysics.cpp engine/MatchSimulation.cpp engine/BowlingAI.cpp engine/FieldSimulation.cpp engine/CricketCAPI.cpp -Iengine -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_FUNCTIONS='["_cricket_reset","_cricket_start_delivery","_cricket_update","_cricket_ball_active","_cricket_ball_x","_cricket_ball_y","_cricket_ball_z","_cricket_strike","_cricket_last_quality","_cricket_last_exit_speed","_cricket_last_launch_angle","_cricket_last_edge","_cricket_result","_cricket_score","_cricket_wickets","_cricket_legal_balls"]' -o engine/cricket_engine.js
+          em++ -std=c++17 -O3 engine/CricketPhysics.cpp engine/MatchSimulation.cpp engine/BowlingAI.cpp engine/FieldSimulation.cpp engine/CricketCAPI.cpp -Iengine -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 -sMODULARIZE=1 -sEXPORTED_FUNCTIONS='["_cricket_reset","_cricket_start_delivery","_cricket_update","_cricket_ball_active","_cricket_ball_x","_cricket_ball_y","_cricket_ball_z","_cricket_strike","_cricket_last_quality","_cricket_last_exit_speed","_cricket_last_launch_angle","_cricket_last_edge","_cricket_result","_cricket_score","_cricket_wickets","_cricket_legal_balls"]' -sEXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -o engine/cricket_engine.js
       - name: Upload WASM build
         uses: actions/upload-artifact@v4
         with:
@@ -56,3 +56,25 @@ jobs:
           path: |
             engine/cricket_engine.js
             engine/cricket_engine.wasm
+
+
+  advanced_native_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -j2
+      - name: Compile advanced physics smoke test
+        run: c++ -std=c++17 -Iengine engine/AdvancedCricketPhysics.cpp engine/test_advanced.cpp -o /tmp/advanced_test && /tmp/advanced_test
+
+  signaling-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: node --check server/signaling.mjs
