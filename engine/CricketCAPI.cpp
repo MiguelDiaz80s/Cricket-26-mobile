@@ -1,4 +1,5 @@
 #include "CricketPhysics.hpp"
+#include <cmath>
 using namespace cricket;
 namespace { CricketPhysics g; ContactResult last{}; }
 
