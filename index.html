@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#03100a">
 <link rel="manifest" href="manifest.webmanifest">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=28">
+<link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
 <div id="app">
@@ -147,10 +147,10 @@
       <div id="hitJoystick" class="hit-joystick">
   <div class="joystick-rings"></div>
   <div class="joystick-ticks" aria-hidden="true"></div>
-  <div id="joystickStick" class="joystick-stick"></div>
+  <div class="joystick-ticks" id="joystickTicks" aria-hidden="true"></div><div id="joystickStick" class="joystick-stick"></div>
   <span class="j-up">FRONT</span><span class="j-down">BACK</span><span class="j-left">OFF</span><span class="j-right">LEG</span>
 </div>
-      <small>Drag to aim your shot</small>
+      <small id="recommendationText">Drag to aim your shot</small>
     </div>
     <div class="batting-buttons">
       <div class="shot-three">
@@ -164,7 +164,7 @@
         <button data-foot="LEAVE">LEAVE</button>
         <button data-foot="SPECIAL">SPECIAL</button>
       </div>
-      <button id="deliveryBtn" class="delivery-btn">DELIVER</button>
+      <button id="deliveryBtn" class="delivery-btn" aria-hidden="true">DELIVER</button>
     </div>
   </div>
   <div class="control-foot"><span>DRAG JOYSTICK</span><span>POWER <b id="powerValue">72%</b></span><span>TAP SHOT AT CONTACT</span><span id="inningsReadout">0 BALLS · 0 RUNS</span></div>
