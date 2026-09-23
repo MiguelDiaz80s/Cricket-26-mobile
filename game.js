@@ -649,6 +649,19 @@ const releasePoint=new THREE.Vector3(0,1.95,-16);
 const bouncePoint=new THREE.Vector3(0,.24,7.8);
 const runUpStart=new THREE.Vector3(0,.18,-25.5);
 const bowlerRelease=new THREE.Vector3(0,.18,-16.0);
+let deliveryBounceZ=7.8;
+let deliveryLineX=0;
+const landingPreview=new THREE.Group();
+const landingDisc=new THREE.Mesh(new THREE.RingGeometry(.32,.52,32),new THREE.MeshBasicMaterial({color:0xffd83d,transparent:true,opacity:.92,side:THREE.DoubleSide}));
+landingDisc.rotation.x=-Math.PI/2;
+landingPreview.add(landingDisc);
+const landingCrossA=new THREE.Mesh(new THREE.BoxGeometry(.9,.025,.055),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9}));
+const landingCrossB=landingCrossA.clone();
+landingCrossB.rotation.y=Math.PI/2;
+landingPreview.add(landingCrossA,landingCrossB);
+landingPreview.position.y=.035;
+landingPreview.visible=false;
+stadium.add(landingPreview);
 
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
@@ -703,11 +716,18 @@ function resetDelivery(){
 function startDelivery(){
  if(deliveryActive||shotFlightActive||inningsWickets>=10)return;
  deliveryActive=true;ballHit=false;shotFlightActive=false;deliveryStart=performance.now();
- deliveryDuration=1350+Math.random()*280;deliverySpeed=118+Math.random()*29;
+ deliveryDuration=3250;
+ deliverySpeed=118+Math.random()*29;
  deliveryLine=["ON_STUMPS","OUTSIDE_OFF","LEG"][Math.floor(Math.random()*3)];
  deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
- matchPhase="RUN_UP";setDeliveryStatus("BOWLER RUN-UP");
- ballSpeed.textContent=Math.round(deliverySpeed)+" KPH";deliveryBtn.disabled=true;
+ deliveryLineX=deliveryLine==="OUTSIDE_OFF"?-.72:deliveryLine==="LEG"?.72:0;
+ deliveryBounceZ=deliveryLength==="FULL"?6.65:deliveryLength==="GOOD"?7.8:9.0;
+ landingPreview.position.set(deliveryLineX,0.035,deliveryBounceZ);
+ landingPreview.visible=true;
+ matchPhase="PREVIEW";
+ setDeliveryStatus("LANDING SPOT");
+ ballSpeed.textContent=Math.round(deliverySpeed)+" KPH";
+ deliveryBtn.disabled=true;
  document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=true);
  matchControls.classList.add("ball-live");showRecommendations();
 }
@@ -832,17 +852,39 @@ document.querySelectorAll("[data-shot]").forEach(btn=>btn.addEventListener("clic
 
 function updateRunUpAndDelivery(now){
  if(!deliveryActive)return;
- const elapsed=(now-deliveryStart)/deliveryDuration;
- if(elapsed<.30){
-  matchPhase="RUN_UP";const p=elapsed/.30;bowler.position.lerpVectors(runUpStart,bowlerRelease,p*p*(3-2*p));
-  bowler.rotation.y=Math.sin(p*Math.PI)*.08;ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));setDeliveryStatus("BOWLER RUN-UP");return;
+ const elapsed=now-deliveryStart;
+ if(elapsed<750){
+  matchPhase="PREVIEW";
+  bowler.position.copy(runUpStart);
+  setDeliveryStatus("LANDING SPOT");
+  timingLabel.textContent="READ THE LANDING SPOT";
+  return;
  }
- if(elapsed<.42){
-  matchPhase="RELEASE";const p=(elapsed-.30)/.12;bowler.position.z=-16.0-p*.8;ball.position.set(0,1.95,-16.0);setDeliveryStatus("RELEASE");return;
+ if(elapsed<2300){
+  matchPhase="RUN_UP";
+  const p=(elapsed-750)/1550;
+  const eased=p*p*(3-2*p);
+  bowler.position.lerpVectors(runUpStart,bowlerRelease,eased);
+  bowler.rotation.y=Math.sin(p*Math.PI)*.08;
+  ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));
+  setDeliveryStatus("BOWLER RUN-UP");
+  timingLabel.textContent="GET READY";
+  return;
  }
- matchPhase="FLIGHT";const p=Math.min(1,(elapsed-.42)/.58),eased=p*p*(3-2*p);
- const x=deliveryLine==="OUTSIDE_OFF"?-.72:deliveryLine==="LEG"?.72:0;
- const lineX=x*Math.sin(Math.PI*eased),z=releasePoint.z+(bouncePoint.z-releasePoint.z)*eased;
+ if(elapsed<2550){
+  matchPhase="RELEASE";
+  const p=(elapsed-2300)/250;
+  bowler.position.z=-16.0-p*.8;
+  ball.position.set(0,1.95,-16.0);
+  landingPreview.visible=false;
+  setDeliveryStatus("RELEASE");
+  return;
+ }
+ matchPhase="FLIGHT";
+ const p=Math.min(1,(elapsed-2550)/700);
+ const eased=p*p*(3-2*p);
+ const lineX=deliveryLineX*Math.sin(Math.PI*eased);
+ const z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*eased;
  let y=releasePoint.y+(bouncePoint.y-releasePoint.y)*eased;
  if(p<.72)y+=1.65*Math.sin(Math.PI*(p/.72));
  else{const q=(p-.72)/.28;y=.24+.95*Math.sin(Math.PI*q);}
