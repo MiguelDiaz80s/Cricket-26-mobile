@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#03100a">
 <link rel="manifest" href="manifest.webmanifest">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 <div id="app">
@@ -214,7 +214,7 @@
 <script>
 window.addEventListener("error",function(e){
   const box=document.getElementById("bootError"); if(!box)return;
-  box.hidden=false; box.querySelector("b").textContent="GAME STARTUP ERROR";
+  box.hidden=false; box.style.setProperty("display","flex","important"); box.querySelector("b").textContent="GAME STARTUP ERROR";
   box.querySelector("span").textContent=(e.message||"Unknown JavaScript error")+" · line "+(e.lineno||"?");
 });
 window.addEventListener("unhandledrejection",function(e){
@@ -228,7 +228,7 @@ window.addEventListener("unhandledrejection",function(e){
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=36");
+    await import("./game.js?v=37");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
