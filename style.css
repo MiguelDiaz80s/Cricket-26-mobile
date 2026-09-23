@@ -255,3 +255,24 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 @media(max-width:700px){.match-controls .joystick-wrap{left:3vw;bottom:13vh;width:145px}.match-controls .hit-joystick{width:145px!important;height:145px!important;min-width:145px!important;min-height:145px!important}.match-controls .joystick-stick{width:44px!important;height:44px!important;margin:-22px!important}.match-controls .batting-buttons{right:2vw;bottom:11vh;width:57vw;height:250px}.match-controls .shot-three{gap:4px}.match-controls .shot-three button{height:42px!important;min-height:42px!important;font-size:10px!important;border-width:2px!important}.match-controls .foot-four{top:58px;height:185px;gap:4px}.match-controls .foot-four button{font-size:8px;border-width:2px!important;border-radius:15px!important}.match-controls .foot-four button:before{font-size:18px}.match-controls .timing-meter{right:3vw;top:4vh;width:145px!important}}
 @media(max-height:700px){.match-controls .joystick-wrap{bottom:8vh}.match-controls .batting-buttons{bottom:6vh;height:250px}}
 @media(orientation:portrait){.match-controls .joystick-wrap{left:4vw;bottom:10vh}.match-controls .batting-buttons{right:3vw;bottom:8vh;width:55vw}.match-controls .hit-joystick{width:145px!important;height:145px!important;min-width:145px!important;min-height:145px!important}.match-controls .shot-three button{height:48px!important;min-height:48px!important;font-size:11px!important}}
+
+/* Reference joystick recommendation triangles */
+.match-controls .joystick-ticks{position:absolute!important;inset:0!important;pointer-events:none!important}
+.match-controls .joystick-triangle{
+ position:absolute!important;
+ left:50%!important;
+ top:50%!important;
+ width:0!important;
+ height:0!important;
+ margin:-7px 0 0 -7px!important;
+ border-left:7px solid transparent!important;
+ border-right:7px solid transparent!important;
+ border-bottom:15px solid rgba(255,255,255,.9)!important;
+ filter:drop-shadow(0 1px 3px #000)!important;
+ transform-origin:7px 7px!important;
+ transform:rotate(var(--angle)) translateY(-106px)!important;
+}
+.match-controls .joystick-triangle.recommended{
+ border-bottom-color:var(--accent)!important;
+ filter:drop-shadow(0 0 5px var(--accent)) drop-shadow(0 1px 3px #000)!important;
+}
