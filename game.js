@@ -338,6 +338,15 @@ let hitDirection={x:0,y:0};
 let selectedShot="STROKE";
 let selectedFoot="";
 let currentRecommendation=null;
+async function requestPhoneLandscape(){
+ if(deviceType!=="phone"||!phoneLandscape)return;
+ try{
+  if(document.documentElement.requestFullscreen && !document.fullscreenElement) await document.documentElement.requestFullscreen();
+ }catch(e){}
+ try{
+  if(screen.orientation?.lock) await screen.orientation.lock("landscape");
+ }catch(e){}
+}
 function applyDeviceMode(){
  document.body.classList.toggle("device-phone",deviceType==="phone");
  document.body.classList.toggle("device-tablet",deviceType==="tablet");
@@ -345,12 +354,15 @@ function applyDeviceMode(){
  document.body.classList.toggle("phone-portrait",deviceType==="phone"&&!phoneLandscape);
  document.body.classList.toggle("phone-landscape",deviceType==="phone"&&phoneLandscape);
  const cd=document.querySelector("#controlDevice"); if(cd) cd.textContent=(deviceType==="phone"?(phoneLandscape?"PHONE · LANDSCAPE":"PHONE · PORTRAIT"):deviceType==="tablet"?"IPAD · WIDE":"PC · KEYBOARD");
- if(deviceType==="phone"&&phoneLandscape&&screen.orientation?.lock){screen.orientation.lock("landscape").catch(()=>{});}
+ if(deviceType==="phone"&&phoneLandscape){requestPhoneLandscape();}
  if(deviceType==="phone"&&!phoneLandscape&&screen.orientation?.unlock)screen.orientation.unlock();
 }
 function chooseDevice(type){
  deviceType=type;localStorage.setItem("cricket26-device",type);applyDeviceMode();
  deviceSetup.classList.remove("open");
+ if(type==="phone"){phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");}
+ applyDeviceMode();
+ if(type==="phone")requestPhoneLandscape();
  showToast(type==="phone"?"PHONE MODE · LANDSCAPE":"CONTROL LAYOUT · "+type.toUpperCase());
 }
 deviceSetup.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>chooseDevice(b.dataset.device)));
@@ -365,7 +377,7 @@ function updateRecommendationUI(){
 }
 recOn.addEventListener("click",()=>{recommendations=true;updateRecommendationUI()});
 recOff.addEventListener("click",()=>{recommendations=false;updateRecommendationUI()});
-document.querySelector("#landscapeChoice").addEventListener("click",()=>{phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");applyDeviceMode();document.querySelector("#landscapeChoice").classList.add("active");document.querySelector("#portraitChoice").classList.remove("active")});
+document.querySelector("#landscapeChoice").addEventListener("click",()=>{phoneLandscape=true;localStorage.setItem("cricket26-phone-orientation","landscape");applyDeviceMode();requestPhoneLandscape();document.querySelector("#landscapeChoice").classList.add("active");document.querySelector("#portraitChoice").classList.remove("active")});
 document.querySelector("#portraitChoice").addEventListener("click",()=>{phoneLandscape=false;localStorage.setItem("cricket26-phone-orientation","portrait");applyDeviceMode();document.querySelector("#portraitChoice").classList.add("active");document.querySelector("#landscapeChoice").classList.remove("active")});
 updateRecommendationUI();
 
