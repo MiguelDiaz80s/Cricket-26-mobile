@@ -402,20 +402,43 @@ function recommendationForDelivery(){
 function renderRecommendationVisuals(options){
  const tickHost=document.querySelector("#joystickTicks");
  const recText=document.querySelector("#recommendationText");
- document.querySelectorAll("[data-shot]").forEach(b=>b.classList.remove("recommended"));
- document.querySelectorAll("[data-foot]").forEach(b=>b.classList.remove("recommended"));
+ document.querySelectorAll("[data-shot]").forEach(el=>el.classList.remove("recommended"));
+ document.querySelectorAll("[data-foot]").forEach(el=>el.classList.remove("recommended"));
  if(!tickHost)return;
+
+ // Eight directional triangles, like the reference controls.
+ // Only the direction(s) that are recommended for this delivery
+ // receive the country's selected accent colour.
  tickHost.innerHTML="";
+ const dirs=[
+  {x:0,y:1},{x:.707,y:.707},{x:1,y:0},{x:.707,y:-.707},
+  {x:0,y:-1},{x:-.707,y:-.707},{x:-1,y:0},{x:-.707,y:.707}
+ ];
+ const recommendedIndexes=new Set();
+ options.forEach(o=>{
+  let best=0,bestDot=-Infinity;
+  dirs.forEach((d,i)=>{
+   const len=Math.hypot(o.dir.x,o.dir.y)||1;
+   const dot=(o.dir.x/len)*d.x+(o.dir.y/len)*d.y;
+   if(dot>bestDot){bestDot=dot;best=i;}
+  });
+  recommendedIndexes.add(best);
+ });
+
+ dirs.forEach((d,i)=>{
+  const tri=document.createElement("span");
+  tri.className="joystick-triangle"+(recommendedIndexes.has(i)?" recommended":"");
+  const angle=Math.atan2(d.x,d.y)*180/Math.PI;
+  tri.style.setProperty("--angle",angle+"deg");
+  tickHost.appendChild(tri);
+ });
+
  if(!recommendations){
   if(recText)recText.textContent="Drag to aim your shot";
   return;
  }
- options.forEach((o)=>{
-  const tick=document.createElement("span");
-  tick.className="joystick-tick recommended";
-  const angle=Math.atan2(-o.dir.y,o.dir.x)*180/Math.PI+90;
-  tick.style.transform="rotate("+angle+"deg) translateY(-46px)";
-  tickHost.appendChild(tick);
+
+ options.forEach(o=>{
   const shot=document.querySelector('[data-shot="'+o.shot+'"]');
   const foot=document.querySelector('[data-foot="'+o.foot+'"]');
   if(shot)shot.classList.add("recommended");
