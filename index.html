@@ -226,6 +226,20 @@ window.addEventListener("unhandledrejection",function(e){
 </script>
 <div id="bootError" hidden style="position:fixed;inset:0;z-index:9999999;background:#050807;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui">
 <div style="max-width:520px;text-align:center"><b style="display:block;font-size:22px;margin-bottom:10px"></b><span style="display:block;color:#b9c2bd"></span><button onclick="location.reload()" style="margin-top:18px;padding:12px 18px;border:0;border-radius:10px">RELOAD</button></div></div>
-<script type="module" src="game.js?v=31"></script>
+<script type="module">
+(async()=>{
+  try{
+    await import("./game.js?v=32");
+  }catch(err){
+    const box=document.getElementById("bootError");
+    if(box){
+      box.hidden=false;
+      box.querySelector("b").textContent="GAME STARTUP ERROR";
+      box.querySelector("span").textContent=(err?.message||String(err))+" · module load";
+    }
+    console.error("Cricket 26 Mobile startup error:",err);
+  }
+})();
+</script>
 </body>
 </html>
