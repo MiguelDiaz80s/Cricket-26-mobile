@@ -1,4 +1,13 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import {loadCricketWasm} from "./engine/wasm-bridge.js";
+
+let wasmEngine=null;
+let wasmPhysicsActive=false;
+loadCricketWasm().then(engine=>{
+  wasmEngine=engine;
+  wasmPhysicsActive=!!engine;
+  if(engine)console.info("Cricket C++ aerodynamics online.");
+});
 
 const canvas=document.querySelector("#scene");
 const isMobileDevice=window.innerWidth<900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -744,6 +753,11 @@ function startDelivery(){
  deliveryLineX=deliveryLine==="OUTSIDE_OFF"?-.72:deliveryLine==="LEG"?.72:0;
  deliveryBounceZ=deliveryLength==="FULL"?6.65:deliveryLength==="GOOD"?7.8:9.0;
  landingPreview.position.set(deliveryLineX,0.035,deliveryBounceZ);
+ if(wasmEngine){
+  wasmEngine.reset();
+  wasmEngine.startDelivery(deliverySpeed,deliveryLineX,deliveryLength==="FULL"?.42:deliveryLength==="GOOD"?.55:.72,
+    (Math.random()*2-1)*.55,(Math.random()*2-1)*.7,deliveryLength==="FULL"?1.05:deliveryLength==="GOOD"?1:.88);
+ }
  landingPreview.visible=true;
  matchPhase="PREVIEW";
  setDeliveryStatus("LANDING SPOT");
@@ -940,8 +954,24 @@ continueFromToss.addEventListener("click",()=>{
 });
 
 deliveryBtn.addEventListener("click",startDelivery);
+let wasmLastTime=performance.now();
 function liveBallLoop(now){
- if(deliveryActive && Number.isFinite(now))updateRunUpAndDelivery(now);
+ const dt=Number.isFinite(now)?Math.min(Math.max((now-wasmLastTime)/1000,0),.033):0;
+ wasmLastTime=now;
+ if(deliveryActive && Number.isFinite(now)){
+  if(wasmPhysicsActive && matchPhase==="FLIGHT"){
+   wasmEngine.update(dt);
+   const p=wasmEngine.position();
+   ball.position.set(p.x,p.y,p.z);
+   const s=wasmEngine.spin();
+   ball.rotation.x+=s.x*dt;
+   ball.rotation.y+=s.y*dt;
+   ball.rotation.z+=s.z*dt;
+   if(!wasmEngine.active())resolveDot();
+  }else{
+   updateRunUpAndDelivery(now);
+  }
+ }
  requestAnimationFrame(liveBallLoop);
 }
 requestAnimationFrame(liveBallLoop);
