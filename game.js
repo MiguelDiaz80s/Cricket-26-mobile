@@ -486,7 +486,7 @@ const cameras={
  cinematic:{pos:[-54,14,48],target:[0,4,0]}
 };
 let cameraMode="broadcast",cinematicTime=0,started=false;
-function setCamera(name){cameraMode=name;document.querySelectorAll(".camera").forEach(b=>b.classList.toggle("active",b.dataset.camera===name));const c=cameras[name];camera.position.set(...c.pos);controls.target.set(...c.target);controls.update()}
+function setCamera(name){cameraMode=name;document.querySelectorAll(".camera").forEach(b=>b.classList.toggle("active",b.dataset.camera===name));const c=cameras[name];camera.position.set(...c.pos);camera.lookAt(...c.target)}
 document.querySelectorAll(".camera").forEach(b=>b.addEventListener("click",()=>setCamera(b.dataset.camera)));
 const cover=document.querySelector("#intro");
 const menuPanel=document.querySelector("#menuPanel");
@@ -523,7 +523,7 @@ function animate(now){
  document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
  document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
  lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*3:115+Math.sin(t*1.3+i)*4);
- if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;controls.target.lerp(new THREE.Vector3(0,3,0),.025)}
+ if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;camera.lookAt(0,3,0)}
  renderer.render(scene,camera);
 }
 requestAnimationFrame(animate);
