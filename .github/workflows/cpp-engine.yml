@@ -1,10 +1,21 @@
 name: C++ Cricket Engine
 on:
   push:
-    paths: ["engine/**","rust/**","server/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
+    paths: ["engine/**","rust/**","server/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt","index.html","game.js","style.css",".github/workflows/cpp-engine.yml"]
   pull_request:
     paths: ["engine/**","rust/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
 jobs:
+
+  javascript-syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check game JavaScript syntax
+        run: node --check game.js
+
   native-test:
     runs-on: ubuntu-latest
     steps:
