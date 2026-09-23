@@ -217,3 +217,41 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 @media(max-width:650px){
  .match-controls .shot-three button,.match-controls .foot-four button{height:28px!important;min-height:28px!important;font-size:7.5px!important;padding:2px 3px!important}
 }
+
+/* REFERENCE BATTER CONTROLS */
+.match-controls{position:fixed!important;inset:0!important;left:0!important;bottom:0!important;width:100vw!important;max-width:none!important;height:100vh!important;transform:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;pointer-events:none!important;overflow:hidden!important}
+.match-controls.hidden{display:none!important}
+.match-controls .delivery-status,.match-controls .control-head,.match-controls .control-foot{display:none!important}
+.match-controls .timing-meter{position:absolute!important;top:4.1vh!important;right:10.4vw!important;width:min(300px,17vw)!important;height:10px!important;margin:0!important;border:1px solid #ffffff55!important;background:#172015cc!important;pointer-events:none!important}
+.match-controls .timing-meter:before{left:37%!important;width:26%!important}
+.match-controls .timing-meter #timingMarker{height:18px!important;top:-5px!important}
+.match-controls .timing-meter #contactZone{top:15px!important;left:0!important;width:100%!important;text-align:center!important;font-size:7px!important;color:#fff!important;text-shadow:0 2px 5px #000!important}
+.match-controls .batting-layout{position:absolute!important;inset:0!important;display:block!important;pointer-events:none!important}
+.match-controls .joystick-wrap{position:absolute!important;left:6.2vw!important;bottom:11.5vh!important;width:260px!important;text-align:center!important;pointer-events:auto!important}
+.match-controls .joystick-title{display:none!important}
+.match-controls .hit-joystick{position:relative!important;width:min(260px,18vw)!important;height:min(260px,18vw)!important;min-width:150px!important;min-height:150px!important;margin:0!important;border:3px solid #ffffff88!important;background:radial-gradient(circle at 50% 50%,#ffffff45 0 18%,#ffffff18 19% 43%,transparent 44%),radial-gradient(circle,#6d806744,#26372a33 63%,transparent 64%)!important;box-shadow:inset 0 0 0 12px #ffffff14,0 8px 25px #0007!important;pointer-events:auto!important}
+.match-controls .joystick-rings{inset:20%!important;border:2px solid #ffffff35!important}
+.match-controls .joystick-ticks{position:absolute!important;inset:0!important;pointer-events:none!important}
+.match-controls .joystick-tick{position:absolute!important;left:50%!important;top:50%!important;width:5px!important;height:18px!important;margin:-9px -2.5px!important;border-radius:99px!important;background:#ffffffaa!important;transform-origin:2.5px 9px!important}
+.match-controls .joystick-tick.recommended{width:8px!important;height:25px!important;margin:-12.5px -4px!important;background:var(--accent)!important;box-shadow:0 0 9px var(--accent),0 0 18px #000!important}
+.match-controls .joystick-stick{width:70px!important;height:70px!important;margin:-35px!important;background:#d5d8ce!important;border:3px solid #ffffff77!important;box-shadow:0 5px 15px #0008,inset 0 0 20px #ffffff55!important}
+.match-controls .hit-joystick .j-up,.match-controls .hit-joystick .j-down,.match-controls .hit-joystick .j-left,.match-controls .hit-joystick .j-right{display:none!important}
+.match-controls .joystick-wrap>small{position:absolute!important;left:50%!important;top:calc(100% + 8px)!important;transform:translateX(-50%)!important;width:240px!important;min-height:0!important;margin:0!important;font-size:10px!important;color:#fff!important;text-shadow:0 2px 5px #000!important;pointer-events:none!important}
+.match-controls .batting-buttons{position:absolute!important;right:5.2vw!important;bottom:9.5vh!important;width:min(760px,43vw)!important;height:350px!important;display:block!important;pointer-events:none!important}
+.match-controls .shot-three{position:absolute!important;right:0!important;top:0!important;width:100%!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:10px!important}
+.match-controls .shot-three button{height:70px!important;min-height:70px!important;border:3px solid #4f9d96!important;border-radius:0!important;background:#0b211bd9!important;color:#eef5ed!important;font-size:23px!important;font-weight:800!important;letter-spacing:.02em!important;box-shadow:0 0 8px #153b35aa,inset 0 0 0 1px #8ed2c555!important;pointer-events:auto!important}
+.match-controls .shot-three .shot-main{background:#0b211bd9!important;color:#eef5ed!important;border-color:#4f9d96!important}
+.match-controls .shot-three button.recommended,.match-controls .shot-three .shot-main.recommended{background:#0b211bd9!important;color:#fff!important;border-color:var(--accent)!important;box-shadow:0 0 14px var(--accent)!important}
+.match-controls .foot-four{position:absolute!important;right:0!important;top:105px!important;width:100%!important;height:245px!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;grid-template-rows:repeat(3,1fr)!important;gap:8px!important;margin:0!important}
+.match-controls .foot-four button{position:relative!important;height:auto!important;min-height:0!important;border:3px solid #4f9d96!important;border-radius:22px!important;background:#0b211bd9!important;color:#eef5ed!important;font-size:17px!important;font-weight:800!important;line-height:1.05!important;white-space:normal!important;text-shadow:0 2px 4px #000!important;pointer-events:auto!important}
+.match-controls .foot-four button:nth-child(1){grid-column:2;grid-row:3}
+.match-controls .foot-four button:nth-child(2){grid-column:2;grid-row:1}
+.match-controls .foot-four button:nth-child(3){grid-column:3;grid-row:2}
+.match-controls .foot-four button:nth-child(4){grid-column:1;grid-row:2}
+.match-controls .foot-four button:before{content:"🏏";display:block;font-size:28px;line-height:1;margin-bottom:3px;filter:grayscale(1) brightness(1.8)}
+.match-controls .foot-four button.recommended{border-color:var(--accent)!important;box-shadow:0 0 14px var(--accent)!important}
+.match-controls .delivery-btn{display:none!important}
+@media(max-width:1100px){.match-controls .joystick-wrap{left:4vw;bottom:12vh}.match-controls .batting-buttons{right:3vw;width:48vw}.match-controls .shot-three button{font-size:17px;height:58px!important;min-height:58px!important}.match-controls .foot-four{top:90px;height:215px}.match-controls .foot-four button{font-size:13px}}
+@media(max-width:700px){.match-controls .joystick-wrap{left:3vw;bottom:13vh;width:145px}.match-controls .hit-joystick{width:145px!important;height:145px!important;min-width:145px!important;min-height:145px!important}.match-controls .joystick-stick{width:44px!important;height:44px!important;margin:-22px!important}.match-controls .batting-buttons{right:2vw;bottom:11vh;width:57vw;height:250px}.match-controls .shot-three{gap:4px}.match-controls .shot-three button{height:42px!important;min-height:42px!important;font-size:10px!important;border-width:2px!important}.match-controls .foot-four{top:58px;height:185px;gap:4px}.match-controls .foot-four button{font-size:8px;border-width:2px!important;border-radius:15px!important}.match-controls .foot-four button:before{font-size:18px}.match-controls .timing-meter{right:3vw;top:4vh;width:145px!important}}
+@media(max-height:700px){.match-controls .joystick-wrap{bottom:8vh}.match-controls .batting-buttons{bottom:6vh;height:250px}}
+@media(orientation:portrait){.match-controls .joystick-wrap{left:4vw;bottom:10vh}.match-controls .batting-buttons{right:3vw;bottom:8vh;width:55vw}.match-controls .hit-joystick{width:145px!important;height:145px!important;min-width:145px!important;min-height:145px!important}.match-controls .shot-three button{height:48px!important;min-height:48px!important;font-size:11px!important}}
