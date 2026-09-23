@@ -516,7 +516,7 @@ menuPanel.addEventListener("click",e=>{
 setCountry("Australia");
 let last=performance.now(); let displayRuns=0; let displayBalls=0; let displayWickets=0;
 function animate(now){
- requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;controls.update();const t=now*.001;
+ requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;const t=now*.001;
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
  crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
