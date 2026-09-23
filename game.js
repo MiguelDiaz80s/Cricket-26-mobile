@@ -377,7 +377,7 @@ function setJoystick(clientX,clientY){
  if(mag>max){dx=dx/mag*max;dy=dy/mag*max;}
  hitDirection.x=dx/max;hitDirection.y=-dy/max;
  joystickStick.style.transform="translate("+dx+"px,"+dy+"px)";
- if(recommendations) document.querySelector("#recommendationText").textContent="TARGET: "+directionName(hitDirection);
+ if(recommendations){const r=document.querySelector("#recommendationText");if(r)r.textContent="TARGET: "+directionName(hitDirection);}
 }
 function resetJoystick(){joystickPointer=false;hitDirection={x:0,y:0};joystickStick.style.transform="translate(0,0)"}
 function directionName(d){
@@ -399,10 +399,41 @@ function recommendationForDelivery(){
  if(!options.length) options.push({dir:{x:0,y:.6},shot:"STROKE",foot:"FRONT"});
  return options;
 }
+function renderRecommendationVisuals(options){
+ const tickHost=document.querySelector("#joystickTicks");
+ const recText=document.querySelector("#recommendationText");
+ document.querySelectorAll("[data-shot]").forEach(b=>b.classList.remove("recommended"));
+ document.querySelectorAll("[data-foot]").forEach(b=>b.classList.remove("recommended"));
+ if(!tickHost)return;
+ tickHost.innerHTML="";
+ if(!recommendations){
+  if(recText)recText.textContent="Drag to aim your shot";
+  return;
+ }
+ options.forEach((o)=>{
+  const tick=document.createElement("span");
+  tick.className="joystick-tick recommended";
+  const angle=Math.atan2(-o.dir.y,o.dir.x)*180/Math.PI+90;
+  tick.style.transform="rotate("+angle+"deg) translateY(-46px)";
+  tickHost.appendChild(tick);
+  const shot=document.querySelector('[data-shot="'+o.shot+'"]');
+  const foot=document.querySelector('[data-foot="'+o.foot+'"]');
+  if(shot)shot.classList.add("recommended");
+  if(foot)foot.classList.add("recommended");
+ });
+ if(recText)recText.textContent=options.length>1?"MULTIPLE GOOD OPTIONS":"RECOMMENDED OPTION";
+}
 function showRecommendations(){
- if(!recommendations)return;
- const options=recommendationForDelivery();currentRecommendation=options[Math.floor(Math.random()*options.length)];
- document.querySelector("#recommendationText").textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot.toLowerCase().replace("foot"," foot")+" · "+o.shot).join("  OR  ");
+ const recText=document.querySelector("#recommendationText");
+ if(!recommendations){
+  currentRecommendation=null;
+  renderRecommendationVisuals([]);
+  return;
+ }
+ const options=chooseRecommendationSet();
+ currentRecommendation=options[Math.floor(Math.random()*options.length)];
+ renderRecommendationVisuals(options);
+ if(recText)recText.textContent=options.length>1?"MULTIPLE GOOD OPTIONS":"RECOMMENDED OPTION";
 }
 
 const settings=document.querySelector("#settings");
@@ -703,7 +734,7 @@ function resolveDot(){
  deliveryActive=false;shotFlightActive=false;ballHit=false;
  inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;
  lastOutcome="DOT BALL";setDeliveryStatus("DOT BALL");showToast("DOT BALL");updateScoreboard();
- setTimeout(resetDelivery,650);
+ setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY")startDelivery()},700)},650);
 }
 
 function finishRuns(runs,label){
@@ -736,13 +767,13 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
   if(!resolved&&boundaryDistance>=43.5){
    resolved=true;shotFlightActive=false;const six=isLoft&&ball.position.y>1.5;
    finishRuns(six?6:4,six?"SIX!":"FOUR · BOUNDARY");setDeliveryStatus(six?"SIX · OVER THE ROPE":"FOUR · BOUNDARY");
-   setTimeout(resetDelivery,850);return;
+   setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY")startDelivery()},700)},850);return;
   }
   if(p>=1&&!resolved){
    resolved=true;shotFlightActive=false;let runs=1;
    if(!isLoft&&quality>.72&&exitSpeed>42)runs=2;
    finishRuns(runs,runs===2?"TWO RUNS":"ONE RUN");setDeliveryStatus(runs+" RUN"+(runs===1?"":"S"));
-   setTimeout(resetDelivery,750);return;
+   setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY")startDelivery()},700)},750);return;
   }
   requestAnimationFrame(animateShot);
  }
@@ -819,6 +850,7 @@ continueFromToss.addEventListener("click",()=>{
  totalOvers=selectedFormat==="T20"?20:selectedFormat==="ODI"?50:9999;
  hudTeam.textContent=battingFirst.toUpperCase();document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
  setCamera("broadcast");resetFielders();resetDelivery();showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER RUN-UP");
+ setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
 });
 
 deliveryBtn.addEventListener("click",startDelivery);
