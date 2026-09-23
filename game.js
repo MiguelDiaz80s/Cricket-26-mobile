@@ -107,16 +107,18 @@ rope.rotation.x=Math.PI/2;rope.scale.y=.82;rope.position.y=.25;stadium.add(rope)
 const standBase=material("#343b3b",.9,.1), seatMat=material("#8f292d",.72);
 for(let tier=0;tier<(isMobileDevice?3:5);tier++){
  const r=48+tier*3.9;
- for(let i=0;i<(isMobileDevice?18:36);i++){
-  const a=i/36*Math.PI*2;const x=Math.cos(a)*r,z=Math.sin(a)*r*.72;
+ const standCount=isMobileDevice?18:36;
+ for(let i=0;i<standCount;i++){
+  const a=i/standCount*Math.PI*2;const x=Math.cos(a)*r,z=Math.sin(a)*r*.72;
   const block=meshBox(7.8,1.2,3.0,standBase,x,2.1+tier*1.9,z);block.rotation.y=-a;stadium.add(block);
   const seats=meshBox(7.2,.28,2.65,seatMat,x,2.78+tier*1.9,z);seats.rotation.y=-a;stadium.add(seats);
  }
 }
 
 const roof=material("#111817",.55,.35);
-for(let i=0;i<28;i++){
- const a=i/28*Math.PI*2,r=61;
+const roofCount=isMobileDevice?12:28;
+for(let i=0;i<roofCount;i++){
+ const a=i/roofCount*Math.PI*2,r=61;
  const panel=meshBox(15,.65,5.2,roof,Math.cos(a)*r,17.2,Math.sin(a)*r*.72);
  panel.rotation.y=-a;stadium.add(panel);
 }
