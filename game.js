@@ -2,9 +2,9 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 
 const canvas=document.querySelector("#scene");
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.65));
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,window.innerWidth<900?1:1.35));
 renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
+renderer.shadowMap.enabled=window.innerWidth>=900;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -47,7 +47,7 @@ const playerTrim=[];
 
 const hemi=new THREE.HemisphereLight(0xa9c8e5,0x11170f,1.25);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe7bd,3.0);
-sun.position.set(-38,55,24);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);
+sun.position.set(-38,55,24);sun.castShadow=true;sun.shadow.mapSize.set(window.innerWidth<900?512:1024,window.innerWidth<900?512:1024);
 sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
 scene.add(sun);
 
@@ -122,7 +122,7 @@ roofRim.scale.y=.72;roofRim.position.y=17.3;stadium.add(roofRim);
 
 const crowd=new THREE.Group();stadium.add(crowd);
 const crowdColors=[0xd9ddd9,0x7b8580,0x34433e,0xb6bfc0,0x563e3e,0xd0b35b];
-for(let i=0;i<2400;i++){
+for(let i=0;i<(window.innerWidth<900?450:1200);i++){
  const a=Math.random()*Math.PI*2,r=49+Math.random()*11,y=3+Math.floor(Math.random()*5)*1.85+Math.random();
  const p=new THREE.Mesh(new THREE.SphereGeometry(.12+Math.random()*.09,7,6),material("#"+crowdColors[Math.floor(Math.random()*crowdColors.length)].toString(16).padStart(6,"0"),1));
  p.position.set(Math.cos(a)*r,y,Math.sin(a)*r*.72);crowd.add(p);
@@ -137,7 +137,7 @@ function floodlight(x,z){
   const bulb=new THREE.Mesh(new THREE.BoxGeometry(.42,.48,.12),new THREE.MeshStandardMaterial({color:0xffffe8,emissive:0xfff1b5,emissiveIntensity:9}));
   bulb.position.set(-2.25+(i%6)*.9,24.4+Math.floor(i/6)*.85,-.42);g.add(bulb);
  }
- const l=new THREE.SpotLight(0xfff0c7,115,85,Math.PI/4,.5,1.25);
+ const l=new THREE.SpotLight(0xfff0c7,window.innerWidth<900?45:115,85,Math.PI/4,.5,1.25);
  l.position.set(0,24,0);l.target.position.set(0,0,0);g.add(l,l.target);lights.push(l);
  stadium.add(g);
 }
@@ -522,7 +522,7 @@ function animate(now){
  crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
  document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
  document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
- lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*3:115+Math.sin(t*1.3+i)*4);
+ lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?(window.innerWidth<900?35:75)+Math.sin(t*1.3+i)*3:(window.innerWidth<900?45:115)+Math.sin(t*1.3+i)*4);
  if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;camera.lookAt(0,3,0)}
  renderer.render(scene,camera);
 }
