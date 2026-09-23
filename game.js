@@ -139,7 +139,7 @@ function floodlight(x,z){
  const g=new THREE.Group();g.position.set(x,0,z);
  g.add(meshCyl(.25,25,material("#303736",.5,.6),0,12.5,0,18));
  g.add(meshBox(5.7,3.2,.7,material("#1b2221",.45,.6),0,25,0));
- for(let i=0;i<12;i++){
+ for(let i=0;i<(isMobileDevice?4:12);i++){
   const bulb=new THREE.Mesh(new THREE.BoxGeometry(.42,.48,.12),new THREE.MeshStandardMaterial({color:0xffffe8,emissive:0xfff1b5,emissiveIntensity:9}));
   bulb.position.set(-2.25+(i%6)*.9,24.4+Math.floor(i/6)*.85,-.42);g.add(bulb);
  }
@@ -306,8 +306,10 @@ ball.position.set(0,.63,6.5);ball.castShadow=true;stadium.add(ball);
 const seam=new THREE.Mesh(new THREE.TorusGeometry(.13,.018,8,28),material("#ead6cf",.55));seam.rotation.x=Math.PI/2;ball.add(seam);
 
 const boundaryBoards=[];
-for(let i=0;i<48;i++){
- const a=i/48*Math.PI*2,r=43.9;const b=meshBox(5,.7,.08,material(theme.a,.55,.1),Math.cos(a)*r,.7,Math.sin(a)*r*.82);b.rotation.y=-a;stadium.add(b);boundaryBoards.push(b);
+const boundaryMat=material(theme.a,.55,.1);
+const boundaryCount=isMobileDevice?24:48;
+for(let i=0;i<boundaryCount;i++){
+ const a=i/boundaryCount*Math.PI*2,r=43.9;const b=meshBox(5,.7,.08,boundaryMat,Math.cos(a)*r,.7,Math.sin(a)*r*.82);b.rotation.y=-a;stadium.add(b);boundaryBoards.push(b);
 }
 
 function setCountry(name){
