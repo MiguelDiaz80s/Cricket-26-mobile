@@ -282,3 +282,43 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-92px)!important}
 @media(max-width:1100px){.match-controls .joystick-wrap{left:22px!important;bottom:90px!important}.match-controls .batting-buttons{right:18px!important;width:47vw!important}.match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-72px)!important}}
 @media(max-width:700px){.match-controls .joystick-wrap{left:16px!important;bottom:82px!important}.match-controls .batting-buttons{right:10px!important;bottom:68px!important;width:57vw!important}.match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-55px)!important}}
+
+/* FINAL TOUCH CONTROL SAFETY LAYER */
+.match-controls{
+ z-index:4000000!important;
+ visibility:visible!important;
+}
+.match-controls.hidden{display:none!important;visibility:hidden!important}
+.match-controls:not(.hidden){display:block!important}
+.match-controls .batting-layout{visibility:visible!important}
+.match-controls .batting-buttons{z-index:20!important;visibility:visible!important}
+.match-controls .shot-three,
+.match-controls .foot-four{visibility:visible!important}
+.match-controls .shot-three button,
+.match-controls .foot-four button{opacity:1!important;visibility:visible!important}
+@media(orientation:portrait){
+ .match-controls:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+ }
+ .match-controls .joystick-wrap{left:14px!important;bottom:74px!important}
+ .match-controls .batting-buttons{
+  right:10px!important;
+  bottom:58px!important;
+  width:58vw!important;
+  max-width:430px!important;
+  height:285px!important;
+ }
+ .match-controls .shot-three button{
+  height:52px!important;
+  min-height:52px!important;
+  font-size:12px!important;
+ }
+ .match-controls .foot-four{top:70px!important;height:205px!important}
+ .match-controls .foot-four button{font-size:10px!important}
+}
+/* Keep the coloured recommendation triangles safely inside the joystick. */
+.match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-84px)!important}
+@media(max-width:700px){.match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-56px)!important}}
