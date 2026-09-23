@@ -4,6 +4,8 @@ on:
     paths: ["engine/**","rust/**","server/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt","index.html","game.js","style.css",".github/workflows/cpp-engine.yml"]
   pull_request:
     paths: ["engine/**","rust/**","python/**","typescript/**","package.json","tsconfig.json","CMakeLists.txt",".github/workflows/cpp-engine.yml"]
+permissions:
+  contents: write
 jobs:
 
   javascript-syntax-check:
@@ -59,7 +61,18 @@ jobs:
           version: latest
       - name: Build WebAssembly module
         run: |
-          em++ -std=c++17 -O3 engine/CricketPhysics.cpp engine/MatchSimulation.cpp engine/BowlingAI.cpp engine/FieldSimulation.cpp engine/CricketCAPI.cpp -Iengine -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 -sMODULARIZE=1 -sEXPORTED_FUNCTIONS='["_cricket_reset","_cricket_start_delivery","_cricket_update","_cricket_ball_active","_cricket_ball_x","_cricket_ball_y","_cricket_ball_z","_cricket_strike","_cricket_last_quality","_cricket_last_exit_speed","_cricket_last_launch_angle","_cricket_last_edge","_cricket_result","_cricket_score","_cricket_wickets","_cricket_legal_balls"]' -sEXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -o engine/cricket_engine.js
+          em++ -std=c++17 -O3 engine/CricketPhysics.cpp engine/MatchSimulation.cpp engine/BowlingAI.cpp engine/FieldSimulation.cpp engine/CricketCAPI.cpp -Iengine -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 -sMODULARIZE=1 -sEXPORTED_FUNCTIONS='["_cricket_reset","_cricket_start_delivery","_cricket_update","_cricket_ball_active","_cricket_ball_x","_cricket_ball_y","_cricket_ball_z","_cricket_ball_vx","_cricket_ball_vy","_cricket_ball_vz","_cricket_ball_spin_x","_cricket_ball_spin_y","_cricket_ball_spin_z","_cricket_ball_speed","_cricket_strike","_cricket_last_quality","_cricket_last_exit_speed","_cricket_last_launch_angle","_cricket_last_edge","_cricket_result","_cricket_score","_cricket_wickets","_cricket_legal_balls"]' -sEXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -o engine/cricket_engine.js
+      - name: Publish generated WASM to main
+        if: github.actor != 'github-actions[bot]'
+        run: |
+          cp engine/cricket_engine.js /tmp/cricket_engine.js
+          cp engine/cricket_engine.wasm /tmp/cricket_engine.wasm
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add engine/cricket_engine.js engine/cricket_engine.wasm
+          git diff --cached --quiet || git commit -m "Build C++ cricket physics WASM"
+          git push
+
       - name: Upload WASM build
         uses: actions/upload-artifact@v4
         with:
