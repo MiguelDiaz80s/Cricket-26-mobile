@@ -18,7 +18,11 @@ void CricketPhysics::reset(){
 }
 float CricketPhysics::clamp01(float v)const{return std::max(0.f,std::min(1.f,v));}
 void CricketPhysics::startDelivery(const Delivery&d){
- delivery_=d; result_=DeliveryResult::Live;
+ delivery_=d;
+ delivery_.swing=std::max(-1.f,std::min(1.f,delivery_.swing));
+ delivery_.seam=std::max(-1.f,std::min(1.f,delivery_.seam));
+ delivery_.bounce=std::max(.5f,std::min(1.2f,delivery_.bounce));
+ result_=DeliveryResult::Live;
  float speed=std::max(20.f,d.speedKph)*KPH;
  ball_.position={d.line*1.2f,2.15f,18};
  ball_.velocity={d.line*-.12f,-std::max(2.f,speed*.18f),-speed};
@@ -41,11 +45,13 @@ void CricketPhysics::applyAerodynamics(float dt){
  const float spinRate=len(ball_.spin);
  const float spinRatio=spinRate*aero_.ballRadius/speed;
  const float lift=std::min(.35f,aero_.magnusCoefficient*spinRatio);
- const Vec3 magnusDir=norm(cross(ball_.spin,ball_.velocity));
+ const Vec3 omegaCrossV=cross(ball_.spin,ball_.velocity);
+ const float omegaCrossVLen=len(omegaCrossV);
+ const Vec3 magnusDir=omegaCrossVLen>.0001f?omegaCrossV*(1.f/omegaCrossVLen):Vec3{};
  const Vec3 magnus=magnusDir*(dynamic*lift*area/aero_.ballMass);
 
  // Swing is a lateral force that acts mainly before the first bounce.
- const float swingForce=dynamic*aero_.swingCoefficient*delivery_.swing;
+ const float swingForce=ball_.bounced?0.f:dynamic*aero_.swingCoefficient*delivery_.swing;
  const Vec3 swing={swingForce/aero_.ballMass,0,0};
 
  // Seam is deliberately weaker in flight and becomes more important at bounce.
