@@ -677,14 +677,6 @@ function chooseRecommendationSet(){
  return options;
 }
 
-function showRecommendations(){
- if(!recommendations)return;
- const options=chooseRecommendationSet();
- currentRecommendation=options[Math.floor(Math.random()*options.length)];
- const el=document.querySelector("#recommendationText");
- if(el)el.textContent="RECOMMENDED: "+options.map(o=>directionName(o.dir)+" · "+o.foot+" · "+o.shot).join("  OR  ");
-}
-
 function footChoice(foot){
  if(!deliveryActive||matchPhase!=="FLIGHT"||ballHit)return;
  selectedFoot=foot;
