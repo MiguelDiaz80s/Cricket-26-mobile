@@ -1,8 +1,10 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
 const canvas=document.querySelector("#scene");
-const isMobileDevice=window.innerWidth<900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);\nconst renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobileDevice,powerPreference:"high-performance",failIfMajorPerformanceCaveat:false});
-const mobilePixelRatio=Math.min(devicePixelRatio||1,1);\nrenderer.setPixelRatio(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35));
+const isMobileDevice=window.innerWidth<900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobileDevice,powerPreference:"high-performance",failIfMajorPerformanceCaveat:false});
+const mobilePixelRatio=Math.min(devicePixelRatio||1,1);
+renderer.setPixelRatio(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=window.innerWidth>=900;
 renderer.shadowMap.type=isMobileDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap;
