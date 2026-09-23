@@ -5,7 +5,7 @@ const isMobileDevice=window.innerWidth<900 || /Mobi|Android|iPhone|iPad|iPod/i.t
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobileDevice,powerPreference:"high-performance",failIfMajorPerformanceCaveat:false});
 const mobilePixelRatio=Math.min(devicePixelRatio||1,1);
 renderer.setPixelRatio(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35));
-renderer.setSize(innerWidth,innerHeight);
+renderer.setSize(innerWidth,innerHeight,false);
 renderer.shadowMap.enabled=window.innerWidth>=900;
 renderer.shadowMap.type=isMobileDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -18,6 +18,7 @@ scene.fog=new THREE.FogExp2(0x07120f,.0068);
 
 const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,1000);
 camera.position.set(30,12,30);
+camera.updateProjectionMatrix();
 
 const countries={
  Australia:{flag:"🇦🇺",desc:"Green & Gold",a:"#0b6b3a",b:"#f5c400",c:"#ffffff"},
@@ -532,7 +533,7 @@ function animate(now){
  renderer.render(scene,camera);
 }
 requestAnimationFrame(animate);
-addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(isMobileDevice?1:Math.min(devicePixelRatio||1,1.35))});
+addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(isMobileDevice?Math.min(devicePixelRatio||1,1):Math.min(devicePixelRatio||1,1.35));renderer.setSize(innerWidth,innerHeight,false)});
 
 /* =========================================================
    NEXT-GEN UI CONTROLLER
