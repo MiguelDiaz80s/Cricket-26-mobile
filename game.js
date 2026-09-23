@@ -70,7 +70,7 @@ field.scale.z=.82;field.position.y=-.22;field.receiveShadow=true;stadium.add(fie
 
 const mowingTexture=canvasTexture(256,256,(x,w,h)=>{
  x.fillStyle="#315f35";x.fillRect(0,0,w,h);
- for(let i=0;i<12;i++){x.fillStyle=i%2?"rgba(0,0,0,.045)":"rgba(255,255,255,.035)";x.fillRect(i*w/12,0,w/12,h)}
+ for(let i=0;i<(isMobileDevice?4:12);i++){x.fillStyle=i%2?"rgba(0,0,0,.045)":"rgba(255,255,255,.035)";x.fillRect(i*w/12,0,w/12,h)}
 },1,8);
 const mowing=new THREE.Mesh(new THREE.RingGeometry(27,43.8,128),new THREE.MeshStandardMaterial({map:mowingTexture,roughness:1}));
 mowing.rotation.x=-Math.PI/2;mowing.scale.y=.82;mowing.position.y=.012;stadium.add(mowing);
@@ -105,9 +105,9 @@ const rope=new THREE.Mesh(new THREE.TorusGeometry(43.5,.13,12,160),material("#e5
 rope.rotation.x=Math.PI/2;rope.scale.y=.82;rope.position.y=.25;stadium.add(rope);
 
 const standBase=material("#343b3b",.9,.1), seatMat=material("#8f292d",.72);
-for(let tier=0;tier<5;tier++){
+for(let tier=0;tier<(isMobileDevice?3:5);tier++){
  const r=48+tier*3.9;
- for(let i=0;i<36;i++){
+ for(let i=0;i<(isMobileDevice?18:36);i++){
   const a=i/36*Math.PI*2;const x=Math.cos(a)*r,z=Math.sin(a)*r*.72;
   const block=meshBox(7.8,1.2,3.0,standBase,x,2.1+tier*1.9,z);block.rotation.y=-a;stadium.add(block);
   const seats=meshBox(7.2,.28,2.65,seatMat,x,2.78+tier*1.9,z);seats.rotation.y=-a;stadium.add(seats);
@@ -186,7 +186,7 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  const segment=(a,b,r,mat)=>{
   const v=new THREE.Vector3().subVectors(b,a);
   const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
-  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),10,16),mat);
+  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),isMobileDevice?6:10,isMobileDevice?8:16),mat);
   m.position.copy(mid);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());
   m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
@@ -214,7 +214,7 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  // Neck, head and hair.
  mesh(new THREE.CapsuleGeometry(.115,.20,10,18),skin,[0,1.70,0],[1,1,1]);
  mesh(new THREE.CapsuleGeometry(.29,.23,12,20),skin,[0,2.00,0],[.94,1.08,.94]);
- mesh(new THREE.SphereGeometry(.30,24,18,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.94,1,.94]);
+ mesh(new THREE.SphereGeometry(.30,isMobileDevice?12:24,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.94,1,.94]);
  mesh(new THREE.SphereGeometry(.045,10,8),skin,[-.275,2.00,0]);
  mesh(new THREE.SphereGeometry(.045,10,8),skin,[.275,2.00,0]);
 
@@ -247,11 +247,11 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 
  // Helmet/headgear.
  if(role!=="keeper"){
-  mesh(new THREE.SphereGeometry(.38,28,18,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,.96,.98]);
+  mesh(new THREE.SphereGeometry(.38,isMobileDevice?14:28,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,.96,.98]);
   const peak=mesh(new THREE.CapsuleGeometry(.055,.30,8,12),helmet,[0,2.06,-.33],[1,.65,.65]);
   peak.rotation.x=Math.PI/2;
  } else {
-  mesh(new THREE.SphereGeometry(.39,28,18,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,.98,.98]);
+  mesh(new THREE.SphereGeometry(.39,isMobileDevice?14:28,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,.98,.98]);
   [-.18,0,.18].forEach((xx,i)=>{
    const bar=mesh(new THREE.CapsuleGeometry(.022,.45,6,10),seamMat,[xx,1.99,-.35],[1,1,.7]);
    bar.rotation.z=(i-1)*.08;
@@ -299,7 +299,7 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 const batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
 const keeper=player({team:1,role:"keeper",x:-.5,z:-13.9,scale:1.02});
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
-const fielders=[[-16,-4],[17,-4],[-22,7],[22,8],[-18,22],[18,22],[-32,15],[31,15],[0,30],[0,-36]].map(([x,z])=>player({team:1,x,z,scale:.9}));
+const fielders=[[-16,-4],[17,-4],[-22,7],[22,8],[-18,22],[18,22],[-32,15],[31,15],[0,30],[0,-36]].slice(0,isMobileDevice?4:10).map(([x,z])=>player({team:1,x,z,scale:.9}));
 
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,24,18),new THREE.MeshStandardMaterial({color:0x8d1119,roughness:.3,clearcoat:.35}));
 ball.position.set(0,.63,6.5);ball.castShadow=true;stadium.add(ball);
@@ -522,13 +522,16 @@ menuPanel.addEventListener("click",e=>{
 setCountry("Australia");
 let last=performance.now(); let displayRuns=0; let displayBalls=0; let displayWickets=0;
 function animate(now){
- requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;const t=now*.001;
+ requestAnimationFrame(animate);
+ const rawDt=(now-last)/1000; last=now;
+ const dt=Number.isFinite(rawDt)?Math.min(Math.max(rawDt,0),.05):0;
+ const t=now*.001;
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
  crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
  document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
  document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
- lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?(isMobileDevice?10:75)+Math.sin(t*1.3+i)*1:(isMobileDevice?16:115)+Math.sin(t*1.3+i)*2);
+ if(!isMobileDevice)lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*1:115+Math.sin(t*1.3+i)*2);
  if(cameraMode==="cinematic"&&started){cinematicTime+=dt;const a=cinematicTime*.16;camera.position.x=-45+Math.sin(a)*12;camera.position.z=45+Math.cos(a)*10;camera.position.y=12+Math.sin(a*1.7)*2;camera.lookAt(0,3,0)}
  renderer.render(scene,camera);
 }
@@ -628,7 +631,8 @@ function animateCoverPresentation(dt){
 }
 let uiClock=performance.now();
 function presentationLoop(now){
- const dt=Math.min((now-uiClock)/1000,.05);uiClock=now;
+ const rawDt=(now-uiClock)/1000;uiClock=now;
+ const dt=Number.isFinite(rawDt)?Math.min(Math.max(rawDt,0),.05):0;
  animateCoverPresentation(dt);
  requestAnimationFrame(presentationLoop);
 }
@@ -932,7 +936,10 @@ continueFromToss.addEventListener("click",()=>{
 });
 
 deliveryBtn.addEventListener("click",startDelivery);
-function liveBallLoop(now){if(deliveryActive)updateRunUpAndDelivery(now);requestAnimationFrame(liveBallLoop);}
+function liveBallLoop(now){
+ if(deliveryActive && Number.isFinite(now))updateRunUpAndDelivery(now);
+ requestAnimationFrame(liveBallLoop);
+}
 requestAnimationFrame(liveBallLoop);
 
 startMatchBtn.addEventListener("click",()=>{setTimeout(()=>{preMatch.classList.remove("open");openCoinToss();},80);});
