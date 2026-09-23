@@ -14,6 +14,15 @@ struct BatterInput{float timing{.5f},directionX{0},directionZ{1},power{.5f};Shot
 struct Delivery{float speedKph{135},line{-.15f},length{.55f},swing{0},seam{0},bounce{1};};
 struct ContactResult{bool connected{false},edge{false};float quality{0},launchAngle{0},exitSpeed{0};Vec3 direction;};
 struct MatchState{int runs{0};int wickets{0};int legalBalls{0};};
+struct Aerodynamics{
+ float airDensity{1.225f};
+ float dragCoefficient{.47f};
+ float magnusCoefficient{.18f};
+ float ballMass{.156f};
+ float ballRadius{.0365f};
+ float swingCoefficient{.00042f};
+ float seamCoefficient{.00020f};
+};
 class CricketPhysics{
 public:
  CricketPhysics();
@@ -27,10 +36,13 @@ public:
  float score()const{return static_cast<float>(runs_);}
  int wickets()const{return wickets_;}
  int legalBalls()const{return legalBalls_;}
+ void setAerodynamics(const Aerodynamics&a){aero_=a;}
+ const Aerodynamics& aerodynamics()const{return aero_;}
 private:
  BallState ball_{};
  Delivery delivery_{};
  DeliveryResult result_{DeliveryResult::Live};
+ Aerodynamics aero_{};
  int runs_{0},wickets_{0},legalBalls_{0};
  float gravity_{-9.81f},pitchBounce_{.62f};
  void applyAerodynamics(float);
