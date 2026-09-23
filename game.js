@@ -1,5 +1,4 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
 const canvas=document.querySelector("#scene");
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance"});
@@ -17,10 +16,6 @@ scene.fog=new THREE.FogExp2(0x07120f,.0068);
 
 const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,1000);
 camera.position.set(30,12,30);
-const controls=new OrbitControls(camera,canvas);
-controls.enableDamping=true; controls.dampingFactor=.055; controls.enablePan=false;
-controls.minDistance=8; controls.maxDistance=110; controls.maxPolarAngle=Math.PI*.49;
-controls.target.set(0,2,0);
 
 const countries={
  Australia:{flag:"🇦🇺",desc:"Green & Gold",a:"#0b6b3a",b:"#f5c400",c:"#ffffff"},
