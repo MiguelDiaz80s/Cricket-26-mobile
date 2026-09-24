@@ -164,6 +164,7 @@
         <button data-foot="SPECIAL">SPECIAL</button>
       </div>
       <button id="deliveryBtn" class="delivery-btn" aria-hidden="true">DELIVER</button>
+      <button id="runBtn" class="run-btn" type="button" aria-label="Run between wickets">RUN</button>
     </div>
   </div>
   <div class="control-foot"><span>DRAG JOYSTICK</span><span>POWER <b id="powerValue">72%</b></span><span>TAP SHOT AT CONTACT</span><span id="inningsReadout">0 BALLS · 0 RUNS</span></div>
@@ -228,7 +229,7 @@ window.addEventListener("unhandledrejection",function(e){
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=42");
+    await import("./game.js?v=43");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
