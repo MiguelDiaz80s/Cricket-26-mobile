@@ -808,7 +808,7 @@ function resolveBowlingDelivery(){
  const r=Math.random();
  inningsBalls++;ballsInOver=inningsBalls%6;
  if(r<wicketChance){
-  inningsWickets++;lastOutcome="WICKET · BOWLED / LBW";setDeliveryStatus("WICKET · "+(bowlLine==="STUMPS"?"BOWLED/LBW":"CAUGHT");showToast("WICKET · "+(bowlLine==="STUMPS"?"BOWLED/LBW":"CAUGHT"));
+  inningsWickets++;lastOutcome="WICKET · BOWLED / LBW";setDeliveryStatus("WICKET · "+(bowlLine==="STUMPS"?"BOWLED/LBW":"CAUGHT"));showToast("WICKET · "+(bowlLine==="STUMPS"?"BOWLED/LBW":"CAUGHT"));
  }else{
   const batR=Math.random();
   const runs=batR<.58?0:batR<.82?1:batR<.95?2:(batR<.99?4:6);
