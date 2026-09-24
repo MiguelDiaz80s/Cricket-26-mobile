@@ -470,3 +470,19 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
     bottom:105px!important;
   }
 }
+
+
+/* iPad Safari split-screen: use the REAL visible viewport, not the layout viewport. */
+@media (orientation:portrait){
+  .match-controls:not(.hidden){
+    height:var(--visible-vh,100vh)!important;
+    max-height:var(--visible-vh,100vh)!important;
+  }
+  .match-controls .batting-buttons{
+    bottom:18px!important;
+    height:230px!important;
+  }
+  .match-controls .joystick-wrap{
+    bottom:18px!important;
+  }
+}
