@@ -911,6 +911,14 @@ document.querySelectorAll("[data-shot]").forEach(btn=>btn.addEventListener("clic
 function updateRunUpAndDelivery(now){
  if(!deliveryActive)return;
  const elapsed=now-deliveryStart;
+ // Arm the bat buttons shortly before release so the player can react to the bowler.
+ if(elapsed>=1850&&elapsed<=3000){
+  document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=false);
+  const q=timingQuality(elapsed);
+  timingLabel.textContent=q==="PERFECT"?"PERFECT RELEASE · HIT NOW":q+" · HIT NOW";
+ }else if(elapsed<1850){
+  document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=true);
+ }
  if(elapsed<750){
   matchPhase="PREVIEW";
   bowler.position.copy(runUpStart);
