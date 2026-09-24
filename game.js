@@ -766,7 +766,9 @@ function setControlMode(mode){
  if(bowlingControls)bowlingControls.classList.toggle("hidden",!bowling);
  if(modeToggle){modeToggle.textContent=bowling?"BAT":"BOWL";modeToggle.classList.toggle("active",bowling);}
  if(controlModeTitle)controlModeTitle.textContent=bowling?"BOWLER CONTROL":"BATTER CONTROL";
- document.querySelector(".batting-layout")?.classList.toggle("bowling-mode",bowling);
+ document.querySelector(".batting-layout")?.classList.toggle("hidden",bowling);
+ document.querySelector(".timing-meter")?.classList.toggle("hidden",bowling);
+ document.querySelector(".control-foot")?.classList.toggle("hidden",bowling);
  document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=bowling);
  if(bowling){deliveryBtn.disabled=true;setDeliveryStatus("BOWLING · SET YOUR DELIVERY");timingLabel.textContent="CHOOSE LENGTH · LINE · PACE";}
  else {deliveryBtn.disabled=deliveryActive||shotFlightActive;setDeliveryStatus("BATTER · WAIT FOR THE BALL");timingLabel.textContent="WAIT FOR THE BALL";}
