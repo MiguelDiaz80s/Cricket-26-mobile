@@ -808,10 +808,10 @@ function updateBowlingDelivery(now){
 function resolveBowlingDelivery(){
  if(!bowlActive)return;
  bowlActive=false;deliveryActive=false;shotFlightActive=false;
- const paceFactor=(bowlSpeed-90)/50;
- const lineBonus=bowlLine==="STUMPS" ? .08 : 0;
- const lengthBonus=bowlLength==="GOOD" ? .08 : bowlLength==="FULL" ? .03 : 0;
- const wicketChance=Math.min(.42,.08+paceFactor*.12+lineBonus+lengthBonus);
+ const paceFactor=Math.max(0,Math.min(1,(bowlSpeed-90)/50));
+ const lineBonus=bowlLine==="STUMPS" ? .03 : 0;
+ const lengthBonus=bowlLength==="GOOD" ? .025 : bowlLength==="FULL" ? .01 : 0;
+ const wicketChance=Math.min(.18,.035+paceFactor*.04+lineBonus+lengthBonus);
  const r=Math.random();
  inningsBalls++;ballsInOver=inningsBalls%6;
  if(r<wicketChance){
@@ -825,7 +825,11 @@ function resolveBowlingDelivery(){
   if(runs)showToast(runs+" RUN"+(runs===1?"":"S"));
  }
  updateScoreboard();
- setTimeout(()=>{resetDelivery();if(controlMode==="BOWL"&&inningsWickets<10)setTimeout(startBowlingDelivery,700)},850);
+ if(inningsWickets>=10){
+  finishInningsAndSwitch();
+  return;
+ }
+ setTimeout(()=>{resetDelivery();if(controlMode==="BOWL")setTimeout(startBowlingDelivery,700)},850);
 }
 function resetDelivery(){
  runState.active=false;runState.runs=0;runState.startedAt=0;runState.runnerProgress=0;runState.fielded=false;runState.throwActive=false;runState.deliveryCounted=false;runState.lastFrame=performance.now();
@@ -920,9 +924,34 @@ function resolveWicket(reason){
  lastOutcome="WICKET · "+reason;setDeliveryStatus("WICKET · "+reason);
  timingLabel.textContent=reason;showToast("WICKET · "+reason);updateScoreboard();
  setTimeout(()=>{
-  if(inningsWickets<10)resetDelivery();
-  else{matchPhase="INNINGS_OVER";deliveryBtn.disabled=true;showToast("INNINGS COMPLETE · "+inningsRuns+" / "+inningsWickets);}
+  if(inningsWickets>=10)finishInningsAndSwitch();
+  else resetDelivery();
  },1100);
+}
+
+function finishInningsAndSwitch(){
+ const completedInningsRuns=inningsRuns;
+ const completedInningsWickets=inningsWickets;
+ const nextMode=controlMode==="BAT"?"BOWL":"BAT";
+ inningsRuns=0;inningsBalls=0;inningsWickets=0;ballsInOver=0;strikerRuns=0;strikerBalls=0;
+ matchPhase="READY";
+ lastOutcome="";
+ runState.active=false;runState.runs=0;runState.throwActive=false;runState.deliveryCounted=false;
+ document.querySelector(".match-pill b").textContent="INNINGS 2 · "+(nextMode==="BAT"?homeTeam:awayTeam);
+ hudTeam.textContent=nextMode==="BAT"?homeTeam.toUpperCase():awayTeam.toUpperCase();
+ updateScoreboard();
+ resetFielders();
+ resetDelivery();
+ setControlMode(nextMode);
+ showToast("INNINGS 1 COMPLETE · "+completedInningsRuns+" / "+completedInningsWickets);
+ setTimeout(()=>{
+  if(nextMode==="BAT"){
+   showToast("YOUR INNINGS · BAT NOW");
+   setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
+  }else{
+   showToast("YOUR INNINGS · BOWL NOW");
+  }
+ },1250);
 }
 
 function resolveDot(){
@@ -1007,8 +1036,8 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
   lastOutcome="RUN OUT · "+safeRuns+" RUN"+(safeRuns===1?"":"S");
   updateScoreboard();setDeliveryStatus("RUN OUT");showToast("RUN OUT · "+safeRuns+" RUN"+(safeRuns===1?"":"S"));
   setTimeout(()=>{
-   if(inningsWickets<10)resetDelivery();
-   else{matchPhase="INNINGS_OVER";deliveryBtn.disabled=true;showToast("INNINGS COMPLETE · "+inningsRuns+" / "+inningsWickets);}
+   if(inningsWickets>=10)finishInningsAndSwitch();
+   else resetDelivery();
   },1100);
  }
 
