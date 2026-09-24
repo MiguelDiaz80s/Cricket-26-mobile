@@ -486,3 +486,56 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
     bottom:18px!important;
   }
 }
+
+
+/* RUN BETWEEN WICKETS — appears only after a successful bat contact */
+.run-btn{
+  display:none!important;
+  position:absolute!important;
+  right:0!important;
+  bottom:-78px!important;
+  width:100%!important;
+  height:64px!important;
+  min-height:64px!important;
+  border:3px solid #f5c400!important;
+  border-radius:16px!important;
+  background:#07140ff2!important;
+  color:#f5c400!important;
+  font-weight:950!important;
+  font-size:20px!important;
+  letter-spacing:.12em!important;
+  box-shadow:0 0 0 2px #0008,0 8px 24px #000c!important;
+  pointer-events:auto!important;
+  z-index:4000020!important;
+}
+.run-btn.active{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  animation:runPulse .75s ease-in-out infinite alternate;
+}
+.run-btn.running{
+  background:#f5c400!important;
+  color:#07140f!important;
+  border-color:#fff!important;
+}
+@keyframes runPulse{
+  from{transform:scale(1)}
+  to{transform:scale(1.035)}
+}
+@media(max-width:700px){
+  .run-btn{
+    bottom:-62px!important;
+    height:52px!important;
+    min-height:52px!important;
+    font-size:16px!important;
+  }
+}
+@media(orientation:portrait){
+  .run-btn{
+    bottom:-58px!important;
+    height:48px!important;
+    min-height:48px!important;
+    font-size:14px!important;
+  }
+}
