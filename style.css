@@ -399,3 +399,39 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
     height:330px!important;
   }
 }
+\n
+/* ORIENTATION-SAFE BAT BUTTON LAYOUT */
+@media (orientation:landscape){
+  .match-controls .batting-buttons{
+    right:clamp(18px,4vw,70px)!important;
+    bottom:clamp(60px,8vh,95px)!important;
+    width:min(700px,42vw)!important;
+    height:330px!important;
+  }
+}
+@media (orientation:portrait){
+  .match-controls .batting-buttons{
+    right:8px!important;
+    bottom:12px!important;
+    width:calc(100vw - 190px)!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:230px!important;
+  }
+  .match-controls .shot-three{
+    gap:5px!important;
+  }
+  .match-controls .shot-three button{
+    height:46px!important;
+    min-height:46px!important;
+    font-size:10px!important;
+  }
+  .match-controls .foot-four{
+    top:54px!important;
+    height:170px!important;
+    gap:4px!important;
+  }
+  .match-controls .foot-four button{
+    font-size:8px!important;
+  }
+}
