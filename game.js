@@ -1258,9 +1258,9 @@ tossChoices.forEach(btn=>btn.addEventListener("click",()=>{
 }));
 
 function chooseTossDecision(batFirst){
- if(!tossComplete||tossDecisionMade)return;
+ if(!tossComplete||tossDecisionMade||tossWinner!==homeTeam)return;
  tossDecisionMade=true;
- battingFirst=batFirst?tossWinner:(tossWinner===homeTeam?awayTeam:homeTeam);
+ battingFirst=batFirst?homeTeam:awayTeam;
  tossDecision.classList.add("hidden");
  tossResult.textContent=tossWinner.toUpperCase()+" WON THE TOSS · "+(batFirst?"BAT FIRST":"FIELD FIRST");
  continueFromToss.disabled=false;
@@ -1268,14 +1268,26 @@ function chooseTossDecision(batFirst){
 chooseBat.addEventListener("click",()=>chooseTossDecision(true));
 chooseField.addEventListener("click",()=>chooseTossDecision(false));
 
-continueFromToss.addEventListener("click",()=>{
- if(!tossDecisionMade)return;
+function finishTossSetup(){
  closeCoinToss();cover.classList.add("hidden");hud.classList.remove("hidden");matchControls.classList.remove("hidden");started=true;
  inningsRuns=0;inningsBalls=0;inningsWickets=0;strikerRuns=0;strikerBalls=0;ballsInOver=0;
  totalOvers=selectedFormat==="T20"?20:selectedFormat==="ODI"?50:9999;
- hudTeam.textContent=battingFirst.toUpperCase();document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
- setCamera("broadcast");resetFielders();resetDelivery();showToast(battingFirst.toUpperCase()+" BAT FIRST · BOWLER RUN-UP");
- setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
+ hudTeam.textContent=battingFirst.toUpperCase();
+ document.querySelector(".match-pill b").textContent="INNINGS 1 · "+battingFirst.toUpperCase();
+ setCamera("broadcast");resetFielders();resetDelivery();
+ if(battingFirst===homeTeam){
+  setControlMode("BAT");
+  showToast("YOU BAT FIRST · BOWLER RUN-UP");
+  setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
+ }else{
+  setControlMode("BOWL");
+  showToast("YOU FIELD FIRST · SET YOUR DELIVERY");
+ }
+}
+
+continueFromToss.addEventListener("click",()=>{
+ if(!tossDecisionMade)return;
+ finishTossSetup();
 });
 
 deliveryBtn.addEventListener("click",startDelivery);
