@@ -840,6 +840,7 @@ function resetDelivery(){
 }
 
 function startDelivery(){
+ if(controlMode!=="BAT")return;
  if(deliveryActive||shotFlightActive||inningsWickets>=10)return;
  deliveryActive=true;ballHit=false;shotFlightActive=false;deliveryStart=performance.now();
  deliveryDuration=3250;
@@ -1292,7 +1293,7 @@ function finishTossSetup(){
   setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
  }else{
   setControlMode("BOWL");
-  showToast("YOU FIELD FIRST · BOWLING");
+  showToast("YOU FIELD FIRST · YOU BOWL");
  }
 }
 
