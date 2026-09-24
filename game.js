@@ -666,11 +666,15 @@ const tossPrompt=document.querySelector("#tossPrompt");
 const tossResult=document.querySelector("#tossResult");
 const continueFromToss=document.querySelector("#continueFromToss");
 const tossChoices=document.querySelectorAll(".toss-choice");
+const tossDecision=document.querySelector("#tossDecision");
+const tossDecisionText=document.querySelector("#tossDecisionText");
+const chooseBat=document.querySelector("#chooseBat");
+const chooseField=document.querySelector("#chooseField");
 const deliveryBtn=document.querySelector("#deliveryBtn");
 const deliveryText=document.querySelector("#deliveryText");
 const ballSpeed=document.querySelector("#ballSpeed");
 
-let tossWinner="",tossComplete=false,battingFirst="";
+let tossWinner="",tossComplete=false,battingFirst="",tossDecisionMade=false;
 let matchPhase="IDLE",deliveryActive=false,shotFlightActive=false,ballHit=false;
 let deliveryStart=0,deliveryDuration=1450,deliverySpeed=0;
 let deliveryLine="ON_STUMPS",deliveryLength="FULL";
@@ -1232,7 +1236,8 @@ function updateRunUpAndDelivery(now){
 
 function openCoinToss(){
  coinToss.classList.add("open");tossPrompt.textContent="Choose HEADS or TAILS.";tossResult.textContent="WAITING FOR CALL";
- tossResult.classList.remove("winner");continueFromToss.disabled=true;tossComplete=false;tossChoices.forEach(b=>b.disabled=false);
+ tossResult.classList.remove("winner");continueFromToss.disabled=true;tossComplete=false;tossDecisionMade=false;
+ tossDecision?.classList.add("hidden");tossChoices.forEach(b=>b.disabled=false);
 }
 function closeCoinToss(){coinToss.classList.remove("open")}
 
@@ -1241,10 +1246,30 @@ tossChoices.forEach(btn=>btn.addEventListener("click",()=>{
  const call=btn.dataset.call,outcome=Math.random()<.5?"HEADS":"TAILS";
  tossWinner=outcome===call?homeTeam:awayTeam;battingFirst=tossWinner;
  coin.classList.remove("flipping");void coin.offsetWidth;coin.classList.add("flipping");tossPrompt.textContent="THE COIN IS IN THE AIR...";
- setTimeout(()=>{tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" BATS FIRST";tossResult.classList.add("winner");tossPrompt.textContent=tossWinner.toUpperCase()+" WON THE TOSS.";continueFromToss.disabled=false;tossComplete=true;},1150);
+ setTimeout(()=>{
+ tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" WON THE TOSS";
+ tossResult.classList.add("winner");
+ tossPrompt.textContent=tossWinner.toUpperCase()+" WON THE TOSS — CHOOSE WHAT TO DO.";
+ tossDecisionText.textContent=tossWinner.toUpperCase()+" WON THE TOSS";
+ tossDecision.classList.remove("hidden");
+ continueFromToss.disabled=true;
+ tossComplete=true;
+},1150);
 }));
 
+function chooseTossDecision(batFirst){
+ if(!tossComplete||tossDecisionMade)return;
+ tossDecisionMade=true;
+ battingFirst=batFirst?tossWinner:(tossWinner===homeTeam?awayTeam:homeTeam);
+ tossDecision.classList.add("hidden");
+ tossResult.textContent=tossWinner.toUpperCase()+" WON THE TOSS · "+(batFirst?"BAT FIRST":"FIELD FIRST");
+ continueFromToss.disabled=false;
+}
+chooseBat.addEventListener("click",()=>chooseTossDecision(true));
+chooseField.addEventListener("click",()=>chooseTossDecision(false));
+
 continueFromToss.addEventListener("click",()=>{
+ if(!tossDecisionMade)return;
  closeCoinToss();cover.classList.add("hidden");hud.classList.remove("hidden");matchControls.classList.remove("hidden");started=true;
  inningsRuns=0;inningsBalls=0;inningsWickets=0;strikerRuns=0;strikerBalls=0;ballsInOver=0;
  totalOvers=selectedFormat==="T20"?20:selectedFormat==="ODI"?50:9999;
