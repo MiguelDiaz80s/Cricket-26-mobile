@@ -680,7 +680,7 @@ const runBtn=document.querySelector("#runBtn");
 const runState={
  active:false,
  runs:0,
- maxRuns:2,
+ maxRuns:1,
  startedAt:0,
  nextStartZ:10.4,
  nextTargetZ:-12.2,
@@ -968,7 +968,8 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
     if(fd<1.0){
      pickup=true;
      ball.position.copy(fielder.position);ball.position.y=.72;
-     beginThrow(now);
+     if(runState.active)beginThrow(now);
+     else endDot();
     }
    }
 
@@ -1005,12 +1006,12 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
       const distanceToWicket=Math.abs(runnerZ-targetZ);
       if(runState.active&&distanceToWicket>1.0){resolveRunOut();return;}
       if(runState.active&&distanceToWicket<=1.0){
-       runState.runs++;
+       runState.runs=1;
        runState.active=false;
        runState.throwActive=false;
-       if(runBtn){runBtn.classList.remove("running");runBtn.textContent=runState.runs<runState.maxRuns?"RUN AGAIN":"WAIT";}
-       setDeliveryStatus(runState.runs+" RUN · SAFE");
-       if(runState.runs>=runState.maxRuns){finishRunningDelivery(runState.runs,runState.runs+" RUNS · SAFE");return;}
+       setDeliveryStatus("1 RUN · SAFE");
+       finishRunningDelivery(1,"1 RUN · SAFE");
+       return;
       }
      }
     }
@@ -1032,12 +1033,9 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
     runState.runnerProgress=0;
     const oldB=batter.position.z;batter.position.z=10.4;nonStriker.position.z=-12.2;
     setDeliveryStatus(runState.runs+" RUN · SAFE");
-    if(runState.runs>=runState.maxRuns){
-     runState.active=false;
-     finishRunningDelivery(runState.runs,runState.runs+" RUNS · SAFE");
-     return;
-    }
-    if(runBtn){runBtn.classList.remove("running");runBtn.textContent="RUN AGAIN";}
+    runState.active=false;
+    finishRunningDelivery(1,"1 RUN · SAFE");
+    return;
    }
   }
 
