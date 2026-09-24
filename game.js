@@ -501,8 +501,9 @@ document.querySelectorAll(".style-choice").forEach(b=>b.addEventListener("click"
 
 const cameras={
  broadcast:{pos:[28,11.5,29],target:[0,2,2]},
- batter:{pos:[5.8,4.2,17.8],target:[0,1.7,1]},
- bowler:{pos:[4.8,4,-25],target:[0,1.7,4]},
+ // Default match views: centered behind the player, with enough distance to see the pitch.
+ batter:{pos:[0,5.2,21.5],target:[0,1.6,2.5]},
+ bowler:{pos:[0,5.2,-28.5],target:[0,1.6,4.5]},
  wide:{pos:[65,29,68],target:[0,3,0]},
  cinematic:{pos:[-54,14,48],target:[0,4,0]}
 };
@@ -766,6 +767,8 @@ function setControlMode(mode){
  if(bowlingControls)bowlingControls.classList.toggle("hidden",!bowling);
  if(modeToggle){modeToggle.textContent=bowling?"BAT":"BOWL";modeToggle.classList.toggle("active",bowling);}
  if(controlModeTitle)controlModeTitle.textContent=bowling?"BOWLER CONTROL":"BATTER CONTROL";
+ // Each control mode gets its natural behind-the-player default. Existing camera buttons still override it.
+ setCamera(bowling?"bowler":"batter");
  document.querySelector(".batting-layout")?.classList.toggle("hidden",bowling);
  matchControls.classList.toggle("bowling-active",bowling);
  document.querySelector(".timing-meter")?.classList.toggle("hidden",bowling);
