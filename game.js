@@ -962,7 +962,7 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
     return;
    }
 
-   moveFieldersToBall(ball.position,Math.min(.033,Math.max(.001,(now-(runState.lastFrame||now))/1000)));
+   moveFieldersToBall(ball.position,.016);
    if(!runState.fielded&&fielder){
     const fd=Math.hypot(fielder.position.x-ball.position.x,fielder.position.z-ball.position.z);
     if(fd<1.0){
