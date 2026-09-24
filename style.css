@@ -322,3 +322,80 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 /* Keep the coloured recommendation triangles safely inside the joystick. */
 .match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-84px)!important}
 @media(max-width:700px){.match-controls .joystick-triangle{transform:rotate(var(--angle)) translateY(-56px)!important}}
+\n
+/* BAT BUTTON VISIBILITY OVERRIDE — final */
+.match-controls:not(.hidden){
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:4000000!important;
+}
+.match-controls .batting-buttons{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:4000010!important;
+}
+.match-controls .shot-three,
+.match-controls .foot-four{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:4000011!important;
+}
+.match-controls .shot-three button,
+.match-controls .foot-four button{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:4000012!important;
+  border:3px solid #ffffff!important;
+  background:#07140fff!important;
+  color:#ffffff!important;
+  box-shadow:0 0 0 2px #0008,0 6px 22px #000c!important;
+  text-shadow:0 2px 5px #000!important;
+}
+.match-controls .shot-three button:disabled,
+.match-controls .foot-four button:disabled{
+  opacity:.55!important;
+  filter:none!important;
+}
+.match-controls .shot-three .shot-main{
+  background:#f5c400!important;
+  color:#111!important;
+  border-color:#f5c400!important;
+  text-shadow:none!important;
+}
+@media(max-width:700px){
+  .match-controls .batting-buttons{
+    right:8px!important;
+    bottom:52px!important;
+    width:60vw!important;
+    max-width:520px!important;
+    min-width:285px!important;
+    height:270px!important;
+  }
+  .match-controls .shot-three button{
+    height:52px!important;
+    min-height:52px!important;
+    font-size:12px!important;
+  }
+  .match-controls .foot-four{
+    top:62px!important;
+    height:200px!important;
+  }
+  .match-controls .foot-four button{
+    font-size:10px!important;
+  }
+}
+@media(min-width:701px){
+  .match-controls .batting-buttons{
+    right:35px!important;
+    bottom:70px!important;
+    width:min(700px,44vw)!important;
+    height:330px!important;
+  }
+}
