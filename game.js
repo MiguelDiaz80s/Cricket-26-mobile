@@ -1242,19 +1242,30 @@ function openCoinToss(){
 function closeCoinToss(){coinToss.classList.remove("open")}
 
 tossChoices.forEach(btn=>btn.addEventListener("click",()=>{
- if(tossComplete)return;tossChoices.forEach(b=>b.disabled=true);
+ if(tossComplete)return;
+ tossChoices.forEach(b=>b.disabled=true);
  const call=btn.dataset.call,outcome=Math.random()<.5?"HEADS":"TAILS";
- tossWinner=outcome===call?homeTeam:awayTeam;battingFirst=tossWinner;
- coin.classList.remove("flipping");void coin.offsetWidth;coin.classList.add("flipping");tossPrompt.textContent="THE COIN IS IN THE AIR...";
+ tossWinner=outcome===call?homeTeam:awayTeam;
+ coin.classList.remove("flipping");void coin.offsetWidth;coin.classList.add("flipping");
+ tossPrompt.textContent="THE COIN IS IN THE AIR...";
  setTimeout(()=>{
- tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" WON THE TOSS";
- tossResult.classList.add("winner");
- tossPrompt.textContent=tossWinner.toUpperCase()+" WON THE TOSS — CHOOSE WHAT TO DO.";
- tossDecisionText.textContent=tossWinner.toUpperCase()+" WON THE TOSS";
- tossDecision.classList.remove("hidden");
- continueFromToss.disabled=true;
- tossComplete=true;
-},1150);
+  tossResult.textContent=outcome+" · "+tossWinner.toUpperCase()+" WON THE TOSS";
+  tossResult.classList.add("winner");
+  tossComplete=true;
+  if(tossWinner===homeTeam){
+   tossPrompt.textContent="YOU WON THE TOSS — CHOOSE WHAT TO DO.";
+   tossDecisionText.textContent="YOU WON THE TOSS";
+   tossDecision.classList.remove("hidden");
+   continueFromToss.disabled=true;
+  }else{
+   const aiBatsFirst=Math.random()<.5;
+   battingFirst=aiBatsFirst?awayTeam:homeTeam;
+   tossDecisionMade=true;
+   tossDecision.classList.add("hidden");
+   tossResult.textContent=awayTeam.toUpperCase()+" WON THE TOSS · "+(aiBatsFirst?"BAT FIRST":"FIELD FIRST");
+   continueFromToss.disabled=false;
+  }
+ },1150);
 }));
 
 function chooseTossDecision(batFirst){
@@ -1262,7 +1273,7 @@ function chooseTossDecision(batFirst){
  tossDecisionMade=true;
  battingFirst=batFirst?homeTeam:awayTeam;
  tossDecision.classList.add("hidden");
- tossResult.textContent=tossWinner.toUpperCase()+" WON THE TOSS · "+(batFirst?"BAT FIRST":"FIELD FIRST");
+ tossResult.textContent="YOU WON THE TOSS · "+(batFirst?"BAT FIRST":"FIELD FIRST");
  continueFromToss.disabled=false;
 }
 chooseBat.addEventListener("click",()=>chooseTossDecision(true));
@@ -1281,7 +1292,7 @@ function finishTossSetup(){
   setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},900);
  }else{
   setControlMode("BOWL");
-  showToast("YOU FIELD FIRST · SET YOUR DELIVERY");
+  showToast("YOU FIELD FIRST · BOWLING");
  }
 }
 
