@@ -1008,3 +1008,22 @@ function liveBallLoop(now){
 requestAnimationFrame(liveBallLoop);
 
 startMatchBtn.addEventListener("click",()=>{setTimeout(()=>{preMatch.classList.remove("open");openCoinToss();},80);});
+
+
+/* Keep fixed HUD/control layers aligned to Safari's actually visible viewport.
+   This matters when the game is running in iPad split-screen with Safari's toolbar visible. */
+(function syncVisibleViewport(){
+ const update=()=>{
+  const vv=window.visualViewport;
+  const h=vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
+  const w=vv && Number.isFinite(vv.width) ? vv.width : window.innerWidth;
+  document.documentElement.style.setProperty("--visible-vh",h+"px");
+  document.documentElement.style.setProperty("--visible-vw",w+"px");
+ };
+ update();
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",update,{passive:true});
+  window.visualViewport.addEventListener("scroll",update,{passive:true});
+ }
+ window.addEventListener("resize",update,{passive:true});
+})();
