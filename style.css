@@ -291,6 +291,7 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .match-controls.hidden{display:none!important;visibility:hidden!important}
 .match-controls:not(.hidden){display:block!important}
 .match-controls .batting-layout{visibility:visible!important}
+.match-controls.bowling-active .batting-layout{display:none!important;visibility:hidden!important;pointer-events:none!important}
 .match-controls .batting-buttons{z-index:20!important;visibility:visible!important}
 .match-controls .shot-three,
 .match-controls .foot-four{visibility:visible!important}
