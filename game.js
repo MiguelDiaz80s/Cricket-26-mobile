@@ -777,7 +777,7 @@ function startBowlingDelivery(){
  const paceMap={FAST:132,MEDIUM:112,SLOW:92};
  bowlSpeed=paceMap[bowlPace]+(Math.random()*6-3);
  deliverySpeed=bowlSpeed;deliveryLine=bowlLine==="OFF"?"OUTSIDE_OFF":bowlLine==="LEG"?"LEG":"ON_STUMPS";deliveryLength=bowlLength;
- deliveryLineX=deliveryLine==="OUTSIDE_OFF"?-.72:deliveryLine==="LEG"?.72:0;
+ deliveryLineX = deliveryLine === "OUTSIDE_OFF" ? -0.72 : (deliveryLine === "LEG" ? 0.72 : 0);
  deliveryBounceZ=deliveryLength==="FULL"?6.65:deliveryLength==="GOOD"?7.8:9;
  landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);landingPreview.visible=true;
  matchPhase="PREVIEW";setDeliveryStatus("BOWLER · "+bowlPace+" · "+bowlLength+" · "+bowlLine);ballSpeed.textContent=Math.round(bowlSpeed)+" KPH";
@@ -846,7 +846,7 @@ function startDelivery(){
  deliverySpeed=118+Math.random()*29;
  deliveryLine=["ON_STUMPS","OUTSIDE_OFF","LEG"][Math.floor(Math.random()*3)];
  deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
- deliveryLineX=deliveryLine==="OUTSIDE_OFF"?-.72:deliveryLine==="LEG"?.72:0;
+ deliveryLineX = deliveryLine === "OUTSIDE_OFF" ? -0.72 : (deliveryLine === "LEG" ? 0.72 : 0);
  deliveryBounceZ=deliveryLength==="FULL"?6.65:deliveryLength==="GOOD"?7.8:9.0;
  landingPreview.position.set(deliveryLineX,0.035,deliveryBounceZ);
  if(wasmEngine){
