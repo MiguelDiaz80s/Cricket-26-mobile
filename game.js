@@ -793,8 +793,25 @@ function footChoice(foot){
 }
 document.querySelectorAll("[data-foot]").forEach(b=>b.addEventListener("click",()=>footChoice(b.dataset.foot)));
 
-function calculateTiming(progress){
- return Math.max(0,1-Math.abs(progress-.84)/.25);
+function calculateTiming(elapsed){
+ // The real contact point is the instant just around the bowler's release.
+ // 0ms = perfect release timing. Early and late contacts still work, but lose power.
+ const releaseContactMs=2425;
+ const contactWindowMs=575;
+ return Math.max(0,1-Math.abs(elapsed-releaseContactMs)/contactWindowMs);
+}
+function timingQuality(elapsed){
+ const delta=elapsed-2425;
+ const abs=Math.abs(delta);
+ if(abs<=75)return "PERFECT";
+ if(abs<=190)return delta<0?"EARLY · GOOD":"LATE · GOOD";
+ if(abs<=380)return delta<0?"EARLY":"LATE";
+ return delta<0?"TOO EARLY":"TOO LATE";
+}
+function timingPower(elapsed){
+ const releaseContactMs=2425;
+ const contactWindowMs=575;
+ return Math.max(0,1-Math.abs(elapsed-releaseContactMs)/contactWindowMs);
 }
 
 function resolveWicket(reason){
@@ -859,12 +876,16 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
 }
 
 function playShot(shot){
- if(!deliveryActive||matchPhase!=="FLIGHT"||ballHit)return;
+ if(!deliveryActive||ballHit)return;
  selectedShot=shot;
- const progress=Math.max(0,Math.min(1,(performance.now()-deliveryStart)/deliveryDuration));
- if(progress<.56)return;
- const timing=calculateTiming(progress);
- const quality=timing>.84?"PERFECT":timing>.62?"GOOD":timing>.38?"OK":"LATE";
+ const elapsed=performance.now()-deliveryStart;
+
+ // Batting is now release-timed: click just before/at release for the strongest hit.
+ // The game accepts contacts from 575ms early through 575ms late.
+ if(elapsed<1850||elapsed>3000)return;
+
+ const timing=timingPower(elapsed);
+ const quality=timingQuality(elapsed);
  const foot=selectedFoot||"";
  const specialAllowed=deliveryLength==="SHORT"&&deliveryLine!=="ON_STUMPS";
  if(foot==="LEAVE"){
@@ -872,9 +893,11 @@ function playShot(shot){
   resolveWicket("LEAVE · BOWLED");return;
  }
  if(foot==="SPECIAL"&&!specialAllowed){resolveWicket("SPECIAL · WRONG DELIVERY");return;}
- if(timing<.28){resolveWicket("MISTIMED");return;}
- const power=(shot==="LOFT"?1.12:shot==="STROKE"?1:.82)*(0.72+.28*timing);
- const exitSpeed=22+deliverySpeed*.18+32*timing*power;
+ if(timing<=0){resolveWicket(quality);return;}
+ const shotMultiplier=shot==="LOFT"?1.12:shot==="STROKE"?1:.82;
+ // Perfect timing gets full power; every millisecond away from release reduces power.
+ const power=shotMultiplier*(0.48+0.52*timing);
+ const exitSpeed=20+deliverySpeed*.18+38*timing*power;
  timingLabel.textContent="TIMING · "+quality;timingBar.style.width=Math.round(timing*100)+"%";
  if((quality==="LATE"||quality==="OK"&&deliveryLine==="OUTSIDE_OFF")&&Math.random()<.34){resolveWicket("EDGED");return;}
  const launch=shot==="LOFT"?48:shot==="STROKE"?24:10,yaw=hitDirection.x*.9;
@@ -925,7 +948,7 @@ function updateRunUpAndDelivery(now){
  else{const q=(p-.72)/.28;y=.24+.95*Math.sin(Math.PI*q);}
  ball.position.set(lineX,y,z);
  if(p>.62&&p<.78){matchControls.classList.add("contact-window");timingLabel.textContent="BOUNCE · READ THE BALL";}
- else if(p>=.78){document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=false);timingLabel.textContent="CONTACT WINDOW";}
+ else if(p>=0.28){document.querySelectorAll("[data-shot]").forEach(b=>b.disabled=false);timingLabel.textContent="CONTACT WINDOW · RELEASE TIMING";}
  timingBar.style.width=Math.round(p*100)+"%";
  if(p>=1)resolveDot();
 }
