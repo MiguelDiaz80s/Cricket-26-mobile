@@ -585,3 +585,10 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  .bowl-row button{min-height:34px;font-size:9px}
  .bowl-deliver{min-height:46px;font-size:15px}
 }
+
+.toss-decision{margin:14px auto 8px;text-align:center;pointer-events:auto}
+.toss-decision.hidden{display:none!important}
+.toss-decision span{display:block;margin-bottom:8px;font-weight:900;letter-spacing:.06em}
+.toss-decision>div{display:flex;justify-content:center;gap:10px}
+.toss-decision button{min-width:130px;min-height:48px;border:2px solid #f5c400;border-radius:12px;background:#07140f;color:#fff;font-weight:950}
+.toss-decision button:hover{background:#f5c400;color:#111}
