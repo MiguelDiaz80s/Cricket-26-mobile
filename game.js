@@ -1157,8 +1157,19 @@ function playShot(shot){
  const exitSpeed=20+deliverySpeed*.18+38*timing*power;
  timingLabel.textContent="TIMING · "+quality;timingBar.style.width=Math.round(timing*100)+"%";
  if((quality==="LATE"||quality==="OK"&&deliveryLine==="OUTSIDE_OFF")&&Math.random()<.34){resolveWicket("EDGED");return;}
- const launch=shot==="LOFT"?48:shot==="STROKE"?24:10,yaw=hitDirection.x*.9;
- const flightDirection=new THREE.Vector3(Math.sin(yaw),Math.sin(launch*Math.PI/180),-Math.cos(yaw));
+ const launch=shot==="LOFT"?48:shot==="STROKE"?24:10;
+ // Map the batting joystick directly into the cricket field:
+ // up = straight down the ground, down = behind the batter,
+ // left/right = off-side/leg-side. The old system only used X/yaw,
+ // so left/right still looked almost straight and backward shots were impossible.
+ const aimX=Math.max(-1,Math.min(1,hitDirection.x));
+ const aimForward=Math.max(-1,Math.min(1,hitDirection.y));
+ let groundX=aimX;
+ let groundZ=-aimForward;
+ if(Math.hypot(groundX,groundZ)<.12){groundZ=-1;}
+ const groundLen=Math.hypot(groundX,groundZ)||1;
+ groundX/=groundLen;groundZ/=groundLen;
+ const flightDirection=new THREE.Vector3(groundX,Math.sin(launch*Math.PI/180),groundZ);
  setDeliveryStatus("SHOT · "+quality);showToast(shot+" · "+quality);
  resolveBallFlight(ball.position.clone(),flightDirection,exitSpeed,shot,timing);
 }
