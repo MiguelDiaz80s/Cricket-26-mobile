@@ -767,6 +767,7 @@ function setControlMode(mode){
  if(modeToggle){modeToggle.textContent=bowling?"BAT":"BOWL";modeToggle.classList.toggle("active",bowling);}
  if(controlModeTitle)controlModeTitle.textContent=bowling?"BOWLER CONTROL":"BATTER CONTROL";
  document.querySelector(".batting-layout")?.classList.toggle("hidden",bowling);
+ matchControls.classList.toggle("bowling-active",bowling);
  document.querySelector(".timing-meter")?.classList.toggle("hidden",bowling);
  document.querySelector(".control-foot")?.classList.toggle("hidden",bowling);
  document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=bowling);
