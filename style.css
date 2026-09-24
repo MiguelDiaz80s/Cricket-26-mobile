@@ -435,3 +435,38 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
     font-size:8px!important;
   }
 }
+
+
+/* IPAD SPLIT-SCREEN PORTRAIT FIX
+   Safari's bottom toolbar can sit over the CSS viewport in split-screen.
+   Keep the batting controls safely above it without changing landscape. */
+@media (orientation:portrait){
+  .match-controls .batting-buttons{
+    right:8px!important;
+    bottom:105px!important;
+    width:calc(100vw - 190px)!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:230px!important;
+  }
+  .match-controls .shot-three{
+    top:0!important;
+    gap:5px!important;
+  }
+  .match-controls .shot-three button{
+    height:46px!important;
+    min-height:46px!important;
+    font-size:10px!important;
+  }
+  .match-controls .foot-four{
+    top:54px!important;
+    height:170px!important;
+    gap:4px!important;
+  }
+  .match-controls .foot-four button{
+    font-size:8px!important;
+  }
+  .match-controls .joystick-wrap{
+    bottom:105px!important;
+  }
+}
