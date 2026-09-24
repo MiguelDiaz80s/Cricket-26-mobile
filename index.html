@@ -138,7 +138,13 @@
 
 <div id="matchControls" class="match-controls hidden">
   <div class="delivery-status"><i></i><span id="deliveryText">WAITING FOR BOWLER</span><b id="ballSpeed">-- KPH</b></div>
-  <div class="control-head"><span>BATTER CONTROL</span><b id="controlDevice">CHOOSE DEVICE</b><b id="timingLabel">WAIT FOR THE BALL</b></div>
+  <div class="control-head"><span id="controlModeTitle">BATTER CONTROL</span><button id="modeToggle" class="mode-toggle" type="button">BOWL</button><b id="controlDevice">CHOOSE DEVICE</b><b id="timingLabel">WAIT FOR THE BALL</b></div>
+  <div id="bowlingControls" class="bowling-controls hidden">
+    <div class="bowl-row"><span>LENGTH</span><button data-bowl-length="FULL">FULL</button><button data-bowl-length="GOOD">GOOD</button><button data-bowl-length="SHORT">SHORT</button></div>
+    <div class="bowl-row"><span>LINE</span><button data-bowl-line="OFF">OFF</button><button data-bowl-line="STUMPS">STUMPS</button><button data-bowl-line="LEG">LEG</button></div>
+    <div class="bowl-row"><span>PACE</span><button data-bowl-pace="FAST" class="active">FAST</button><button data-bowl-pace="MEDIUM">MEDIUM</button><button data-bowl-pace="SLOW">SLOW</button></div>
+    <button id="bowlDeliver" class="bowl-deliver" type="button">BOWL</button>
+  </div>
   
   <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
   <div class="batting-layout">
@@ -229,7 +235,7 @@ window.addEventListener("unhandledrejection",function(e){
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=43");
+    await import("./game.js?v=44");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
