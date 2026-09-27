@@ -1418,14 +1418,34 @@ function updateSwingAnimation(now){
 }
 function animateWicketPresentation(now){
  if(!wicketPresentation)return;
- const p=Math.min(1,(now-wicketPresentation.start)/1900),q=p*p*(3-2*p),w=wicketPresentation.group;
- if(batRagdoll){const bp=Math.min(1,(now-batRagdoll.start)/1300),bq=bp*bp*(3-2*bp);batter.rotation.z=batRagdoll.baseRotZ+batRagdoll.dir*bq*1.15;batter.rotation.x=batRagdoll.baseRotX-bq*.35;batter.position.y=Math.max(.18,batRagdoll.baseY-bq*.22);if(bp>=1)batRagdoll=null;}
- if(w)w.children.forEach((m,i)=>{const d=i%2?-1:1;m.rotation.z=wicketPresentation.rotations[i].z+d*q*(.9+(i%3)*.15);m.position.y=wicketPresentation.positions[i].y-q*(.45+(i%2)*.12);m.position.x=wicketPresentation.positions[i].x+d*q*.08;});
- if(p>=1)wicketPresentation=null;
+ const elapsed=(now-wicketPresentation.start)/1000;
+ const w=wicketPresentation.group;
+ if(batRagdoll){
+  const bp=Math.min(1,(now-batRagdoll.start)/1300),bq=bp*bp*(3-2*bp);
+  batter.rotation.z=batRagdoll.baseRotZ+batRagdoll.dir*bq*1.15;
+  batter.rotation.x=batRagdoll.baseRotX-bq*.35;
+  batter.position.y=Math.max(.18,batRagdoll.baseY-bq*.22);
+  if(bp>=1)batRagdoll=null;
+ }
+ if(w){
+  w.children.forEach((m,i)=>{
+   const v=wicketPresentation.velocities[i];
+   const a=wicketPresentation.angular[i];
+   if(!v||!a)return;
+   v.y-=5.8*.016;
+   m.position.x+=v.x*.016;m.position.y=Math.max(.08,m.position.y+v.y*.016);m.position.z+=v.z*.016;
+   m.rotation.x+=a.x*.016;m.rotation.y+=a.y*.016;m.rotation.z+=a.z*.016;
+  });
+ }
+ if(elapsed>=1.9)wicketPresentation=null;
 }
 function startWicketPresentation(reason){
  const w=wicketGroups[1]||wicketGroups[0];if(!w)return;
- wicketPresentation={start:performance.now(),group:w,rotations:w.children.map(m=>m.rotation.clone()),positions:w.children.map(m=>m.position.clone())};
+ wicketPresentation={
+  start:performance.now(),group:w,
+  velocities:w.children.map((m,i)=>new THREE.Vector3((i%2?-1:1)*(.55+.22*i),2.2+.55*(i%2),.12*(i-2))),
+  angular:w.children.map((m,i)=>new THREE.Vector3((i%2?-1:1)*(1.6+i*.35),(i%2?1:-1)*1.1,(i%2?-1:1)*.8))
+ };
  if(String(reason).includes("BOWLED")||String(reason).includes("LBW")){batRagdoll={start:performance.now(),baseRotZ:batter.rotation.z,baseRotX:batter.rotation.x,baseY:batter.position.y,dir:batter.position.x>=0?1:-1};}
  showToast(reason==="BOWLED"?"WICKETS BROKEN":"WICKET · "+reason);
 }
