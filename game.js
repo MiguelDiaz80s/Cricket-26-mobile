@@ -2,7 +2,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 import {loadCricketWasm} from "./engine/wasm-bridge.js";
 
 let wasmEngine=null;
-let wasmPhysicsActive=false;
+let wasmPhysicsActive=!!engine;
 loadCricketWasm().then(engine=>{
   wasmEngine=engine;
   wasmPhysicsActive=false;
@@ -1445,9 +1445,9 @@ function updateBowlingDelivery(now){
  if(!deliveryActive||!bowlActive)return;
  const elapsed=now-bowlStart;
  if(elapsed<850){matchPhase="PREVIEW";bowler.position.copy(runUpStart);bowler.rotation.set(0,0,0);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));return;}
- if(elapsed<3050){matchPhase="RUN_UP";const p=(elapsed-850)/2200,e=p*p*(3-2*p);bowler.position.lerpVectors(runUpStart,bowlerRelease,e);setDeliveryStatus("BOWLER RUN-UP · "+bowlPace);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));return;}
- if(elapsed<3300){matchPhase="RELEASE";const p=(elapsed-3050)/250;bowler.position.z=-16-p*.8;ball.position.set(0,1.95,-16);return;}
- matchPhase="FLIGHT";const p=Math.min(1,(elapsed-3300)/600),e=p*p*(3-2*p);let variationX=deliveryLineX;if(bowlTypeState==="OUT_SWING")variationX-=.28*e;if(bowlTypeState==="IN_SWING")variationX+=.28*e;if(bowlTypeState==="REVERSE_SWING")variationX+=.20*Math.sin(Math.PI*e);const z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*e,y=releasePoint.y+(bouncePoint.y-releasePoint.y)*e;ball.position.set(variationX*Math.sin(Math.PI*e),y,z);if(p>=1)resolveBowlingDelivery();
+ if(elapsed<3600){matchPhase="RUN_UP";const p=(elapsed-850)/2750,e=p*p*(3-2*p);bowler.position.lerpVectors(runUpStart,bowlerRelease,e);bowler.rotation.z=Math.sin(p*Math.PI)*.06;setDeliveryStatus("BOWLER RUN-UP · "+bowlPace);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));return;}
+ if(elapsed<3900){matchPhase="RELEASE";const p=(elapsed-3600)/300;bowler.position.z=-16-p*.8;bowler.rotation.x=-.10+p*.18;bowler.rotation.z=-.06+p*.12;ball.position.set(0,1.95,-16);return;}
+ matchPhase="FLIGHT";const p=Math.min(1,(elapsed-3900)/700),e=p*p*(3-2*p);bowler.rotation.x=.08;bowler.rotation.z=0;let variationX=deliveryLineX;if(bowlTypeState==="OUT_SWING")variationX-=.28*e;if(bowlTypeState==="IN_SWING")variationX+=.28*e;if(bowlTypeState==="REVERSE_SWING")variationX+=.20*Math.sin(Math.PI*e);const z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*e,y=releasePoint.y+(bouncePoint.y-releasePoint.y)*e;ball.position.set(variationX*Math.sin(Math.PI*e),y,z);if(p>=1)resolveBowlingDelivery();
 }
 function resolveBowlingDelivery(){
  if(!bowlActive)return;bowlActive=false;deliveryActive=false;shotFlightActive=false;
