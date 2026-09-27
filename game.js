@@ -1633,5 +1633,3 @@ if(runBtn){runBtn.style.position="fixed";runBtn.style.right="18px";runBtn.style.
  window.addEventListener("resize",update,{passive:true});
 })();
 
-/* FINAL GAMEPLAY CLEANUP v46 */
-.run-btn{position:absolute!important;left:0!important;right:0!important;bottom:auto!important;width:100%!important;height:50px!important;min-height:50px!important;margin-top:8px!important;z-index:5000050!important}.run-btn.active{display:flex!important}.match-controls .batting-buttons{padding-bottom:58px!important}.bowling-controls{top:auto!important;bottom:10px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(500px,calc(100vw - 24px))!important;max-height:36vh!important;overflow:auto!important}.score-card,.match-pill,.hud-status,.hud-right{z-index:6000000!important}.game-panel,.player-hub{pointer-events:none!important}.game-panel.open,.player-hub.open{pointer-events:auto!important}
