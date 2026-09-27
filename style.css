@@ -957,7 +957,7 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .match-controls .foot-four{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--ui-gap);width:100%!important}
 .match-controls .shot-three button,.match-controls .foot-four button,.match-controls #runBtn{min-height:48px;border:1px solid #ffffff28;border-radius:11px;background:linear-gradient(180deg,#14261f,#07130e);color:#f4f7f4;font:900 10px/1.1 system-ui,sans-serif;letter-spacing:.06em;box-shadow:0 7px 18px #0008;transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .match-controls .shot-three button.selected,.match-controls .shot-three button:focus-visible,.match-controls .shot-three button.recommended{border-color:var(--accent,#f5c400);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#f5c400) 55%,transparent),0 0 18px color-mix(in srgb,var(--accent,#f5c400) 35%,transparent),0 7px 18px #0008}
-.match-controls .shot-three button.selected{background:linear-gradient(180deg,color-mix(in srgb,var(--accent,#f5c400) 28%,#14261f),#07130e)}
+.match-controls .shot-three button.selected{background:linear-gradient(180deg,color-mix(in srgb,var(--accent,#f5c400) 28%,#14261f),#07130e);animation:intentPulse 1.05s ease-in-out infinite}
 .match-controls .foot-four button.recommended{border-color:var(--accent,#f5c400);box-shadow:0 0 0 1px var(--accent,#f5c400),0 0 13px color-mix(in srgb,var(--accent,#f5c400) 30%,transparent)}
 .match-controls button.touch-pressed{transform:scale(.92)!important;filter:brightness(1.18)}
 .match-controls #runBtn{justify-self:center;width:110px!important;min-width:110px!important;margin:0!important;background:linear-gradient(180deg,#f5c400,#b48700);color:#111;border-color:#ffe57b}
@@ -986,3 +986,6 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  .match-controls .hit-joystick{width:92px!important;height:92px!important}
  .match-controls .joystick-wrap{width:96px}
 }
+
+.pitch-marker-live{filter:drop-shadow(0 0 8px rgba(255,255,255,.35))}
+@keyframes intentPulse{0%,100%{transform:translateY(0);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#f5c400) 55%,transparent),0 0 14px color-mix(in srgb,var(--accent,#f5c400) 30%,transparent),0 7px 18px #0008}50%{transform:translateY(-1px);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#f5c400) 70%,transparent),0 0 22px color-mix(in srgb,var(--accent,#f5c400) 48%,transparent),0 9px 20px #0008}}
