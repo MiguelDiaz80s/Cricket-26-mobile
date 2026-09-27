@@ -113,6 +113,7 @@ function makeWicket(z){
  const g=new THREE.Group();
  [-.34,0,.34].forEach(x=>g.add(meshCyl(.055,2.25,wood,x,.98,0,14)));
  g.add(meshBox(.82,.09,.13,wood,0,2.08,0),meshBox(.82,.09,.13,wood,0,2.17,0));
+ g.children.forEach(m=>{m.userData.home={position:m.position.clone(),rotation:m.rotation.clone()};});
  g.position.z=z;stadium.add(g);wicketGroups.push(g);
 }
 makeWicket(-12.2);makeWicket(12.2);
