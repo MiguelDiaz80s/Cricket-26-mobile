@@ -1341,8 +1341,8 @@ function startSwingAnimation(foot,shot){swingAnimation={start:performance.now(),
 function updateSwingAnimation(now){
  if(!swingAnimation)return;
  const p=Math.min(1,(now-swingAnimation.start)/620),a=Math.sin(Math.PI*p),back=swingAnimation.foot==="BACK";
- batter.rotation.y=Math.PI+a*(swingAnimation.shot==="LOFT"? 72:swingAnimation.shot==="PUSH"? 30:.48);
- batter.rotation.z=a*(back?-.18:.13);batter.rotation.x=a*(back? 10:-.055);
+ batter.rotation.y=Math.PI+a*(swingAnimation.shot==="LOFT"? 0.72:swingAnimation.shot==="PUSH"? 0.30:.48);
+ batter.rotation.z=a*(back?-.18:.13);batter.rotation.x=a*(back? 0.10:-.055);
  if(p>=1){batter.rotation.set(0,Math.PI,0);swingAnimation=null;}
 }
 function animateWicketPresentation(now){
@@ -1420,7 +1420,7 @@ function endCleanRunningDelivery(){if(runState.deliveryCounted)return;runState.d
 
 function applyCleanBowlAim(){
  const x=Math.max(-1,Math.min(1,bowlAimState.x)),y=Math.max(-1,Math.min(1,bowlAimState.y));
- bowlLine=x<-.28?"OFF":x>.28?"LEG":"STUMPS";bowlLength=y>.30?"SHORT":y<-.30?"FULL":"GOOD";deliveryLine=bowlLine==="OFF"?"OUTSIDE_OFF":bowlLine==="LEG"?"LEG":"ON_STUMPS";deliveryLength=bowlLength;deliveryBounceZ=bowlLength==="FULL"?6.65:bowlLength==="GOOD"?7.8:9.1;deliveryLineX=bowlLine==="OFF"?-.72:bowlLine==="LEG"? 72:0;landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);landingPreview.visible=true;
+ bowlLine=x<-.28?"OFF":x>.28?"LEG":"STUMPS";bowlLength=y>.30?"SHORT":y<-.30?"FULL":"GOOD";deliveryLine=bowlLine==="OFF"?"OUTSIDE_OFF":bowlLine==="LEG"?"LEG":"ON_STUMPS";deliveryLength=bowlLength;deliveryBounceZ=bowlLength==="FULL"?6.65:bowlLength==="GOOD"?7.8:9.1;deliveryLineX=bowlLine==="OFF"?-.72:bowlLine==="LEG"? 0.72:0;landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);landingPreview.visible=true;
 }
 function setupCleanBowlJoystick(){
  const j=document.querySelector("#bowlJoystick"),stick=document.querySelector("#bowlJoystickStick");if(!j||!stick)return;let dragging=false;
