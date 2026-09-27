@@ -715,6 +715,10 @@ const landingPreview=new THREE.Group();
 const landingDisc=new THREE.Mesh(new THREE.RingGeometry(.32,.52,32),new THREE.MeshBasicMaterial({color:0xffd83d,transparent:true,opacity:.92,side:THREE.DoubleSide}));
 landingDisc.rotation.x=-Math.PI/2;
 landingPreview.add(landingDisc);
+const landingDot=new THREE.Mesh(new THREE.CircleGeometry(.105,20),new THREE.MeshBasicMaterial({color:0xfff3a0,transparent:true,opacity:.95,side:THREE.DoubleSide}));
+landingDot.rotation.x=-Math.PI/2;
+landingDot.position.y=.012;
+landingPreview.add(landingDot);
 const landingCrossA=new THREE.Mesh(new THREE.BoxGeometry(.9,.025,.055),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9}));
 const landingCrossB=landingCrossA.clone();
 landingCrossB.rotation.y=Math.PI/2;
@@ -788,7 +792,20 @@ function setControlMode(mode){
  else {deliveryBtn.disabled=deliveryActive||shotFlightActive;setDeliveryStatus("BATTER · WAIT FOR THE BALL");timingLabel.textContent="WAIT FOR THE BALL";}
 }
 function resetDelivery(){
- if(controlMode==="BOWL"){bowlStage=0;bowlAimLockedState=false;document.querySelector("#bowlJoystick")?.classList.remove("locked");}
+ if(controlMode==="BOWL"){
+  bowlStage=0;
+  bowlAimLockedState=false;
+  bowlAimState.x=0;
+  bowlAimState.y=0;
+  document.querySelector("#bowlJoystick")?.classList.remove("locked");
+  const stick=document.querySelector("#bowlJoystickStick");
+  if(stick)stick.style.transform="translate(0,0)";
+  bouncePoint.set(0,.24,7.8);
+  deliveryBounceZ=7.8;
+  deliveryLineX=0;
+  landingPreview.position.set(0,.035,7.8);
+  landingPreview.visible=false;
+ }
 
  runState.active=false;runState.runs=0;runState.startedAt=0;runState.runnerProgress=0;runState.fielded=false;runState.throwActive=false;runState.deliveryCounted=false;runState.lastFrame=performance.now();
  if(runBtn){runBtn.classList.remove("active","running");runBtn.textContent="RUN";}
@@ -1416,8 +1433,27 @@ function updateRunning(dt){
 function endCleanRunningDelivery(){if(runState.deliveryCounted)return;runState.deliveryCounted=true;runState.active=false;shotFlightActive=false;ballHit=false;if(runBtn){runBtn.classList.remove("active","running");runBtn.textContent="RUN";}setTimeout(()=>{resetRunners();resetDelivery();if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},800);}
 
 function applyCleanBowlAim(){
- const x=Math.max(-1,Math.min(1,bowlAimState.x)),y=Math.max(-1,Math.min(1,bowlAimState.y));
- bowlLine=x<-.28?"OFF":x>.28?"LEG":"STUMPS";bowlLength=y>.30?"SHORT":y<-.30?"FULL":"GOOD";deliveryLine=bowlLine==="OFF"?"OUTSIDE_OFF":bowlLine==="LEG"?"LEG":"ON_STUMPS";deliveryLength=bowlLength;deliveryBounceZ=bowlLength==="FULL"?6.65:bowlLength==="GOOD"?7.8:9.1;deliveryLineX=bowlLine==="OFF"?-.72:bowlLine==="LEG"? 0.72:0;landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);landingPreview.visible=true;
+ const x=Math.max(-1,Math.min(1,bowlAimState.x));
+ const y=Math.max(-1,Math.min(1,bowlAimState.y));
+
+ // The joystick directly maps to a legal area of the pitch.
+ // X controls line across the 5.5m pitch; Y controls length down the pitch.
+ const maxAimX=1.78;
+ const minBounceZ=4.8;
+ const maxBounceZ=10.9;
+ deliveryLineX=x*maxAimX;
+ deliveryBounceZ=minBounceZ+((y+1)*.5)*(maxBounceZ-minBounceZ);
+
+ // Keep the old descriptive labels, but derive them from the actual target.
+ bowlLine=x<-.28?"OFF":x>.28?"LEG":"STUMPS";
+ bowlLength=deliveryBounceZ<6.7?"FULL":deliveryBounceZ>9.0?"SHORT":"GOOD";
+ deliveryLine=deliveryLineX<-.42?"OUTSIDE_OFF":deliveryLineX>.42?"LEG":"ON_STUMPS";
+ deliveryLength=bowlLength;
+
+ // This marker is the exact point the flight code will aim for.
+ bouncePoint.set(deliveryLineX,.24,deliveryBounceZ);
+ landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);
+ landingPreview.visible=true;
 }
 function setupCleanBowlJoystick(){
  const j=document.querySelector("#bowlJoystick"),stick=document.querySelector("#bowlJoystickStick");if(!j||!stick)return;let dragging=false;
@@ -1443,7 +1479,12 @@ function startBowlingDelivery(){
  const paceMap={FAST:132,MEDIUM:112,SLOW:92};
  let variationSpeed=bowlTypeState==="SLOWER"?-24:0;
  bowlSpeed=paceMap[bowlPace]+variationSpeed+(Math.random()*6-3);
- deliverySpeed=bowlSpeed;applyCleanBowlAim();landingPreview.visible=false;matchPhase="PREVIEW";bowlStage=3;refreshCleanBowlingUI();setDeliveryStatus("RUN-UP · "+bowlPace+" · "+bowlTypeState.replaceAll("_"," "));
+ deliverySpeed=bowlSpeed;// Use the exact point selected by the joystick; do not re-snap it.
+ bouncePoint.set(deliveryLineX,.24,deliveryBounceZ);
+ applyCleanBowlAim();
+ landingPreview.visible=false;
+ matchPhase="PREVIEW";
+ bowlStage=3;refreshCleanBowlingUI();setDeliveryStatus("RUN-UP · "+bowlPace+" · "+bowlTypeState.replaceAll("_"," "));
 }
 function updateBowlingDelivery(now){
  if(!deliveryActive||!bowlActive)return;
@@ -1515,7 +1556,12 @@ function resolveBowlingDelivery(){
 }
 
 const __cleanBaseAnimate=animate;
-animate=function(now){updateSwingAnimation(now);animateWicketPresentation(now);updateCatchCamera(now);__cleanBaseAnimate(now);};
+animate=function(now){
+ if(controlMode==="BOWL" && bowlStage===0 && !bowlAimLockedState && landingPreview.visible){
+  const pulse=1+Math.sin(now*.006)*.10;
+  landingPreview.scale.set(pulse,pulse,pulse);
+ }
+ updateSwingAnimation(now);animateWicketPresentation(now);updateCatchCamera(now);__cleanBaseAnimate(now);};
 const __cleanBaseFinishRuns=finishRuns;
 finishRuns=function(runs,label){__cleanBaseFinishRuns(runs,label);};
 const __cleanBaseResolveWicket=resolveWicket;
