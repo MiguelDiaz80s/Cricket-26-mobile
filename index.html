@@ -119,8 +119,8 @@
   </div>
 </div>
 
-<div id="playerHub" class="player-hub">
-  <div class="hub-backdrop"></div><div class="hub-card"><button id="playerHubClose">×</button>
+<div id="careerPanel" class="game-panel"><div class="game-panel-card"><button class="game-panel-close">×</button><span>CAREER / WORLD PATH</span><h2>CAREER MODE</h2><p>Build your season from club cricket toward higher-level selection.</p><div class="career-grid"><button>START CAREER</button><button>SEASON</button><button>SELECTION</button><button>STATS</button></div></div></div><div id="tournamentPanel" class="game-panel"><div class="game-panel-card"><button class="game-panel-close">×</button><span>TOURNAMENTS / WORLD CRICKET</span><h2>TOURNAMENT HUB</h2><p>Choose a competition and enter its match setup.</p><div class="career-grid"><button>TEST</button><button>ODI</button><button>T20</button><button>WORLD CUP</button></div></div></div><div id="playerHub" class="player-hub">
+  <div class="hub-backdrop"></div><div class="hub-card"><button id="playerHubClose" class="game-panel-close">×</button>
     <span>MY CRICKETER / 01</span><h2>BUILD YOUR PLAYER</h2><p>The creator is coming online. Your custom cricketer will own the career mode.</p>
     <div class="player-preview"><div class="player-glow"></div><div class="player-silhouette"></div><div><b>OLIVER</b><small>RIGHT ARM FAST · ALL ROUND ATHLETE</small><em>PLAYER CREATOR / LOCKED FOR NEXT BUILD</em></div></div>
     <div class="stat-row"><div><b>86</b><small>PACE</small></div><div><b>82</b><small>POWER</small></div><div><b>79</b><small>REFLEX</small></div><div><b>88</b><small>MENTAL</small></div></div>
@@ -141,10 +141,9 @@
   <div class="delivery-status"><i></i><span id="deliveryText">WAITING FOR BOWLER</span><b id="ballSpeed">-- KPH</b></div>
   <div class="control-head"><span id="controlModeTitle">BATTER CONTROL</span><button id="modeToggle" class="mode-toggle" type="button">BOWL</button><b id="controlDevice">CHOOSE DEVICE</b><b id="timingLabel">WAIT FOR THE BALL</b></div>
   <div id="bowlingControls" class="bowling-controls hidden">
-    <div class="bowl-row"><span>LENGTH</span><button data-bowl-length="FULL">FULL</button><button data-bowl-length="GOOD">GOOD</button><button data-bowl-length="SHORT">SHORT</button></div>
-    <div class="bowl-row"><span>LINE</span><button data-bowl-line="OFF">OFF</button><button data-bowl-line="STUMPS">STUMPS</button><button data-bowl-line="LEG">LEG</button></div>
-    <div class="bowl-row"><span>PACE</span><button data-bowl-pace="FAST" class="active">FAST</button><button data-bowl-pace="MEDIUM">MEDIUM</button><button data-bowl-pace="SLOW">SLOW</button></div>
-    <button id="bowlDeliver" class="bowl-deliver" type="button">BOWL</button>
+    <div id="bowlJoystick" class="bowl-joystick"><div class="bowl-joystick-ring"></div><div id="bowlJoystickStick" class="bowl-joystick-stick"></div><span class="bowl-label bowl-full">FULL</span><span class="bowl-label bowl-short">SHORT</span><span class="bowl-label bowl-off">OFF</span><span class="bowl-label bowl-leg">LEG</span></div>
+    <div id="bowlVariation" class="bowl-variation hidden"><button data-bowl-type="STRAIGHT" class="active">STRAIGHT</button><button data-bowl-type="SLOWER">SLOW</button><button data-bowl-type="REVERSE_SWING">REVERSE SWING</button><button data-bowl-type="OUT_SWING">OUT SWING</button><button data-bowl-type="IN_SWING">IN SWING</button><button data-bowl-type="OFF_CUTTER">OFF CUTTER</button><button data-bowl-type="LEG_CUTTER">LEG CUTTER</button></div>
+    <button id="bowlDeliver" class="bowl-deliver" type="button" disabled>BOWL</button>
   </div>
   
   <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
@@ -236,7 +235,7 @@ window.addEventListener("unhandledrejection",function(e){
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=50");
+    await import("./game.js?v=51");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
