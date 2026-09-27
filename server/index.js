@@ -33,7 +33,7 @@ app.get("/health",async(_req,res)=>{
 app.get("/api/leaderboard",async(req,res)=>{
   const limit=Math.min(100,Math.max(1,Number(req.query.limit)||100));
   const [rows]=await pool.query(
-    "SELECT u.username,s.total_runs,s.highest_score,s.wickets_taken FROM user_profiles u LEFT JOIN batting_statistics s ON s.user_id=u.user_id LEFT JOIN bowling_statistics b ON b.user_id=u.user_id ORDER BY COALESCE(s.total_runs,0) DESC, COALESCE(s.highest_score,0) DESC LIMIT ?",
+    "SELECT u.username,s.total_runs,s.highest_score,s.wickets_taken FROM user_profiles u LEFT JOIN batting_statistics s ON s.user_id=u.user_id LEFT JOIN bowling_statistics b ON b.user_id=u.user_id ORDER BY COALESCE(s.total_runs,0) DESC, COALESCE(s.highest_score,0) DESC, COALESCE(b.wickets_taken,0) DESC LIMIT ?",
     [limit]
   );
   res.json({players:rows});
