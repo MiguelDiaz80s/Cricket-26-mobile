@@ -1286,6 +1286,33 @@ function startSwingAnimation(foot,shot){
  const now=performance.now();
  swingAnimation={start:now,foot,shot,contactAt:now+430};
 }
+function updateSwingAnimation(now){
+ if(!swingAnimation)return;
+ const elapsed=now-swingAnimation.start;
+ const p=Math.min(1,Math.max(0,elapsed/620));
+ const eased=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+ const foot=swingAnimation.foot;
+ const shot=swingAnimation.shot;
+ // Load into a compact stance, then rotate through the ball, then recover.
+ const side=hitDirection.x<0?-1:1;
+ const baseY=foot==="BACK"?Math.PI:Math.PI;
+ const swingArc=shot==="LOFT"?.92:shot==="PUSH"?.42:.68;
+ const contactPhase=Math.min(1,Math.max(0,(elapsed-180)/260));
+ const followPhase=Math.min(1,Math.max(0,(elapsed-430)/190));
+ const contactEase=contactPhase*contactPhase*(3-2*contactPhase);
+ const followEase=followPhase*followPhase*(3-2*followPhase);
+ batter.rotation.y=baseY + side*swingArc*contactEase*(1-.22*followEase);
+ batter.rotation.x=-.06*contactEase + .16*followEase;
+ batter.rotation.z=side*.10*contactEase;
+ batter.position.y=DEFAULT_BATTER_POS.y + .035*Math.sin(Math.PI*p);
+ if(foot==="BACK")batter.position.x=DEFAULT_BATTER_POS.x+side*.055*contactEase;
+ if(foot==="FRONT")batter.position.x=DEFAULT_BATTER_POS.x-side*.035*contactEase;
+ if(p>=1){
+  batter.rotation.set(0,Math.PI,0);
+  batter.position.copy(DEFAULT_BATTER_POS);
+  swingAnimation=null;
+ }
+}
 function animateWicketPresentation(now){
  if(!wicketPresentation)return;
  const p=Math.min(1,(now-wicketPresentation.start)/1900),q=p*p*(3-2*p),w=wicketPresentation.group;
@@ -1352,6 +1379,7 @@ function resetRunners(){batter.position.copy(DEFAULT_BATTER_POS);nonStriker.posi
 
 function startRun(){
  if(!shotFlightActive||runState.deliveryCounted||runState.throwActive||runState.fielded||runState.active)return;
+ if(runState.runs>=4){setDeliveryStatus("MAX 4 RUNS · BALL LIVE");return;}
  runState.active=true;runState.startedAt=performance.now();runState.runnerProgress=0;
  if(runBtn){runBtn.classList.add("running");runBtn.textContent=runState.runs>0?"RUN AGAIN":"RUN";}
  setDeliveryStatus("RUNNING · TAP RUN AGAIN");
