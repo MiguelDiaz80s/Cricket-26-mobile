@@ -803,6 +803,38 @@ landingPreview.position.y=.035;
 landingPreview.visible=false;
 stadium.add(landingPreview);
 
+function predictBounceIntersection(position,velocity,targetY=.24){
+ const v=velocity.clone();
+ if(Math.abs(v.z)<1e-6)return new THREE.Vector3(position.x,targetY,position.z);
+ const t=(deliveryBounceZ-position.z)/v.z;
+ if(t<=0)return new THREE.Vector3(deliveryLineX,targetY,deliveryBounceZ);
+ return new THREE.Vector3(position.x+v.x*t,targetY,position.z+v.z*t);
+}
+function setPitchMarkerColor(){
+ const color=deliveryLength==="SHORT"?0xffcc00:(deliveryLength==="FULL"?0xff3333:0x33cc33);
+ landingDisc.material.color.setHex(color);
+ landingDot.material.color.setHex(color);
+ landingPreview.scale.setScalar(deliveryLength==="SHORT"?1.08:deliveryLength==="FULL"?.94:1);
+}
+function calculateAndShowPitchMarker(){
+ const horizontal=new THREE.Vector3(deliveryLineX,0,deliveryBounceZ-releasePoint.z);
+ const distance=Math.max(.001,horizontal.length());
+ const speed=Math.max(1,deliverySpeed);
+ const velocity=horizontal.normalize().multiplyScalar(speed);
+ velocity.y=-(releasePoint.y-.24)/(distance/speed);
+ const projected=predictBounceIntersection(releasePoint,velocity,.24);
+ landingPreview.position.set(projected.x,.035,projected.z);
+ setPitchMarkerColor();
+ landingPreview.visible=true;
+ pitchMarkerCleared=false;
+ pitchMarkerShownAt=performance.now();
+}
+function clearPitchMarkerOnBounce(){
+ if(pitchMarkerCleared)return;
+ pitchMarkerCleared=true;
+ landingPreview.visible=false;
+}
+
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
  const team=document.querySelector("#scorecardTeam"),runs=document.querySelector("#scorecardRuns"),scorecardOvers=document.querySelector("#scorecardOvers"),inn=document.querySelector("#scorecardInnings");
