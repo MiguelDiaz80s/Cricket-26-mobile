@@ -620,3 +620,39 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .game-panel,.player-hub{pointer-events:none!important}
 .game-panel.open,.player-hub.open{pointer-events:auto!important}
 @media(max-width:700px){.bowling-controls{bottom:8px!important;max-height:34vh!important}.run-btn{height:44px!important;min-height:44px!important}}
+
+
+/* FINAL GAMEPLAY / MENU CLEANUP v47 */
+.score-card,.match-pill,.hud-status,.hud-right{position:fixed!important;z-index:7000000!important;}
+.score-card{top:12px!important;left:12px!important;}
+.match-pill{top:12px!important;left:50%!important;transform:translateX(-50%)!important;}
+.hud-right{top:12px!important;right:12px!important;}
+.hud-status{top:12px!important;right:160px!important;}
+
+/* Bowling controls live at the bottom so the scoreboard is never covered. */
+.bowling-controls{position:fixed!important;top:auto!important;bottom:max(10px,env(safe-area-inset-bottom))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(520px,calc(100vw - 24px))!important;z-index:8000000!important;max-height:38vh!important;overflow:auto!important;}
+.bowling-controls .bowl-variation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+.bowling-controls .bowl-variation button{min-height:42px;font-size:11px;}
+
+/* RUN stays in the existing batting button column, vertically stacked instead of stretching horizontally. */
+.match-controls .batting-buttons{display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important;padding-bottom:10px!important;}
+.match-controls .batting-buttons .shot-three,.match-controls .batting-buttons .foot-four{width:100%;}
+.run-btn{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;width:104px!important;min-width:104px!important;height:46px!important;min-height:46px!important;margin:4px auto 0!important;z-index:9000000!important;}
+.run-btn.active{display:flex!important;}
+
+/* Mode panels are independent, clickable menus. */
+.game-panel,.player-hub{pointer-events:none!important;z-index:9000000!important;}
+.game-panel.open,.player-hub.open{pointer-events:auto!important;}
+.game-panel-card,.hub-card{pointer-events:auto!important;max-height:84vh!important;overflow:auto!important;}
+.game-panel .career-grid button,.menu-inner .mode-card,.menu-inner .menu-grid button{pointer-events:auto!important;touch-action:manipulation!important;}
+
+/* Keep touch targets usable without forcing the controls into a horizontal strip. */
+@media(max-width:700px){
+ .score-card{top:8px!important;left:8px!important;}
+ .match-pill{top:8px!important;}
+ .hud-right{top:8px!important;right:8px!important;}
+ .hud-status{display:none!important;}
+ .bowling-controls{bottom:8px!important;max-height:42vh!important;width:calc(100vw - 16px)!important;}
+ .bowling-controls .bowl-variation{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .run-btn{width:92px!important;min-width:92px!important;height:44px!important;min-height:44px!important;}
+}
