@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#03100a">
 <link rel="manifest" href="manifest.webmanifest">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 <div id="app">
@@ -132,6 +132,27 @@
 <div id="hud" class="hud hidden">
   <div class="score-card"><div><span id="hudTeam">AUSTRALIA</span><b id="scoreValue">0 / 0</b></div><strong id="oversValue">0.0 OVERS</strong></div>
   <div class="match-pill"><span>TEST MATCH</span><b>DAY 1</b></div>
+  <div id="matchScorecard" class="match-scorecard" aria-label="Match scorecard">
+  <div class="scorecard-head"><span>SCORECARD</span><button id="scorecardToggle" type="button">DETAILS</button></div>
+  <div class="scorecard-main">
+    <div class="scorecard-team"><small id="scorecardTeam">AUSTRALIA</small><strong id="scorecardRuns">0 / 0</strong><span id="scorecardOvers">0.0 OVERS</span></div>
+    <div class="scorecard-target"><small>INNINGS</small><b id="scorecardInnings">1</b></div>
+  </div>
+  <div id="scorecardDetails" class="scorecard-details">
+    <div class="scorecard-section">
+      <span>BATTING</span>
+      <div class="score-row score-row-head"><b>PLAYER</b><b>R</b><b>B</b><b>4s</b><b>6s</b></div>
+      <div class="score-row"><b>BATTER</b><b id="strikerRunsUi">0</b><b id="strikerBallsUi">0</b><b>0</b><b>0</b></div>
+      <div class="score-row"><b>NON-STRIKER</b><b>0</b><b>0</b><b>0</b><b>0</b></div>
+    </div>
+    <div class="scorecard-section">
+      <span>BOWLING</span>
+      <div class="score-row score-row-head"><b>PLAYER</b><b>O</b><b>M</b><b>R</b><b>W</b></div>
+      <div class="score-row"><b>BOWLER</b><b id="bowlerOversUi">0.0</b><b>0</b><b id="bowlerRunsUi">0</b><b id="bowlerWicketsUi">0</b></div>
+    </div>
+  </div>
+</div>
+
   <div class="hud-status"><i></i><span>LIVE MATCH BUILD</span></div>
   <div class="hud-right"><button class="hud-btn" id="cameraHud">CAMERA</button><button class="hud-btn" id="backHome">MENU</button></div>
 </div>
@@ -235,7 +256,7 @@ window.addEventListener("unhandledrejection",function(e){
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=48");
+    await import("./game.js?v=49");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
