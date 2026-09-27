@@ -308,8 +308,8 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  return g;
 }
 
-const batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
-const nonStriker=player({team:0,role:"batter",x:-.8,z:-12.2,scale:1.08});
+let batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
+let nonStriker=player({team:0,role:"batter",x:-.8,z:-12.2,scale:1.08});
 nonStriker.rotation.y=0;
 const keeper=player({team:1,role:"keeper",x:-.5,z:-13.9,scale:1.02});
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
@@ -1544,6 +1544,10 @@ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
    if(q>=1){
     runState.runs++;runState.runnerProgress=0;runState.active=false;
     batter.position.z=10.4;nonStriker.position.z=-12.2;
+    // Completing a run changes ends: the former non-striker becomes striker.
+    const oldStriker=batter;batter=nonStriker;nonStriker=oldStriker;
+    batter.position.z=10.4;nonStriker.position.z=-12.2;
+    batter.rotation.set(0,Math.PI,0);nonStriker.rotation.set(0,0,0);
     inningsRuns++;strikerRuns++;updateScoreboard();setDeliveryStatus(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");showToast(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
     if(runBtn){runBtn.classList.remove("running");runBtn.textContent="RUN AGAIN";}
    }
