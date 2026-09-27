@@ -5,7 +5,7 @@ let wasmEngine=null;
 let wasmPhysicsActive=false;
 loadCricketWasm().then(engine=>{
   wasmEngine=engine;
-  wasmPhysicsActive=!!engine;
+  wasmPhysicsActive=false;
   if(engine)console.info("Cricket C++ aerodynamics online.");
 });
 
