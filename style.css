@@ -656,3 +656,136 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  .bowling-controls .bowl-variation{grid-template-columns:repeat(2,minmax(0,1fr));}
  .run-btn{width:92px!important;min-width:92px!important;height:44px!important;min-height:44px!important;}
 }
+
+
+/* =========================================================
+   FINAL GAMEPLAY CLEANUP v48
+   Sequential bowling UI + vertical run control + reliable menus.
+   ========================================================= */
+.topbar{z-index:9000010!important;pointer-events:auto!important}
+.top-nav{pointer-events:auto!important}
+.top-nav span{pointer-events:auto!important;cursor:pointer!important;touch-action:manipulation!important}
+
+.score-card,.match-pill,.hud-status,.hud-right{z-index:9100000!important}
+
+.match-controls .bowling-controls{
+ position:fixed!important;
+ left:50%!important;
+ right:auto!important;
+ top:auto!important;
+ bottom:max(10px,env(safe-area-inset-bottom))!important;
+ transform:translateX(-50%)!important;
+ width:min(470px,calc(100vw - 24px))!important;
+ max-height:44vh!important;
+ overflow:visible!important;
+ z-index:9200000!important;
+ padding:10px 12px!important;
+ border:1px solid #ffffff22!important;
+ border-radius:16px!important;
+ background:linear-gradient(180deg,#07130fee,#030907f5)!important;
+ box-shadow:0 18px 50px #000b!important;
+}
+.bowling-controls.hidden{display:none!important}
+.bowling-controls .bowl-joystick{margin:0 auto!important}
+.bowling-controls .bowl-variation{
+ margin:0 auto!important;
+ width:100%!important;
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ gap:7px!important;
+}
+.bowling-controls .bowl-variation button{
+ min-height:44px!important;
+ border-radius:10px!important;
+ font-size:10px!important;
+ touch-action:manipulation!important;
+}
+.bowling-controls .bowl-deliver{
+ display:block!important;
+ width:100%!important;
+ min-height:48px!important;
+ margin-top:8px!important;
+ border-radius:11px!important;
+ font-weight:1000!important;
+}
+.bowling-controls .bowl-deliver.hidden{display:none!important}
+
+/* Only the footwork/action buttons execute a batting action at contact.
+   Stroke / Push / Loft remain selectable shot intents. */
+.match-controls .batting-buttons{
+ position:absolute!important;
+ right:clamp(10px,4vw,70px)!important;
+ bottom:clamp(60px,8vh,100px)!important;
+ width:min(700px,42vw)!important;
+ height:auto!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
+ gap:8px!important;
+ pointer-events:none!important;
+}
+.match-controls .shot-three,
+.match-controls .foot-four{
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:auto!important;
+ display:grid!important;
+ margin:0!important;
+ pointer-events:auto!important;
+}
+.match-controls .shot-three{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.match-controls .foot-four{
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-template-rows:auto auto!important;
+}
+.match-controls .foot-four button:nth-child(1),
+.match-controls .foot-four button:nth-child(2),
+.match-controls .foot-four button:nth-child(3),
+.match-controls .foot-four button:nth-child(4){grid-column:auto!important;grid-row:auto!important}
+.match-controls .run-btn{
+ position:relative!important;
+ inset:auto!important;
+ align-self:center!important;
+ width:108px!important;
+ min-width:108px!important;
+ height:48px!important;
+ min-height:48px!important;
+ margin:0!important;
+ z-index:9200010!important;
+ pointer-events:auto!important;
+}
+.run-btn.active{display:flex!important;align-items:center!important;justify-content:center!important}
+.match-controls.bowling-active .run-btn{display:none!important}
+
+.game-panel,.player-hub{z-index:9300000!important;pointer-events:none!important}
+.game-panel.open,.player-hub.open{pointer-events:auto!important}
+.game-panel-card,.hub-card{pointer-events:auto!important}
+.game-panel .career-grid button,.menu-inner .mode-card,.menu-inner .menu-grid button{
+ pointer-events:auto!important;
+ touch-action:manipulation!important;
+ cursor:pointer!important;
+}
+
+#drsReview{
+ top:18%!important;
+ z-index:9400000!important;
+ max-width:min(430px,90vw)!important;
+}
+#drsReview b{font-size:20px;letter-spacing:.12em}
+#drsReview span{font-size:10px;color:#9daaa3;letter-spacing:.12em}
+#drsReview i{font-style:normal;font-size:12px;padding:5px 8px;border-radius:6px;background:#ffffff0a}
+
+@media(max-width:700px){
+ .match-controls .bowling-controls{
+  width:calc(100vw - 16px)!important;
+  bottom:8px!important;
+  max-height:45vh!important;
+ }
+ .bowling-controls .bowl-variation{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .match-controls .batting-buttons{
+  right:10px!important;
+  bottom:68px!important;
+  width:57vw!important;
+ }
+ .match-controls .run-btn{width:92px!important;min-width:92px!important;height:44px!important;min-height:44px!important}
+}
