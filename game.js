@@ -1151,22 +1151,6 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
  requestAnimationFrame(animateShot);
 }
 
-function startRun(){
- if(!shotFlightActive||resolvedRunState())return;
- if(runState.fielded){
-  if(runState.throwActive)return;
-  return;
- }
- if(runState.active)return;
- runState.active=true;
- runState.runs=runState.runs||0;
- runState.startedAt=performance.now();
- runState.runnerProgress=0;
- runState.deliveryCounted=false;
- if(runBtn){runBtn.classList.add("running");runBtn.textContent="RUNNING";}
- setDeliveryStatus("RUNNING · WATCH THE FIELDER");
- showToast("RUN!");
-}
 function resolvedRunState(){return !shotFlightActive||runState.deliveryCounted||runState.throwActive;}
 
 function playShot(shot){
