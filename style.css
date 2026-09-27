@@ -789,3 +789,14 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  }
  .match-controls .run-btn{width:92px!important;min-width:92px!important;height:44px!important;min-height:44px!important}
 }
+
+
+/* LICENSE-SAFE BROADCAST SCORECARD — generic roles, no real player names */
+.match-scorecard{position:fixed;left:12px;top:92px;width:min(390px,calc(100vw - 24px));z-index:7000010;color:#fff;background:linear-gradient(180deg,#06120df2,#020705ed);border:1px solid #ffffff26;border-radius:14px;box-shadow:0 14px 42px #0009;backdrop-filter:blur(10px);overflow:hidden;pointer-events:auto;font-family:Inter,system-ui,sans-serif}
+.scorecard-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #ffffff18;font-size:8px;letter-spacing:.16em;font-weight:950;color:#aab7ae}
+.scorecard-head button{border:1px solid #ffffff25;border-radius:7px;background:#ffffff0a;color:#f5c400;font-size:8px;font-weight:900;padding:5px 8px}
+.scorecard-main{display:flex;align-items:center;justify-content:space-between;padding:9px 11px}
+.scorecard-team{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.scorecard-team small,.scorecard-target small{font-size:8px;color:#9ca9a2;letter-spacing:.1em;font-weight:900}.scorecard-team strong{font-size:23px;line-height:1}.scorecard-team span{font-size:8px;color:#b8c2bc}.scorecard-target{text-align:right}.scorecard-target b{display:block;font-size:18px;color:#f5c400}
+.scorecard-details{display:none;border-top:1px solid #ffffff18;padding:8px 10px 10px}.match-scorecard.expanded .scorecard-details{display:block}.scorecard-section+ .scorecard-section{margin-top:9px}.scorecard-section>span{display:block;margin-bottom:4px;color:#f5c400;font-size:8px;font-weight:950;letter-spacing:.13em}.score-row{display:grid;grid-template-columns:minmax(0,1fr) 34px 34px 34px 34px;gap:4px;align-items:center;min-height:25px;padding:0 4px;border-radius:5px;font-size:8px}.score-row b:not(:first-child){text-align:right}.score-row-head{color:#718078;font-size:7px;letter-spacing:.08em}.score-row:not(.score-row-head){background:#ffffff05}.score-row:not(.score-row-head) b:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:700px){.match-scorecard{left:8px;top:68px;width:min(310px,calc(100vw - 16px));}.scorecard-main{padding:7px 9px}.scorecard-team strong{font-size:19px}.score-row{grid-template-columns:minmax(0,1fr) 28px 28px 28px 28px;font-size:7px;min-height:23px}.scorecard-details{padding:6px 7px 8px}}
+@media(orientation:portrait){.match-scorecard{top:70px;max-height:38vh;overflow:auto}}
