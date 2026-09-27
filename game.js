@@ -1451,7 +1451,7 @@ function updateBowlingDelivery(now){
 }
 function resolveBowlingDelivery(){
  if(!bowlActive)return;bowlActive=false;deliveryActive=false;shotFlightActive=false;
- const paceFactor=Math.max(0,Math.min(1,(bowlSpeed-90)/50)),variationBonus=bowlTypeState==="STRAIGHT"? 006:bowlTypeState==="SLOWER"? 010:.014,lineBonus=bowlLine==="STUMPS"? 015:0,lengthBonus=bowlLength==="GOOD"? 012:bowlLength==="FULL"? 005,wicketChance=Math.min(.085,.02+paceFactor*.02+lineBonus+lengthBonus+variationBonus);
+ const paceFactor=Math.max(0,Math.min(1,(bowlSpeed-90)/50)),variationBonus=bowlTypeState==="STRAIGHT"? 0.006:bowlTypeState==="SLOWER"? 0.010:.014,lineBonus=bowlLine==="STUMPS"? 0.015:0,lengthBonus=bowlLength==="GOOD"? 0.012:bowlLength==="FULL"? 0.005,wicketChance=Math.min(.085,.02+paceFactor*.02+lineBonus+lengthBonus+variationBonus);
  inningsBalls++;ballsInOver=inningsBalls%6;
  if(Math.random()<wicketChance){inningsWickets++;strikerBalls++;updateScoreboard();startWicketPresentation("BOWLED");if(bowlLine==="STUMPS"&&Math.random()<.55)showSlowDRS("LBW",()=>{if(inningsWickets>=10)finishInningsAndSwitch();else resetDelivery();});else setTimeout(()=>{if(inningsWickets>=10)finishInningsAndSwitch();else resetDelivery();},1900);}
  else{const r=Math.random(),runs=r<.55?0:r<.78?1:r<.93?2:r<.99?4:6;inningsRuns+=runs;updateScoreboard();setDeliveryStatus(runs?runs+" RUNS":"DOT BALL");setTimeout(()=>{resetDelivery();if(controlMode==="BOWL")setTimeout(startBowlingDelivery,650)},1000);}
