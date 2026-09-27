@@ -725,10 +725,10 @@ stadium.add(landingPreview);
 
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
- const team=document.querySelector("#scorecardTeam"),runs=document.querySelector("#scorecardRuns"),overs=document.querySelector("#scorecardOvers"),inn=document.querySelector("#scorecardInnings");
+ const team=document.querySelector("#scorecardTeam"),runs=document.querySelector("#scorecardRuns"),scorecardOvers=document.querySelector("#scorecardOvers"),inn=document.querySelector("#scorecardInnings");
  if(team)team.textContent=(hudTeam?.textContent||homeTeam||"TEAM").toUpperCase();
  if(runs)runs.textContent=inningsRuns+" / "+inningsWickets;
- if(overs)overs.textContent=Math.floor(inningsBalls/6)+"."+(inningsBalls%6)+" OVERS";
+ if(scorecardOvers)scorecardOvers.textContent=Math.floor(inningsBalls/6)+"."+(inningsBalls%6)+" OVERS";
  if(inn)inn.textContent=document.querySelector(".match-pill b")?.textContent.match(/INNINGS\s+(\d+)/)?.[1]||"1";
  const sr=document.querySelector("#strikerRunsUi"),sb=document.querySelector("#strikerBallsUi");
  if(sr)sr.textContent=strikerRuns;
