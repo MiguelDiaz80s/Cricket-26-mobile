@@ -1369,6 +1369,13 @@ function showSlowDRS(reason,done){
  camera.lookAt(0,.5,7.8);
  p.style.display="flex";
  const rows=p.querySelectorAll("i"),d=p.querySelector("strong");
+ let drsLine=document.querySelector("#drsPathLine");
+ if(!drsLine){
+  drsLine=document.createElement("div");drsLine.id="drsPathLine";
+  Object.assign(drsLine.style,{position:"fixed",left:"50%",top:"50%",width:"4px",height:"120px",background:"#f5c400",boxShadow:"0 0 18px #f5c400",transform:"translate(-50%,-50%) scaleY(.1)",transformOrigin:"bottom",zIndex:"9500001",opacity:"0",transition:"transform 900ms ease,opacity 300ms ease"});
+  document.body.appendChild(drsLine);
+ }
+ drsLine.style.opacity="1";drsLine.style.transform="translate(-50%,-50%) scaleY(.1)";
  d.textContent="DECISION · REVIEWING";
  rows[0].textContent="PITCHING · CHECKING";
  rows[1].textContent="IMPACT · CHECKING";
@@ -1376,11 +1383,11 @@ function showSlowDRS(reason,done){
  showToast("DRS REVIEW · THIRD UMPIRE");
  clearTimeout(window.__drs1);clearTimeout(window.__drs2);clearTimeout(window.__drs3);clearTimeout(window.__drs4);clearTimeout(window.__drs5);
  window.__drs1=setTimeout(()=>{camera.position.set(3.8,2.8,9.2);camera.lookAt(0,.35,7.8);rows[0].textContent="PITCHING · IN LINE";},1800);
- window.__drs2=setTimeout(()=>{camera.position.set(2.6,2.2,10.8);camera.lookAt(0,.75,9.8);rows[1].textContent="IMPACT · IN LINE";},3800);
- window.__drs3=setTimeout(()=>{camera.position.set(2.2,2.0,11.8);camera.lookAt(0,1.0,11.2);rows[2].textContent="WICKET · HITTING";},5800);
+ window.__drs2=setTimeout(()=>{camera.position.set(2.6,2.2,10.8);camera.lookAt(0,.75,9.8);rows[1].textContent="IMPACT · IN LINE";drsLine.style.transform="translate(-50%,-50%) scaleY(.55)";},3800);
+ window.__drs3=setTimeout(()=>{camera.position.set(2.2,2.0,11.8);camera.lookAt(0,1.0,11.2);rows[2].textContent="WICKET · "+(reason==="LBW"?"HITTING":"CHECKING");drsLine.style.transform="translate(-50%,-50%) scaleY(1)";},5800);
  window.__drs4=setTimeout(()=>{d.textContent=reason==="LBW"?"DECISION · OUT":"DECISION · "+reason;},7600);
  window.__drs5=setTimeout(()=>{
-  p.style.display="none";
+  p.style.display="none";drsLine.style.opacity="0";
   if(previousCamera==="catch"){cameraMode="catch";}else{cameraMode=previousCamera;camera.position.copy(previousPosition);}
   if(cameraMode!=="catch")camera.lookAt(previousTarget);
   done&&done();
