@@ -823,7 +823,7 @@ function resetDelivery(){
 }
 
 function startDelivery(){
- if(controlMode!=="BAT")return;
+ if(replayActive||controlMode!=="BAT")return;
  if(deliveryActive||shotFlightActive||inningsWickets>=10)return;
  deliveryActive=true;ballHit=false;shotFlightActive=false;deliveryStart=performance.now();
  deliveryDuration=3250;
@@ -1132,7 +1132,7 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
 function resolvedRunState(){return !shotFlightActive||runState.deliveryCounted||runState.throwActive;}
 
 function playShot(shot){
- if(!deliveryActive||ballHit)return;
+ if(replayActive||!deliveryActive||ballHit)return;
  selectedShot=shot;
  const elapsed=performance.now()-deliveryStart;
 
@@ -1174,7 +1174,7 @@ function playShot(shot){
 }
 
 
-if(runBtn)runBtn.addEventListener("click",startRun);
+if(runBtn)runBtn.addEventListener("click",()=>{if(!replayActive)startRun();});
 
 
 
@@ -1299,7 +1299,7 @@ setControlMode=function(mode){
 };
 
 function chooseShotOnly(shot){
- if(controlMode!=="BAT")return;
+ if(replayActive||controlMode!=="BAT")return;
  selectedDeliveryShot=shot;selectedShot=shot;
  document.querySelectorAll("[data-shot]").forEach(b=>b.classList.toggle("selected",b.dataset.shot===shot));
  const power=SHOT_POWER_MODIFIERS[shot]||1.2;
