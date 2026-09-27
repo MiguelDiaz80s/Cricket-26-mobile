@@ -800,3 +800,15 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
 .scorecard-details{display:none;border-top:1px solid #ffffff18;padding:8px 10px 10px}.match-scorecard.expanded .scorecard-details{display:block}.scorecard-section+ .scorecard-section{margin-top:9px}.scorecard-section>span{display:block;margin-bottom:4px;color:#f5c400;font-size:8px;font-weight:950;letter-spacing:.13em}.score-row{display:grid;grid-template-columns:minmax(0,1fr) 34px 34px 34px 34px;gap:4px;align-items:center;min-height:25px;padding:0 4px;border-radius:5px;font-size:8px}.score-row b:not(:first-child){text-align:right}.score-row-head{color:#718078;font-size:7px;letter-spacing:.08em}.score-row:not(.score-row-head){background:#ffffff05}.score-row:not(.score-row-head) b:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:700px){.match-scorecard{left:8px;top:68px;width:min(310px,calc(100vw - 16px));}.scorecard-main{padding:7px 9px}.scorecard-team strong{font-size:19px}.score-row{grid-template-columns:minmax(0,1fr) 28px 28px 28px 28px;font-size:7px;min-height:23px}.scorecard-details{padding:6px 7px 8px}}
 @media(orientation:portrait){.match-scorecard{top:70px;max-height:38vh;overflow:auto}}
+
+
+/* FINAL MOBILE CONTROL CLEANUP v50 */
+.match-controls{overflow:visible!important;}
+.bowling-controls{top:54px!important;bottom:auto!important;max-height:calc(var(--visible-vh,100vh) - 150px)!important;overflow-y:auto!important;}
+.run-btn{right:-82px!important;bottom:92px!important;width:72px!important;height:58px!important;min-height:58px!important;}
+@media(max-width:700px){.run-btn{right:-74px!important;bottom:78px!important;width:64px!important;height:52px!important;min-height:52px!important;font-size:14px!important;}}
+@media(orientation:portrait){.run-btn{right:-66px!important;bottom:72px!important;width:58px!important;height:48px!important;min-height:48px!important;font-size:12px!important;}}
+.top-nav,.top-nav span,.top-nav button{pointer-events:auto!important;position:relative;z-index:6000000!important;}
+.game-panel,.player-hub{pointer-events:none!important;z-index:7000000!important;}
+.game-panel.open,.player-hub.open{pointer-events:auto!important;}
+.game-panel .game-panel-card,.player-hub .hub-card{pointer-events:auto!important;}
