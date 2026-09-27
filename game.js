@@ -1354,7 +1354,8 @@ function animateWicketPresentation(now){
 function startWicketPresentation(reason){
  const w=wicketGroups[1]||wicketGroups[0];if(!w)return;
  wicketPresentation={start:performance.now(),group:w,rotations:w.children.map(m=>m.rotation.clone()),positions:w.children.map(m=>m.position.clone())};
- if(String(reason).includes("BOWLED")){batRagdoll={start:performance.now(),baseRotZ:batter.rotation.z,baseRotX:batter.rotation.x,dir:batter.position.x>=0?1:-1};}\n showToast(reason==="BOWLED"?"WICKETS BROKEN":"WICKET · "+reason);
+ if(String(reason).includes("BOWLED")){batRagdoll={start:performance.now(),baseRotZ:batter.rotation.z,baseRotX:batter.rotation.x,dir:batter.position.x>=0?1:-1};}
+ showToast(reason==="BOWLED"?"WICKETS BROKEN":"WICKET · "+reason);
 }
 function showSlowDRS(reason,done){
  let p=document.querySelector("#drsReview");
