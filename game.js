@@ -809,8 +809,8 @@ function resolveBowlingDelivery(){
  if(!bowlActive)return;
  bowlActive=false;deliveryActive=false;shotFlightActive=false;
  const paceFactor=Math.max(0,Math.min(1,(bowlSpeed-90)/50));
- const lineBonus=bowlLine==="STUMPS" ? .03 : 0;
- const lengthBonus=bowlLength==="GOOD" ? .025 : bowlLength==="FULL" ? .01 : 0;
+ const lineBonus=bowlLine==="STUMPS" ? 0.03 : 0;
+ const lengthBonus=bowlLength==="GOOD" ? 0.025 : bowlLength==="FULL" ? 0.01 : 0;
  const wicketChance=Math.min(.18,.035+paceFactor*.04+lineBonus+lengthBonus);
  const r=Math.random();
  inningsBalls++;ballsInOver=inningsBalls%6;
@@ -859,7 +859,7 @@ function startDelivery(){
  landingPreview.position.set(deliveryLineX,0.035,deliveryBounceZ);
  if(wasmEngine){
   wasmEngine.reset();
-  wasmEngine.startDelivery(deliverySpeed,deliveryLineX,deliveryLength==="FULL" ? .42 : deliveryLength==="GOOD" ? .55 : .72,
+  wasmEngine.startDelivery(deliverySpeed,deliveryLineX,deliveryLength==="FULL" ? 0.42 : deliveryLength==="GOOD" ? 0.55 : .72,
     (Math.random()*2-1)*.55,(Math.random()*2-1)*.7,deliveryLength==="FULL"?1.05:deliveryLength==="GOOD"?1:.88);
  }
  landingPreview.visible=true;
