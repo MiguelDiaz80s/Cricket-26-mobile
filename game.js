@@ -760,7 +760,7 @@ function moveFieldersToBall(ballPos,dt){
   const target=ballPos.clone();target.y=.18;
   const dx=target.x-p.position.x,dz=target.z-p.position.z;
   const dist=Math.hypot(dx,dz);
-  const speed=2.65+(i%3)*.35;
+  const speed=2.35+(i%3)*.28;
   if(dist>.8){
    const step=Math.min(dist,speed*dt);
    p.position.x+=(dx/dist)*step;
@@ -884,7 +884,7 @@ function resolveWicket(reason){
  setTimeout(()=>{
   if(inningsWickets>=10)finishInningsAndSwitch();
   else resetDelivery();
- },1100);
+ },2100);
 }
 
 function finishInningsAndSwitch(){
@@ -1284,12 +1284,12 @@ document.querySelectorAll("[data-shot]").forEach(b=>b.addEventListener("click",e
 
 function startSwingAnimation(foot,shot){
  const now=performance.now();
- swingAnimation={start:now,foot,shot,contactAt:now+430};
+ swingAnimation={start:now,foot,shot,contactAt:now+520};
 }
 function updateSwingAnimation(now){
  if(!swingAnimation)return;
  const elapsed=now-swingAnimation.start;
- const p=Math.min(1,Math.max(0,elapsed/620));
+ const p=Math.min(1,Math.max(0,elapsed/760));
  const eased=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
  const foot=swingAnimation.foot;
  const shot=swingAnimation.shot;
@@ -1465,6 +1465,7 @@ function updateBowlingDelivery(now){
   bowler.position.y=.18+strideBob;
   bowler.rotation.z=Math.sin(p*Math.PI*5)*.045;
   bowler.rotation.x=-.035*p;
+  bowler.scale.y=1+.018*Math.sin(p*Math.PI*10);
   ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));
   setDeliveryStatus(p>.72?"BOWLER · DELIVERY STRIDE":"BOWLER · RUN-UP");
   return;
@@ -1476,6 +1477,7 @@ function updateBowlingDelivery(now){
   bowler.position.y=.18+Math.sin(p*Math.PI)*.08;
   bowler.rotation.x=-.10+p*.34;
   bowler.rotation.z=-.06+p*.14;
+  bowler.scale.y=1+.035*Math.sin(p*Math.PI);
   ball.position.set(0,1.95,-16);
   setDeliveryStatus("RELEASE · BALL AWAY");
   return;
@@ -1495,6 +1497,7 @@ function updateBowlingDelivery(now){
   ball.position.set(variationX*Math.sin(Math.PI*e),y,z);
   bowler.rotation.x=.24+.10*Math.sin(Math.PI*e);
   bowler.rotation.z=-.02+.05*Math.sin(Math.PI*e);
+  bowler.scale.y=1+.028*Math.sin(Math.PI*e);
   if(p>=1){resolveBowlingDelivery();}
   return;
  }
@@ -1607,12 +1610,13 @@ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
    if(q>=1){
     runState.runs++;runState.runnerProgress=0;runState.active=false;
     batter.position.z=10.4;nonStriker.position.z=-12.2;
-    // Completing a run changes ends: the former non-striker becomes striker.
     const oldStriker=batter;batter=nonStriker;nonStriker=oldStriker;
     batter.position.z=10.4;nonStriker.position.z=-12.2;
     batter.rotation.set(0,Math.PI,0);nonStriker.rotation.set(0,0,0);
-    inningsRuns++;strikerRuns++;updateScoreboard();setDeliveryStatus(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");showToast(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
-    if(runBtn){runBtn.classList.remove("running");runBtn.textContent="RUN AGAIN";}
+    inningsRuns++;strikerRuns++;updateScoreboard();
+    setDeliveryStatus(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
+    showToast(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
+    if(runBtn){runBtn.classList.remove("running");runBtn.classList.add("active");runBtn.textContent=runState.runs<4?"RUN AGAIN":"BALL DEAD";}
    }
   }
 
@@ -1642,13 +1646,18 @@ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
 
 /* Functional mode menus — single delegated controller. */
 function closeCleanPanels(){["#careerPanel","#tournamentPanel","#playerHub"].forEach(id=>document.querySelector(id)?.classList.remove("open"));}
-function openCleanPanel(id){closeCleanPanels();const panel=document.querySelector(id);if(panel){panel.classList.add("open");panel.style.pointerEvents="auto";}menuPanel?.classList.remove("open");}
+function openCleanPanel(id){closeCleanPanels();const panel=document.querySelector(id);if(panel){panel.classList.add("open");panel.style.pointerEvents="auto";panel.removeAttribute("hidden");}menuPanel?.classList.remove("open");document.querySelectorAll(".top-nav span").forEach(x=>x.classList.toggle("nav-active",x.textContent.trim()==="HOME"));}
 document.querySelector(".top-nav")?.addEventListener("click",e=>{const item=e.target.closest("span");if(!item)return;const n=item.textContent.trim();if(n==="CAREER")openCleanPanel("#careerPanel");else if(n==="MY CRICKETER")openCleanPanel("#playerHub");else if(n==="PLAY")openPreMatch();});
 document.querySelector(".menu-inner")?.addEventListener("click",e=>{const card=e.target.closest(".mode-card");if(card){const n=card.querySelector("strong")?.textContent.trim();if(n==="QUICK MATCH")openPreMatch();else if(n==="CAREER")openCleanPanel("#careerPanel");else if(n==="TOURNAMENTS")openCleanPanel("#tournamentPanel");else if(n==="CREATE PLAYER")openCleanPanel("#playerHub");return;}const b=e.target.closest(".menu-grid button");if(!b)return;const n=b.textContent.trim();if(n==="MY CRICKETER")openCleanPanel("#playerHub");else if(n==="STADIUMS"||n==="TEAMS")showToast(n+" · HUB READY");});
 document.querySelectorAll(".game-panel-close").forEach(b=>b.addEventListener("click",closeCleanPanels));
 document.querySelectorAll("#careerPanel .career-grid button").forEach(b=>b.addEventListener("click",()=>{
  const n=b.textContent.trim();
  showToast(n==="START CAREER"?"CAREER · NEW SEASON READY":n+" · HUB READY");
+}));
+document.querySelectorAll("#tournamentPanel .career-grid button").forEach(b=>b.addEventListener("click",()=>{
+ const n=b.textContent.trim();
+ selectedFormat=n==="WORLD CUP"?"ODI":n;
+ closeCleanPanels();openPreMatch();showToast((n==="WORLD CUP"?"WORLD CUP":"FORMAT")+" · MATCH SETUP");
 }));
 document.querySelectorAll("#menuPanel .mode-card").forEach(card=>card.addEventListener("pointerup",()=>{
  const n=card.querySelector("strong")?.textContent.trim();
