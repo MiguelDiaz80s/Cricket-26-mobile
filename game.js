@@ -941,7 +941,10 @@ function startDelivery(){
  deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
  deliveryLineX = deliveryLine === "OUTSIDE_OFF" ? -0.72 : (deliveryLine === "LEG" ? 0.72 : 0);
  deliveryBounceZ=deliveryLength==="FULL"?6.65:deliveryLength==="GOOD"?7.8:9.0;
+ pitchMarkerCleared=false;
+ pitchMarkerShownAt=0;
  landingPreview.position.set(deliveryLineX,0.035,deliveryBounceZ);
+ landingPreview.visible=false;
  if(wasmEngine){
   wasmEngine.reset();
   wasmEngine.startDelivery(deliverySpeed,deliveryLineX,deliveryLength==="FULL" ? 0.42 : deliveryLength==="GOOD" ? 0.55 : .72,
