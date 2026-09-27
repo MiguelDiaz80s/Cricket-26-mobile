@@ -1497,7 +1497,7 @@ function updateBowlingDelivery(now){
  if(elapsed<850){matchPhase="PREVIEW";bowler.position.copy(runUpStart);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));return;}
  if(elapsed<3050){matchPhase="RUN_UP";const p=(elapsed-850)/2200,e=p*p*(3-2*p);bowler.position.lerpVectors(runUpStart,bowlerRelease,e);setDeliveryStatus("BOWLER RUN-UP · "+bowlPace);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));return;}
  if(elapsed<3300){matchPhase="RELEASE";const p=(elapsed-3050)/250;bowler.position.z=-16-p*.8;ball.position.set(0,1.95,-16);return;}
- matchPhase="FLIGHT";const p=Math.min(1,(elapsed-3300)/600),e=p*p*(3-2*p),z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*e,y=releasePoint.y+(bouncePoint.y-releasePoint.y)*e;ball.position.set(deliveryLineX*Math.sin(Math.PI*e),y,z);if(p>=1)resolveBowlingDelivery();
+ matchPhase="FLIGHT";const p=Math.min(1,(elapsed-3300)/600),e=p*p*(3-2*p);let variationX=deliveryLineX;if(bowlTypeState==="OUT_SWING")variationX-=.28*e;if(bowlTypeState==="IN_SWING")variationX+=.28*e;if(bowlTypeState==="REVERSE_SWING")variationX+=.20*Math.sin(Math.PI*e);const z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*e,y=releasePoint.y+(bouncePoint.y-releasePoint.y)*e;ball.position.set(variationX*Math.sin(Math.PI*e),y,z);if(p>=1)resolveBowlingDelivery();
 }
 function resolveBowlingDelivery(){
  if(!bowlActive)return;bowlActive=false;deliveryActive=false;shotFlightActive=false;
@@ -1582,7 +1582,7 @@ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
 
   if(!runState.fielded&&!resolved){
    const boundary=Math.hypot(ball.position.x,ball.position.z*.82);
-   if(boundary>=43.5){finishRuns(isLoft&&ball.position.y>1.5?6:4,isLoft&&ball.position.y>1.5?"SIX!":"FOUR · BOUNDARY");return;}
+   if(boundary>=43.5){finishRuns(isLoft&&ball.position.y>1.5?6:4,isLoft&&ball.position.y>1.5?"SIX!":"FOUR · BOUNDARY");finishEndOfBall();return;}
   }
 
   if(fielder&&!runState.fielded){
