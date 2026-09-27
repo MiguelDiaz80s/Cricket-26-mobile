@@ -100,6 +100,12 @@ function addLine(w,d,x,z){const o=meshBox(w,.035,d,lineMat,x,.25,z);stadium.add(
 addLine(4.95,.075,0,-13.05);addLine(4.95,.075,0,13.05);
 addLine(.075,5.9,-2.05,-11.0);addLine(.075,5.9,2.05,-11.0);
 addLine(.075,5.9,-2.05,11.0);addLine(.075,5.9,2.05,11.0);
+function addCreaseMarkings(){
+ addLine(4.95,.055,0,-13.05);addLine(4.95,.055,0,13.05);
+ [-2.55,2.55].forEach(x=>{addLine(.055,2.0,x,-13.67);addLine(.055,2.0,x,-12.43);addLine(.055,2.0,x,12.43);addLine(.055,2.0,x,13.67);});
+}
+addCreaseMarkings();
+
 
 const wood=material("#d4bd8c",.6);
 const wicketGroups=[];
@@ -318,6 +324,57 @@ const fielders=[[-16,-4],[17,-4],[-22,7],[22,8],[-18,22],[18,22],[-32,15],[31,15
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,24,18),new THREE.MeshStandardMaterial({color:0x8d1119,roughness:.3,clearcoat:.35}));
 ball.position.set(0,.63,6.5);ball.castShadow=true;stadium.add(ball);
 const seam=new THREE.Mesh(new THREE.TorusGeometry(.13,.018,8,28),material("#ead6cf",.55));seam.rotation.x=Math.PI/2;ball.add(seam);
+const ballTrailLength=18;
+const ballTrailPositions=Array.from({length:ballTrailLength},()=>new THREE.Vector3());
+const ballTrailGeometry=new THREE.BufferGeometry();
+const ballTrailArray=new Float32Array(ballTrailLength*3);
+ballTrailGeometry.setAttribute("position",new THREE.BufferAttribute(ballTrailArray,3));
+const ballTrailMaterial=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.78,depthWrite:false});
+const ballTrail=new THREE.Line(ballTrailGeometry,ballTrailMaterial);
+ballTrail.frustumCulled=false;stadium.add(ballTrail);
+
+let replayBuffer=[],replayActive=false,replayStart=0,replayFrames=[],replayReason="",replayOverlay=null;
+const REPLAY_BUFFER_SIZE=300;
+function updateBallTrail(){
+ for(let i=ballTrailLength-1;i>0;i--)ballTrailPositions[i].lerp(ballTrailPositions[i-1],.72);
+ ballTrailPositions[0].copy(ball.position);
+ const a=ballTrailGeometry.attributes.position.array;
+ for(let i=0;i<ballTrailLength;i++){a[i*3]=ballTrailPositions[i].x;a[i*3+1]=ballTrailPositions[i].y;a[i*3+2]=ballTrailPositions[i].z;}
+ ballTrailGeometry.attributes.position.needsUpdate=true;
+ ballTrailMaterial.color.set(bowlTypeState==="SLOWER"?0x8fc7ff:0xffffff);
+ ballTrailMaterial.opacity=bowlTypeState==="SLOWER"?.42:.78;
+}
+function recordReplayFrame(now){
+ replayBuffer.push({t:now,ball:ball.position.clone(),batter:batter.position.clone(),rot:batter.rotation.clone()});
+ if(replayBuffer.length>REPLAY_BUFFER_SIZE)replayBuffer.shift();
+}
+function triggerActionReplay(reason){
+ if(replayActive||replayBuffer.length<30)return;
+ replayFrames=replayBuffer.slice(-300);replayActive=true;replayReason=reason;replayStart=performance.now();
+ if(!replayOverlay){
+  replayOverlay=document.createElement("div");replayOverlay.id="actionReplayOverlay";
+  replayOverlay.innerHTML="<div class='replay-flash'></div><div class='replay-card'><span>ACTION REPLAY</span><b>0.5× SLOW MOTION</b><small id='replayReason'></small></div>";
+  Object.assign(replayOverlay.style,{position:"fixed",inset:"0",display:"none",zIndex:"9800000",pointerEvents:"auto"});
+  document.body.appendChild(replayOverlay);
+ }
+ replayOverlay.querySelector("#replayReason").textContent=reason;
+ replayOverlay.style.display="block";document.body.classList.add("replay-active");
+}
+function updateActionReplay(now){
+ if(!replayActive)return;
+ const elapsed=(now-replayStart)*.5;
+ const i=Math.min(replayFrames.length-1,Math.floor(elapsed/16.666));
+ const f=replayFrames[i];
+ if(f){
+  ball.position.lerp(f.ball,.9);batter.position.lerp(f.batter,.9);
+  batter.rotation.x+=(f.rot.x-batter.rotation.x)*.18;batter.rotation.y+=(f.rot.y-batter.rotation.y)*.18;batter.rotation.z+=(f.rot.z-batter.rotation.z)*.18;
+  const a=-.8+(i/Math.max(1,replayFrames.length-1))*1.6;
+  camera.position.lerp(new THREE.Vector3(ball.position.x+Math.cos(a)*18,7+Math.sin(i*.04)*1.5,ball.position.z+Math.sin(a)*18),.12);
+  camera.lookAt(ball.position.x,ball.position.y+1.1,ball.position.z);
+ }
+ if(i>=replayFrames.length-1){replayActive=false;replayOverlay.style.display="none";document.body.classList.remove("replay-active");setCamera("broadcast");}
+}
+
 
 const boundaryBoards=[];
 const boundaryMat=material(theme.a,.55,.1);
@@ -509,6 +566,22 @@ const cameras={
 };
 let cameraMode="broadcast",cinematicTime=0,started=false;
 function setCamera(name){cameraMode=name;document.querySelectorAll(".camera").forEach(b=>b.classList.toggle("active",b.dataset.camera===name));const c=cameras[name];camera.position.set(...c.pos);camera.lookAt(...c.target)}
+const smoothBroadcastTarget=new THREE.Vector3(0,1.5,2),smoothBroadcastPosition=new THREE.Vector3(28,11.5,29);
+function updateDynamicBroadcastCamera(dt){
+ if(replayActive||cameraMode!=="broadcast"||!started)return;
+ if(shotFlightActive){
+  smoothBroadcastPosition.copy(ball.position).add(new THREE.Vector3(17,8,17));
+  smoothBroadcastTarget.copy(ball.position);smoothBroadcastTarget.y+=1.1;
+ }else if(deliveryActive||ballHit){
+  smoothBroadcastPosition.set(20,8,22);
+  smoothBroadcastTarget.copy(batter.position).lerp(ball.position,.5);smoothBroadcastTarget.y=1.5;
+ }else{
+  smoothBroadcastPosition.set(...cameras.broadcast.pos);smoothBroadcastTarget.set(...cameras.broadcast.target);
+ }
+ camera.position.lerp(smoothBroadcastPosition,Math.min(1,dt*3.6));
+ camera.lookAt(smoothBroadcastTarget);
+}
+
 document.querySelectorAll(".camera").forEach(b=>b.addEventListener("click",()=>setCamera(b.dataset.camera)));
 const cover=document.querySelector("#intro");
 const menuPanel=document.querySelector("#menuPanel");
@@ -793,6 +866,7 @@ function setControlMode(mode){
 }
 function resetDelivery(){
  batCanHitBall=true;deliveryAnimationRate=1;
+ wicketGroups.forEach(g=>g.children.forEach(m=>{const h=m.userData.home;if(h){m.position.copy(h.position);m.rotation.copy(h.rotation);}}));
  if(controlMode==="BOWL"){
   bowlStage=0;
   bowlAimLockedState=false;
@@ -895,6 +969,7 @@ function timingPower(elapsed){
 }
 
 function resolveWicket(reason){
+ triggerActionReplay("WICKET · "+reason);
  deliveryActive=false;shotFlightActive=false;ballHit=true;
  inningsWickets++;inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;
  lastOutcome="WICKET · "+reason;setDeliveryStatus("WICKET · "+reason);
@@ -938,6 +1013,7 @@ function resolveDot(){
 }
 
 function finishRuns(runs,label){
+ if(runs>=4)triggerActionReplay(label||"BOUNDARY");
  inningsRuns+=runs;inningsBalls++;ballsInOver=inningsBalls%6;strikerRuns+=runs;strikerBalls++;
  lastOutcome=label||String(runs)+" RUNS";updateScoreboard();
  if(label)showToast(label);
