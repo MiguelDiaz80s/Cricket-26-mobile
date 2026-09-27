@@ -936,3 +936,53 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
   .match-controls .bowling-controls{bottom:8px!important;max-height:40vh!important;}
   .match-controls .bowling-controls .bowl-variation{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
 }
+
+
+/* =========================================================
+   BROADCAST PRESENTATION + MOBILE CONTROL UI v55
+   ========================================================= */
+:root{--ui-gap:8px}
+.replay-active{cursor:none!important}
+.replay-active .match-controls,.replay-active .bottom-ui,.replay-active .score-card,.replay-active .match-scorecard{filter:brightness(.55);pointer-events:none!important}
+#actionReplayOverlay .replay-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,rgba(255,255,255,.28),transparent 36%);animation:replayFlash .55s ease-out}
+#actionReplayOverlay .replay-card{position:absolute;left:50%;top:14%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 18px;border:1px solid #f5c40088;border-radius:12px;background:#03110dec;box-shadow:0 12px 38px #000b;color:#fff;font:900 11px/1.2 system-ui,sans-serif;letter-spacing:.14em}
+#actionReplayOverlay .replay-card b{color:#f5c400;font-size:9px}
+#actionReplayOverlay .replay-card small{color:#b9c3bd;font-size:8px;letter-spacing:.1em}
+@keyframes replayFlash{0%{opacity:1}100%{opacity:0}}
+
+.match-controls .batting-layout{position:relative;z-index:8000000;display:grid!important;grid-template-columns:minmax(150px,30vw) minmax(260px,1fr);align-items:end;gap:clamp(12px,3vw,34px);width:min(900px,calc(100vw - 28px));margin:0 auto;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+.match-controls .joystick-wrap{align-self:end}
+.match-controls .batting-buttons{position:relative!important;right:auto!important;bottom:auto!important;width:100%!important;display:grid!important;grid-template-rows:auto auto auto;gap:var(--ui-gap);padding:0!important;pointer-events:auto!important}
+.match-controls .shot-three{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--ui-gap);width:100%!important}
+.match-controls .foot-four{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--ui-gap);width:100%!important}
+.match-controls .shot-three button,.match-controls .foot-four button,.match-controls #runBtn{min-height:48px;border:1px solid #ffffff28;border-radius:11px;background:linear-gradient(180deg,#14261f,#07130e);color:#f4f7f4;font:900 10px/1.1 system-ui,sans-serif;letter-spacing:.06em;box-shadow:0 7px 18px #0008;transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.match-controls .shot-three button.selected,.match-controls .shot-three button:focus-visible,.match-controls .shot-three button.recommended{border-color:var(--accent,#f5c400);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#f5c400) 55%,transparent),0 0 18px color-mix(in srgb,var(--accent,#f5c400) 35%,transparent),0 7px 18px #0008}
+.match-controls .shot-three button.selected{background:linear-gradient(180deg,color-mix(in srgb,var(--accent,#f5c400) 28%,#14261f),#07130e)}
+.match-controls .foot-four button.recommended{border-color:var(--accent,#f5c400);box-shadow:0 0 0 1px var(--accent,#f5c400),0 0 13px color-mix(in srgb,var(--accent,#f5c400) 30%,transparent)}
+.match-controls button.touch-pressed{transform:scale(.92)!important;filter:brightness(1.18)}
+.match-controls #runBtn{justify-self:center;width:110px!important;min-width:110px!important;margin:0!important;background:linear-gradient(180deg,#f5c400,#b48700);color:#111;border-color:#ffe57b}
+.match-controls #runBtn:not(.active){visibility:hidden}
+.bowling-controls{touch-action:manipulation}
+.bowling-controls button.touch-pressed{transform:scale(.92)!important}
+
+@media(max-width:900px){
+ .match-controls .batting-layout{grid-template-columns:clamp(112px,28vw,165px) minmax(0,1fr);gap:10px;width:calc(100vw - 16px);padding-bottom:6px}
+ .match-controls .shot-three button,.match-controls .foot-four button{min-height:42px;font-size:9px}
+ .match-controls .foot-four{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .match-controls #runBtn{min-height:42px!important;height:42px!important;width:92px!important;min-width:92px!important}
+}
+@media(max-width:700px){
+ .match-controls .batting-layout{position:fixed!important;left:50%;bottom:max(6px,env(safe-area-inset-bottom));transform:translateX(-50%);width:calc(100vw - 12px);grid-template-columns:108px minmax(0,1fr);gap:8px;z-index:8000000}
+ .match-controls .joystick-wrap{width:108px}
+ .match-controls .hit-joystick{width:104px!important;height:104px!important}
+ .match-controls .batting-buttons{gap:5px}
+ .match-controls .shot-three,.match-controls .foot-four{gap:5px}
+ .match-controls .shot-three button,.match-controls .foot-four button{min-height:38px!important;padding:4px 3px;font-size:8px;border-radius:9px}
+ .match-controls #runBtn{height:38px!important;min-height:38px!important;width:82px!important;min-width:82px!important;font-size:10px}
+ .match-controls .control-foot{display:none}
+}
+@media(orientation:portrait) and (max-width:700px){
+ .match-controls .batting-layout{bottom:4px}
+ .match-controls .hit-joystick{width:92px!important;height:92px!important}
+ .match-controls .joystick-wrap{width:96px}
+}
