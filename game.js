@@ -1522,11 +1522,124 @@ function endBallAfterRuns(){
 }
 
 /* Wrap the original flight so the RUN button can be used repeatedly; its original fielding/throw logic remains intact. */
-const __cleanResolveBallFlight=resolveBallFlight;
+
+/* Replace the old one-run flight with a single authoritative ball-flight state machine. */
+const __oldResolveWicketForFlight=resolveWicket;
+function resolveCleanWicket(reason){
+ __oldResolveWicketForFlight(reason);
+}
 resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
- runState.runs=0;runState.deliveryCounted=false;runState.fielded=false;runState.throwActive=false;runState.runnerProgress=0;
- __cleanResolveBallFlight(origin,direction,exitSpeed,shot,quality);
+ shotFlightActive=true;ballHit=true;deliveryActive=false;
+ runState.runs=0;runState.active=false;runState.fielded=false;runState.throwActive=false;runState.deliveryCounted=false;runState.runnerProgress=0;
  if(runBtn){runBtn.classList.add("active");runBtn.classList.remove("running");runBtn.textContent="RUN";}
+ const start=origin.clone(),dir=direction.clone().normalize(),flat=new THREE.Vector3(dir.x,0,dir.z);
+ if(flat.lengthSq()<.001)flat.set(0,0,-1);else flat.normalize();
+ const target=start.clone().add(flat.multiplyScalar(9.5+exitSpeed*.24));target.y=.25;
+ const isLoft=shot==="LOFT",startTime=performance.now(),duration=Math.min(3600,1350+exitSpeed*7);
+ let resolved=false,picked=false,throwStarted=false,throwStart=0,throwEnd=0,throwTarget=10.4,fielder=null;
+ let nearest=Infinity;
+ fielders.forEach((f,i)=>{const d=Math.hypot(f.position.x-target.x,f.position.z-target.z);if(d<nearest){nearest=d;fielder=f;}});
+ if(fielder)fielder.userData.target=target.clone();
+
+ const finishDotClean=()=>{
+  if(resolved)return;resolved=true;shotFlightActive=false;ballHit=false;
+  if(runBtn)runBtn.classList.remove("active","running");
+  inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;lastOutcome="DOT BALL";updateScoreboard();setDeliveryStatus("DOT BALL");
+  setTimeout(()=>{resetRunners();resetDelivery();if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},700);
+ };
+ const finishEndOfBall=()=>{
+  if(resolved)return;resolved=true;shotFlightActive=false;ballHit=false;runState.deliveryCounted=true;
+  if(runBtn){runBtn.classList.remove("active","running");runBtn.textContent="RUN";}
+  setTimeout(()=>{resetRunners();resetDelivery();if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},700);
+ };
+ const startThrow=now=>{
+  if(throwStarted||!fielder)return;
+  throwStarted=true;runState.throwActive=true;throwStart=now;
+  const targetZ=runState.runs%2===1?-12.2:10.4;throwTarget=targetZ;
+  throwEnd=now+Math.max(620,Math.min(1100,620+Math.hypot(fielder.position.x-target.x,fielder.position.z-target.z)*35));
+  setDeliveryStatus("FIELDER · THROWING");
+ };
+ const runOut=()=>{
+  if(resolved)return;resolved=true;shotFlightActive=false;ballHit=true;runState.throwActive=false;
+  inningsWickets++;inningsBalls++;ballsInOver=inningsBalls%6;strikerBalls++;updateScoreboard();setDeliveryStatus("RUN OUT · "+runState.runs);showToast("RUN OUT");
+  setTimeout(()=>{if(inningsWickets>=10)finishInningsAndSwitch();else resetDelivery()},1100);
+ };
+
+ let last=performance.now();
+ const tick=now=>{
+  if(!shotFlightActive||resolved)return;
+  const dt=Math.min(.033,Math.max(0,(now-last)/1000));last=now;
+  const p=Math.min(1,(now-startTime)/duration),e=p*p*(3-2*p);
+  ball.position.lerpVectors(start,target,e);
+  const lift=isLoft?3.2*Math.sin(Math.PI*e):.72*Math.sin(Math.PI*e);
+  ball.position.y=Math.max(.24,start.y+(target.y-start.y)*e+lift);
+  ball.rotation.x+=dt*10;ball.rotation.y+=dt*12;
+
+  if(!runState.fielded&&!resolved&&isLoft&&p>.48&&p<.92&&fielder){
+   const fd=Math.hypot(fielder.position.x-ball.position.x,fielder.position.z-ball.position.z);
+   if(fd<1.45){showCatchCamera(fielder);startWicketPresentation("CAUGHT");resolveWicket("CAUGHT");return;}
+  }
+
+  if(!runState.fielded&&!resolved){
+   const boundary=Math.hypot(ball.position.x,ball.position.z*.82);
+   if(boundary>=43.5){finishRuns(isLoft&&ball.position.y>1.5?6:4,isLoft&&ball.position.y>1.5?"SIX!":"FOUR · BOUNDARY");return;}
+  }
+
+  if(fielder&&!runState.fielded){
+   moveFieldersToBall(ball.position,dt);
+   const fd=Math.hypot(fielder.position.x-ball.position.x,fielder.position.z-ball.position.z);
+   if(fd<.9){
+    runState.fielded=true;picked=true;ball.position.copy(fielder.position);ball.position.y=.72;
+    if(runState.active)startThrow(now);else{finishDotClean();return;}
+   }
+  }
+
+  if(runState.active&&!runState.fielded){
+   const dist=22.6,speed=5.9;
+   runState.runnerProgress=Math.min(1,runState.runnerProgress+(speed*dt)/dist);
+   const q=runState.runnerProgress;
+   batter.position.z=10.4-22.6*q;nonStriker.position.z=-12.2+22.6*q;
+   batter.rotation.y=q<.5?Math.PI:0;nonStriker.rotation.y=q<.5?0:Math.PI;
+   if(q>=1){
+    runState.runs++;runState.runnerProgress=0;runState.active=false;
+    batter.position.z=10.4;nonStriker.position.z=-12.2;
+    inningsRuns++;strikerRuns++;updateScoreboard();setDeliveryStatus(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");showToast(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
+    if(runBtn){runBtn.classList.remove("running");runBtn.textContent="RUN AGAIN";}
+   }
+  }
+
+  if(runState.fielded&&throwStarted){
+   const q=Math.min(1,Math.max(0,(now-throwStart)/(throwEnd-throwStart)));
+   const sx=fielder.position.x,sz=fielder.position.z;
+   ball.position.x=sx*(1-q);ball.position.z=sz*(1-q)+throwTarget*q;ball.position.y=.72+Math.sin(Math.PI*q)*1.15;
+   if(q>=1){
+    runState.throwActive=false;ball.position.set(0,.95,throwTarget);
+    if(runState.active){
+     if(Math.abs(batter.position.z-throwTarget)>1.0){runOut();return;}
+     runState.runs++;runState.active=false;inningsRuns++;strikerRuns++;updateScoreboard();setDeliveryStatus(runState.runs+" RUN · SAFE");
+    }
+    finishEndOfBall();return;
+   }
+  }
+
+  if(p>=1&&!runState.fielded){
+   // Keep the ball live briefly so the fielder can collect it and the player can call runs.
+   ball.position.copy(target);ball.position.y=.25;
+   if(!runState.active&&!runState.runs){setDeliveryStatus("BALL FIELDING · TAP RUN");}
+  }
+  requestAnimationFrame(tick);
+ };
+ requestAnimationFrame(tick);
+};
+
+/* Disable the old secondary runner RAF; running is owned by resolveBallFlight above. */
+updateRunning=function(){};
+const __cleanStartRun2=startRun;
+startRun=function(){
+ if(!shotFlightActive||runState.deliveryCounted||runState.throwActive||runState.fielded||runState.active)return;
+ runState.active=true;runState.startedAt=performance.now();runState.runnerProgress=0;
+ if(runBtn){runBtn.classList.add("running");runBtn.textContent=runState.runs>0?"RUN AGAIN":"RUN";}
+ setDeliveryStatus("RUNNING · TAP RUN AGAIN");
 };
 
 const __cleanStartRun=startRun;
