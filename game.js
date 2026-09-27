@@ -1053,10 +1053,27 @@ function resolveDot(){
  setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY")startDelivery()},700)},650);
 }
 
+function showBoundaryBanner(runs){
+ const text=runs===6?"6 RUNS":"4 RUNS";
+ let banner=document.querySelector("#boundaryBanner");
+ if(!banner){
+  banner=document.createElement("div");
+  banner.id="boundaryBanner";
+  banner.className="boundary-banner";
+  document.body.appendChild(banner);
+ }
+ banner.textContent=text;
+ banner.classList.remove("show");
+ void banner.offsetWidth;
+ banner.classList.add("show");
+ clearTimeout(window.__boundaryBannerTimer);
+ window.__boundaryBannerTimer=setTimeout(()=>banner.classList.remove("show"),1250);
+}
 function finishRuns(runs,label){
  if(runs>=4)triggerActionReplay(label||"BOUNDARY");
  inningsRuns+=runs;inningsBalls++;ballsInOver=inningsBalls%6;strikerRuns+=runs;strikerBalls++;
  lastOutcome=label||String(runs)+" RUNS";updateScoreboard();
+ if(runs>=4)showBoundaryBanner(runs);
  if(label)showToast(label);
 }
 function finishRunningDelivery(runs,label=""){
@@ -1073,6 +1090,27 @@ function finishRunningDelivery(runs,label=""){
  runState.active=false;runState.throwActive=false;shotFlightActive=false;ballHit=false;
  if(runBtn){runBtn.classList.remove("active","running");runBtn.textContent="RUN";}
  setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY"&&inningsWickets<10)startDelivery()},700)},750);
+}
+
+const BOUNDARY_X_RADIUS=43.5;
+const BOUNDARY_Z_RADIUS=43.5*.82;
+function getFieldSector(x,z){
+ const angle=Math.atan2(x,-z);
+ const index=(Math.round((angle/(Math.PI*2))*8)+8)%8;
+ return ["STRAIGHT","COVER","OFF_SIDE","THIRD_MAN","FINE_LEG","MID_WICKET","LEG_SIDE","SQUARE_LEG"][index];
+}
+function getBoundaryMetrics(position){
+ const nx=position.x/BOUNDARY_X_RADIUS;
+ const nz=position.z/BOUNDARY_Z_RADIUS;
+ return {distance:Math.hypot(nx,nz),touchingGround:position.y<=.34};
+}
+function checkBoundaryCollision(position,isAerial){
+ const metrics=getBoundaryMetrics(position);
+ if(metrics.distance<1)return null;
+ // A ball that crosses the rope while still airborne is a six; one that
+ // reaches the perimeter on/near the ground is a four.
+ if(isAerial && position.y>.34)return {runs:6,label:"SIX! · OVER THE ROPE",sector:getFieldSector(position.x,position.z)};
+ return {runs:4,label:"FOUR · BOUNDARY",sector:getFieldSector(position.x,position.z)};
 }
 
 function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
@@ -1153,13 +1191,12 @@ function resolveBallFlight(origin,direction,exitSpeed,shot,quality){
    ball.rotation.x+=.28;ball.rotation.y+=.34;
 
    // Boundary resolves before anyone can run after a boundary.
-   const boundaryDistance=Math.hypot(ball.position.x,ball.position.z*.82);
-   if(!resolved&&boundaryDistance>=43.5){
+   const boundaryResult=checkBoundaryCollision(ball.position,isLoft);
+   if(!resolved&&boundaryResult){
     resolved=true;shotFlightActive=false;
     if(runBtn)runBtn.classList.remove("active","running");
-    const six=isLoft&&ball.position.y>1.5;
-    finishRuns(six?6:4,six?"SIX!":"FOUR · BOUNDARY");
-    setDeliveryStatus(six?"SIX · OVER THE ROPE":"FOUR · BOUNDARY");
+    finishRuns(boundaryResult.runs,boundaryResult.label);
+    setDeliveryStatus(boundaryResult.label+" · "+boundaryResult.sector);
     setTimeout(()=>{resetDelivery();setTimeout(()=>{if(matchPhase==="READY")startDelivery()},700)},850);
     return;
    }
