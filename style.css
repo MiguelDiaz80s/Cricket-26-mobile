@@ -1008,3 +1008,114 @@ body.phone-portrait .batting-layout{grid-template-columns:1fr!important}
  78%{opacity:1;transform:translate(-50%,-50%) scale(1)}
  100%{opacity:0;transform:translate(-50%,-50%) scale(.94)}
 }
+
+
+/* FINAL PHONE BATTER UI FIX v58
+   One authoritative phone layout, overriding older mobile passes. */
+body.device-phone .match-controls:not(.hidden){
+ display:block!important;
+ visibility:visible!important;
+ opacity:1!important;
+ position:fixed!important;
+ inset:0!important;
+ width:100vw!important;
+ height:100dvh!important;
+ min-height:100dvh!important;
+ z-index:5000000!important;
+ pointer-events:none!important;
+ transform:none!important;
+ overflow:hidden!important;
+}
+body.device-phone .match-controls .batting-layout:not(.hidden){
+ display:block!important;
+ position:absolute!important;
+ inset:0!important;
+ width:100%!important;
+ height:100%!important;
+ pointer-events:none!important;
+}
+body.device-phone .match-controls .joystick-wrap{
+ display:block!important;
+ position:absolute!important;
+ left:3vw!important;
+ right:auto!important;
+ bottom:max(12px,env(safe-area-inset-bottom) + 8px)!important;
+ width:clamp(118px,29vw,160px)!important;
+ height:auto!important;
+ pointer-events:auto!important;
+}
+body.device-phone .match-controls .hit-joystick{
+ display:block!important;
+ width:clamp(112px,28vw,150px)!important;
+ height:clamp(112px,28vw,150px)!important;
+ min-width:0!important;
+ min-height:0!important;
+ margin:0!important;
+ pointer-events:auto!important;
+}
+body.device-phone .match-controls .joystick-wrap>small{display:none!important}
+body.device-phone .match-controls .batting-buttons{
+ display:block!important;
+ position:absolute!important;
+ right:2.5vw!important;
+ left:auto!important;
+ bottom:max(10px,env(safe-area-inset-bottom) + 8px)!important;
+ width:min(58vw,560px)!important;
+ height:auto!important;
+ padding:0!important;
+ pointer-events:none!important;
+}
+body.device-phone .match-controls .shot-three{
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:5px!important;
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:auto!important;
+}
+body.device-phone .match-controls .foot-four{
+ display:grid!important;
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ gap:5px!important;
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:auto!important;
+ margin-top:5px!important;
+}
+body.device-phone .match-controls .shot-three button,
+body.device-phone .match-controls .foot-four button{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:100%!important;
+ height:clamp(32px,8vh,46px)!important;
+ min-height:0!important;
+ padding:3px!important;
+ font-size:clamp(7px,1.8vw,11px)!important;
+ pointer-events:auto!important;
+ touch-action:manipulation!important;
+}
+body.device-phone .match-controls .delivery-btn{display:none!important}
+body.device-phone .match-controls #runBtn{
+ display:flex!important;
+ position:relative!important;
+ width:clamp(70px,17vw,100px)!important;
+ height:clamp(32px,7vh,42px)!important;
+ min-height:0!important;
+ margin:5px auto 0!important;
+ pointer-events:auto!important;
+}
+@media(max-height:520px) and (orientation:landscape){
+ body.device-phone .match-controls .joystick-wrap{bottom:6px!important}
+ body.device-phone .match-controls .batting-buttons{bottom:6px!important}
+ body.device-phone .match-controls .hit-joystick{width:108px!important;height:108px!important}
+ body.device-phone .match-controls .shot-three button,
+ body.device-phone .match-controls .foot-four button{height:30px!important;font-size:7px!important}
+ body.device-phone .match-controls #runBtn{height:28px!important}
+}
+@media(orientation:portrait) and (max-width:700px){
+ body.device-phone .match-controls .joystick-wrap{left:4vw;bottom:8px}
+ body.device-phone .match-controls .batting-buttons{right:3vw;bottom:8px;width:60vw}
+}
