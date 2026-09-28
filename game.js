@@ -423,7 +423,7 @@ async function requestPhoneLandscape(){
  }catch(e){}
 }
 function applyDeviceMode(){
- const iPadLike=window.innerWidth>=700 && window.innerWidth<=1400 && navigator.maxTouchPoints>1;
+ const iPadLike=navigator.maxTouchPoints>1 && Math.max(window.innerWidth,window.innerHeight)>=700;
  const effectiveTablet=deviceType==="tablet" || iPadLike;
  const effectivePhone=deviceType==="phone" && !iPadLike;
  document.body.classList.toggle("device-phone",effectivePhone);
@@ -894,7 +894,16 @@ function setControlMode(mode){
  if(bowlingControls)bowlingControls.classList.toggle("hidden",!bowling);
  if(modeToggle){modeToggle.textContent=bowling?"BAT":"BOWL";modeToggle.classList.toggle("active",bowling);}
  if(controlModeTitle)controlModeTitle.textContent=bowling?"BOWLER CONTROL":"BATTER CONTROL";
- document.querySelector(".batting-layout")?.classList.toggle("hidden",bowling);
+ const battingLayout=document.querySelector(".batting-layout");
+ if(battingLayout){
+  battingLayout.classList.toggle("hidden",bowling);
+  if(!bowling){
+   battingLayout.style.display="";
+   battingLayout.style.visibility="visible";
+  }else{
+   battingLayout.style.display="none";
+  }
+ }
  matchControls.classList.toggle("bowling-active",bowling);
  document.querySelector(".timing-meter")?.classList.toggle("hidden",bowling);
  document.querySelector(".control-foot")?.classList.toggle("hidden",bowling);
