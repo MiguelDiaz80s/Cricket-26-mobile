@@ -423,9 +423,12 @@ async function requestPhoneLandscape(){
  }catch(e){}
 }
 function applyDeviceMode(){
- document.body.classList.toggle("device-phone",deviceType==="phone");
- document.body.classList.toggle("device-tablet",deviceType==="tablet");
- document.body.classList.toggle("device-pc",deviceType==="pc");
+ const iPadLike=window.innerWidth>=700 && window.innerWidth<=1400 && navigator.maxTouchPoints>1;
+ const effectiveTablet=deviceType==="tablet" || iPadLike;
+ const effectivePhone=deviceType==="phone" && !iPadLike;
+ document.body.classList.toggle("device-phone",effectivePhone);
+ document.body.classList.toggle("device-tablet",effectiveTablet);
+ document.body.classList.toggle("device-pc",deviceType==="pc"&&!effectiveTablet&&!effectivePhone);
  document.body.classList.toggle("phone-portrait",deviceType==="phone"&&!phoneLandscape);
  document.body.classList.toggle("phone-landscape",deviceType==="phone"&&phoneLandscape);
  const cd=document.querySelector("#controlDevice"); if(cd) cd.textContent=(deviceType==="phone"?(phoneLandscape?"PHONE · LANDSCAPE":"PHONE · PORTRAIT"):deviceType==="tablet"?"IPAD · WIDE":"PC · KEYBOARD");
