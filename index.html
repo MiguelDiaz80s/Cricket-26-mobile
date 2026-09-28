@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#03100a">
 <link rel="manifest" href="manifest.webmanifest">
 <title>CRICKET 26 MOBILE — Next Generation Cricket</title>
-<link rel="stylesheet" href="style.css?v=58">
+<link rel="stylesheet" href="style.css?v=59">
 </head>
 <body>
 <div id="app">
@@ -251,12 +251,12 @@ window.addEventListener("unhandledrejection",function(e){
   box.querySelector("span").textContent=String(e.reason?.message||e.reason||"Promise error");
 });
 </script>
-<div id="bootError" data-build="58" hidden style="display:none !important;position:fixed;inset:0;z-index:9999999;background:#050807;color:#fff;align-items:center;justify-content:center;align-items:center;justify-content:center;padding:24px;font-family:system-ui">
+<div id="bootError" data-build="59" hidden style="display:none !important;position:fixed;inset:0;z-index:9999999;background:#050807;color:#fff;align-items:center;justify-content:center;align-items:center;justify-content:center;padding:24px;font-family:system-ui">
 <div style="max-width:520px;text-align:center"><b style="display:block;font-size:22px;margin-bottom:10px"></b><span style="display:block;color:#b9c2bd"></span><button onclick="location.reload()" style="margin-top:18px;padding:12px 18px;border:0;border-radius:10px">RELOAD</button></div></div>
 <script type="module">
 (async()=>{
   try{
-    await import("./game.js?v=58");
+    await import("./game.js?v=59");
   }catch(err){
     const box=document.getElementById("bootError");
     if(box){
