@@ -1119,3 +1119,134 @@ body.device-phone .match-controls #runBtn{
  body.device-phone .match-controls .joystick-wrap{left:4vw;bottom:8px}
  body.device-phone .match-controls .batting-buttons{right:3vw;bottom:8px;width:60vw}
 }
+
+
+/* FINAL IPAD / TABLET BATTER UI FIX v59
+   Tablet-only: phone controls are untouched. */
+body.device-tablet .match-controls:not(.hidden){
+ display:block!important;
+ visibility:visible!important;
+ opacity:1!important;
+ position:fixed!important;
+ inset:0!important;
+ width:100vw!important;
+ height:100dvh!important;
+ min-height:100dvh!important;
+ z-index:5000000!important;
+ pointer-events:none!important;
+ overflow:visible!important;
+}
+body.device-tablet .match-controls .batting-layout:not(.hidden){
+ display:grid!important;
+ position:absolute!important;
+ left:50%!important;
+ bottom:max(18px,env(safe-area-inset-bottom) + 10px)!important;
+ transform:translateX(-50%)!important;
+ width:min(1080px,calc(100vw - 40px))!important;
+ height:auto!important;
+ grid-template-columns:190px minmax(420px,1fr)!important;
+ align-items:end!important;
+ gap:28px!important;
+ padding:0!important;
+ margin:0!important;
+ pointer-events:none!important;
+ z-index:8000000!important;
+}
+body.device-tablet .match-controls .joystick-wrap{
+ display:block!important;
+ position:relative!important;
+ left:auto!important;
+ right:auto!important;
+ bottom:auto!important;
+ width:190px!important;
+ align-self:end!important;
+ pointer-events:auto!important;
+}
+body.device-tablet .match-controls .hit-joystick{
+ display:block!important;
+ width:178px!important;
+ height:178px!important;
+ margin:0 auto!important;
+ pointer-events:auto!important;
+}
+body.device-tablet .match-controls .batting-buttons{
+ display:grid!important;
+ position:relative!important;
+ left:auto!important;
+ right:auto!important;
+ bottom:auto!important;
+ width:100%!important;
+ height:auto!important;
+ min-height:0!important;
+ grid-template-rows:auto auto auto!important;
+ gap:8px!important;
+ padding:0!important;
+ pointer-events:none!important;
+}
+body.device-tablet .match-controls .shot-three{
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:8px!important;
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:auto!important;
+}
+body.device-tablet .match-controls .foot-four{
+ display:grid!important;
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ gap:8px!important;
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:auto!important;
+ margin:0!important;
+}
+body.device-tablet .match-controls .shot-three button,
+body.device-tablet .match-controls .foot-four button{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:100%!important;
+ min-height:52px!important;
+ height:52px!important;
+ padding:5px!important;
+ font-size:11px!important;
+ pointer-events:auto!important;
+ touch-action:manipulation!important;
+}
+body.device-tablet .match-controls #runBtn{
+ display:flex!important;
+ position:relative!important;
+ left:auto!important;
+ right:auto!important;
+ bottom:auto!important;
+ width:112px!important;
+ min-width:112px!important;
+ height:44px!important;
+ min-height:44px!important;
+ margin:0 auto!important;
+ pointer-events:auto!important;
+}
+body.device-tablet .match-controls .delivery-btn{display:none!important}
+body.device-tablet .match-controls .control-foot{
+ position:absolute!important;
+ left:50%!important;
+ bottom:4px!important;
+ transform:translateX(-50%)!important;
+ pointer-events:none!important;
+}
+@media (orientation:portrait){
+ body.device-tablet .match-controls .batting-layout{
+  width:calc(100vw - 28px)!important;
+  grid-template-columns:150px minmax(0,1fr)!important;
+  gap:16px!important;
+  bottom:max(14px,env(safe-area-inset-bottom) + 8px)!important;
+ }
+ body.device-tablet .match-controls .joystick-wrap{width:150px!important}
+ body.device-tablet .match-controls .hit-joystick{width:140px!important;height:140px!important}
+ body.device-tablet .match-controls .shot-three button,
+ body.device-tablet .match-controls .foot-four button{
+  min-height:46px!important;height:46px!important;font-size:10px!important;
+ }
+}
