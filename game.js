@@ -444,7 +444,12 @@ function chooseDevice(type){
  showToast(type==="phone"?"PHONE MODE · LANDSCAPE":"CONTROL LAYOUT · "+type.toUpperCase());
 }
 deviceSetup.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>chooseDevice(b.dataset.device)));
-if(deviceType) deviceSetup.classList.remove("open"); else applyDeviceMode();
+if(deviceType){
+ deviceSetup.classList.remove("open");
+ applyDeviceMode();
+}else{
+ applyDeviceMode();
+}
 
 const recOn=document.querySelector("#recommendationsToggle"),recOff=document.querySelector("#recommendationsOff");
 function updateRecommendationUI(){
