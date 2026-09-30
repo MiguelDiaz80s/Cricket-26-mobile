@@ -1390,7 +1390,14 @@ chooseBat.addEventListener("click",()=>chooseTossDecision(true));
 chooseField.addEventListener("click",()=>chooseTossDecision(false));
 
 function finishTossSetup(){
- closeCoinToss();cover.classList.add("hidden");hud.classList.remove("hidden");matchControls.classList.remove("hidden");started=true;
+ closeCoinToss();
+ cover.classList.add("hidden");
+ hud.classList.remove("hidden");
+ matchControls.classList.remove("hidden");
+ matchControls.style.display="block";
+ matchControls.style.visibility="visible";
+ matchControls.style.opacity="1";
+ started=true;
  inningsRuns=0;inningsBalls=0;inningsWickets=0;strikerRuns=0;strikerBalls=0;ballsInOver=0;
  totalOvers=selectedFormat==="T20"?20:selectedFormat==="ODI"?50:9999;
  hudTeam.textContent=battingFirst.toUpperCase();
@@ -1440,7 +1447,15 @@ function liveBallLoop(now){
 }
 requestAnimationFrame(liveBallLoop);
 
-startMatchBtn.addEventListener("click",()=>{setTimeout(()=>{preMatch.classList.remove("open");openCoinToss();},80);});
+startMatchBtn.addEventListener("click",e=>{
+ e.preventDefault();
+ preMatch.classList.remove("open");
+ matchControls.classList.add("hidden");
+ closeCoinToss();
+ // Open the toss immediately. The old delayed callback could leave the match
+ // visually running while matchControls was still hidden on iPad/Split View.
+ requestAnimationFrame(()=>openCoinToss());
+});
 
 
 
