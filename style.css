@@ -1250,3 +1250,69 @@ body.device-tablet .match-controls .control-foot{
   min-height:46px!important;height:46px!important;font-size:10px!important;
  }
 }
+
+/* NARROW IPAD / SPLIT VIEW BATTER UI v64 */
+/* Handles iPad Split View / narrow browser widths without changing phone controls. */
+@media (min-width:651px) and (max-width:760px){
+ body.device-tablet .match-controls .batting-layout{
+  left:8px!important;
+  right:8px!important;
+  transform:none!important;
+  width:auto!important;
+  grid-template-columns:116px minmax(0,1fr)!important;
+  gap:8px!important;
+  bottom:max(14px,env(safe-area-inset-bottom) + 8px)!important;
+ }
+ body.device-tablet .match-controls .joystick-wrap{
+  width:116px!important;
+ }
+ body.device-tablet .match-controls .hit-joystick{
+  width:108px!important;
+  height:108px!important;
+ }
+ body.device-tablet .match-controls .batting-buttons{
+  width:100%!important;
+  min-width:0!important;
+  gap:4px!important;
+ }
+ body.device-tablet .match-controls .shot-three,
+ body.device-tablet .match-controls .foot-four{
+  gap:4px!important;
+  width:100%!important;
+  min-width:0!important;
+ }
+ body.device-tablet .match-controls .shot-three button,
+ body.device-tablet .match-controls .foot-four button{
+  min-width:0!important;
+  width:100%!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:2px!important;
+  font-size:8px!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+ }
+ body.device-tablet .match-controls #runBtn{
+  width:82px!important;
+  min-width:82px!important;
+  height:34px!important;
+  min-height:34px!important;
+  margin:2px auto 0!important;
+ }
+ body.device-tablet .match-controls .control-foot{
+  display:none!important;
+ }
+ body.device-tablet .bottom-ui{
+  z-index:9990!important;
+  padding:5px 6px max(5px,env(safe-area-inset-bottom))!important;
+  background:linear-gradient(transparent,#000b)!important;
+ }
+ body.device-tablet .camera-buttons{
+  max-width:240px!important;
+  gap:3px!important;
+ }
+ body.device-tablet .camera{
+  padding:5px 4px!important;
+  font-size:6px!important;
+ }
+}
