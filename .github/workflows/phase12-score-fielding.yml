@@ -1,0 +1,406 @@
+name: Phase 12 score and fielding patch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Apply Phase 12 gameplay layer
+        shell: bash
+        run: |
+          set -e
+          if grep -q 'CRICKET26_PHASE12_SCORE_FIELDING' game.js; then
+            echo 'Phase 12 already applied.'
+            exit 0
+          fi
+          cat >> game.js <<'PHASE12'
+
+/* CRICKET26_PHASE12_SCORE_FIELDING
+   Score resolution, sector-aware fielding, 200ms aerial catch window,
+   three-second delivery recovery, and database-ready delivery payload. */
+(function phase12ScoreAndFielding(){
+ const X_RADIUS=43.5;
+ const Z_RADIUS=43.5*.82;
+ const RECOVERY_MS=3000;
+ const CATCH_ALTITUDE=1.2;
+ const CATCH_WINDOW_MS=200;
+ const CATCH_RADIUS=1.65;
+ const SECTORS=["STRAIGHT","COVER","OFF_SIDE","THIRD_MAN","FINE_LEG","MID_WICKET","LEG_SIDE","SQUARE_LEG"];
+ let phase12Active=false;
+ let phase12Finalized=false;
+ let phase12Counted=false;
+ let phase12CatchWindowUntil=0;
+ let phase12PreviousY=.25;
+ let phase12Fielder=null;
+ let phase12Throwing=false;
+ let phase12ThrowStart=0;
+ let phase12ThrowEnd=0;
+ let phase12ThrowTargetZ=10.4;
+ let phase12Start=0;
+ let phase12Last=0;
+ let phase12RunsCommitted=0;
+
+ const style=document.createElement("style");
+ style.textContent=`
+ .phase12-recovery{transition:opacity .42s ease,filter .42s ease!important;opacity:.28!important;filter:blur(1px)!important;pointer-events:none!important}
+ .phase12-recovery-overlay{position:fixed;inset:0;z-index:9899999;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .42s ease;background:rgba(0,8,5,.28);backdrop-filter:blur(2px)}
+ .phase12-recovery-overlay.show{opacity:1}
+ .phase12-recovery-card{font:900 clamp(18px,3vw,34px)/1 Arial,sans-serif;letter-spacing:.12em;color:#fff;text-align:center;text-shadow:0 3px 12px #000;padding:14px 20px;border:2px solid rgba(255,255,255,.45);border-radius:14px;background:rgba(2,18,11,.76)}
+ .phase12-sector{position:fixed;left:50%;top:16%;transform:translate(-50%,-50%);z-index:9900001;pointer-events:none;opacity:0;font:900 13px/1 Arial,sans-serif;letter-spacing:.14em;color:#fff;padding:7px 12px;border-radius:999px;background:rgba(3,16,10,.72);border:1px solid rgba(255,255,255,.28);transition:opacity .2s ease}
+ .phase12-sector.show{opacity:1}
+ `;
+ document.head.appendChild(style);
+
+ const recovery=document.createElement("div");
+ recovery.className="phase12-recovery-overlay";
+ recovery.innerHTML='<div class="phase12-recovery-card"><span>DELIVERY COMPLETE</span></div>';
+ document.body.appendChild(recovery);
+ const sectorHud=document.createElement("div");
+ sectorHud.className="phase12-sector";
+ document.body.appendChild(sectorHud);
+
+ function sectorForVelocity(v){
+  const angle=Math.atan2(v.x,-v.z);
+  const index=(Math.round((angle/(Math.PI*2))*8)+8)%8;
+  return SECTORS[index];
+ }
+ function boundaryMetric(p){return Math.hypot(p.x/X_RADIUS,p.z/Z_RADIUS);}
+ function showSector(sector){
+  sectorHud.textContent="FIELD SECTOR · "+sector;
+  sectorHud.classList.remove("show");
+  void sectorHud.offsetWidth;
+  sectorHud.classList.add("show");
+  clearTimeout(window.__phase12SectorTimer);
+  window.__phase12SectorTimer=setTimeout(()=>sectorHud.classList.remove("show"),900);
+ }
+ function setHasBall(fielder,has){
+  if(!fielder)return;
+  fielder.userData.hasBall=!!has;
+  fielder.userData.running=false;
+  fielder.userData.target=null;
+ }
+ function fadeRecovery(show,label){
+  const controls=document.querySelector("#matchControls");
+  const hud=document.querySelector("#hud");
+  if(show){
+   controls?.classList.add("phase12-recovery");
+   hud?.classList.add("phase12-recovery");
+   recovery.querySelector("span").textContent=label||"DELIVERY COMPLETE";
+   recovery.classList.add("show");
+  }else{
+   controls?.classList.remove("phase12-recovery");
+   hud?.classList.remove("phase12-recovery");
+   recovery.classList.remove("show");
+  }
+ }
+ function buildPayload(runs,dismissal,action,timing){
+  const payload={
+   variation:(typeof bowlTypeState!=="undefined"?bowlTypeState:"UNKNOWN"),
+   intent:(typeof selectedDeliveryShot!=="undefined"?selectedDeliveryShot:"STROKE"),
+   action:action||pendingBatAction?.foot||"NONE",
+   timing:timing||"Unknown",
+   runs:Number(runs)||0,
+   dismissal:dismissal||"None"
+  };
+  window.currentBallRunsScored=payload.runs;
+  window.lastDeliveryPayload=payload;
+  window.deliveryHistory=window.deliveryHistory||[];
+  window.deliveryHistory.push(payload);
+  window.dispatchEvent(new CustomEvent("cricket26:delivery",{detail:payload}));
+  return payload;
+ }
+ function commitScore(runs,dismissal,timing,action){
+  const n=Math.max(0,Math.floor(Number(runs)||0));
+  if(phase12Counted)return window.lastDeliveryPayload||buildPayload(n,dismissal,action,timing);
+  phase12Counted=true;
+  inningsRuns+=n;
+  inningsBalls++;
+  ballsInOver=inningsBalls%6;
+  strikerRuns+=n;
+  strikerBalls++;
+  lastOutcome=dismissal&&dismissal!=="None"?"WICKET · "+dismissal:(n?String(n)+" RUNS":"DOT BALL");
+  updateScoreboard();
+  return buildPayload(n,dismissal,action,timing);
+ }
+ function commitWicket(reason,timing,action){
+  if(phase12Counted)return window.lastDeliveryPayload||buildPayload(phase12RunsCommitted,reason,action,timing);
+  phase12Counted=true;
+  inningsWickets++;
+  inningsBalls++;
+  ballsInOver=inningsBalls%6;
+  strikerBalls++;
+  lastOutcome="WICKET · "+reason;
+  setDeliveryStatus("WICKET · "+reason);
+  updateScoreboard();
+  return buildPayload(phase12RunsCommitted,reason,action,timing);
+ }
+ function beginRecovery(label,runs,dismissal,timing,action,scoreAlreadyApplied=false){
+  if(phase12Finalized)return;
+  phase12Finalized=true;
+  phase12Active=false;
+  shotFlightActive=false;
+  ballHit=false;
+  deliveryActive=false;
+  runState.active=false;
+  runState.throwActive=false;
+  if(runBtn){runBtn.classList.remove("active","running");runBtn.textContent="RUN";runBtn.disabled=true;}
+  if(!scoreAlreadyApplied)commitScore(runs,dismissal,timing,action);
+  else buildPayload(runs,dismissal,action,timing);
+  setDeliveryStatus(label||"DELIVERY COMPLETE");
+  showToast(label||"DELIVERY COMPLETE");
+  fadeRecovery(true,label||"DELIVERY COMPLETE");
+  setTimeout(()=>{
+   fadeRecovery(false);
+   resetRunners();
+   resetDelivery();
+   phase12CatchWindowUntil=0;
+   phase12Fielder=null;
+   phase12Throwing=false;
+   phase12Finalized=false;
+   phase12Counted=false;
+   phase12RunsCommitted=0;
+   if(runBtn)runBtn.disabled=false;
+   if(matchPhase==="READY"&&inningsWickets<10)setTimeout(()=>startDelivery(),250);
+  },RECOVERY_MS);
+ }
+ function chooseFielder(target,sector,isLoft){
+  let best=null,bestScore=Infinity;
+  fielders.forEach((f,i)=>{
+   const angleSector=sectorForVelocity(new THREE.Vector3(f.position.x,0,f.position.z));
+   const angularPenalty=angleSector===sector?0:12;
+   const speed=4.2+(i%4)*.45;
+   const distance=Math.hypot(f.position.x-target.x,f.position.z-target.z);
+   const score=angularPenalty+distance/speed;
+   if(score<bestScore){bestScore=score;best=f;best.userData.skill=.68+(i%5)*.06;best.userData.fieldSector=angleSector;}
+  });
+  if(best){
+   const intercept=isLoft?target.clone():target.clone();
+   best.userData.target=intercept;
+   best.userData.phase12Speed=4.2+(fielders.indexOf(best)%4)*.45;
+   best.userData.phase12Sector=sector;
+  }
+  return best;
+ }
+ function moveFielder(f,dt){
+  if(!f||f.userData.hasBall)return;
+  const t=f.userData.target;
+  if(!t)return;
+  const dx=t.x-f.position.x,dz=t.z-f.position.z;
+  const d=Math.hypot(dx,dz);
+  const speed=f.userData.phase12Speed||4.5;
+  if(d>.04){
+   const step=Math.min(d,speed*dt);
+   f.position.x+=(dx/d)*step;
+   f.position.z+=(dz/d)*step;
+   f.userData.running=true;
+   f.rotation.y=Math.atan2(dx,dz);
+  }else f.userData.running=false;
+ }
+ function phase12ResolveCatch(timing,action){
+  if(phase12Finalized)return;
+  setHasBall(phase12Fielder,true);
+  if(runBtn){runBtn.classList.remove("active","running");runBtn.disabled=true;}
+  showCatchCamera(phase12Fielder);
+  if(typeof triggerActionReplay==="function")triggerActionReplay("CAUGHT");
+  setDeliveryStatus("CAUGHT · "+(phase12Fielder.userData.fieldSector||"FIELD"));
+  showToast("CAUGHT!");
+  phase12RunsCommitted=runState.runs||0;
+  commitWicket("Caught",timing,action);
+  startWicketPresentation("CAUGHT");
+  fadeRecovery(true,"CAUGHT!");
+  phase12Finalized=true;phase12Active=false;shotFlightActive=false;ballHit=true;deliveryActive=false;runState.active=false;
+  setTimeout(()=>{
+   fadeRecovery(false);resetRunners();resetDelivery();
+   phase12CatchWindowUntil=0;phase12Fielder=null;phase12Throwing=false;phase12Finalized=false;phase12Counted=false;phase12RunsCommitted=0;
+   if(inningsWickets>=10)finishInningsAndSwitch();else if(matchPhase==="READY")setTimeout(()=>startDelivery(),250);
+  },RECOVERY_MS);
+ }
+
+ const phase12BaseResolveBallFlight=resolveBallFlight;
+ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
+  phase12Active=true;phase12Finalized=false;phase12Counted=false;phase12RunsCommitted=0;phase12CatchWindowUntil=0;phase12Throwing=false;
+  shotFlightActive=true;ballHit=true;deliveryActive=false;
+  runState.runs=0;runState.active=false;runState.fielded=false;runState.throwActive=false;runState.deliveryCounted=false;runState.runnerProgress=0;
+  const start=origin.clone();
+  const velocity=direction.clone().normalize();
+  const flat=new THREE.Vector3(velocity.x,0,velocity.z);
+  if(flat.lengthSq()<.001)flat.set(0,0,-1);else flat.normalize();
+  const isLoft=shot==="LOFT";
+  const power=SHOT_POWER_MODIFIERS[shot]||1.2;
+  const distance=(isLoft?28:22)+Math.max(0,exitSpeed)*(.82*power);
+  const target=start.clone().add(flat.multiplyScalar(distance));
+  target.y=.25;
+  const duration=Math.min(5000,2100+Math.max(0,exitSpeed)*34);
+  const sector=sectorForVelocity(flat);
+  showSector(sector);
+  const catchPoint=start.clone().lerp(target,.86);
+  if(isLoft)catchPoint.y=1.05;
+  phase12Fielder=chooseFielder(isLoft?catchPoint:target,sector,isLoft);
+  if(phase12Fielder)phase12Fielder.userData.target=(isLoft?catchPoint:target).clone();
+  if(runBtn){runBtn.disabled=false;runBtn.classList.add("active");runBtn.classList.remove("running");runBtn.textContent="RUN";}
+  const started=performance.now();
+  phase12Start=started;phase12Last=started;phase12PreviousY=start.y;
+  let resolved=false;
+
+  const finishBoundary=(runs,label)=>{
+   if(resolved||phase12Finalized)return;
+   resolved=true;phase12RunsCommitted=runs;shotFlightActive=false;ballHit=false;
+   if(runBtn)runBtn.classList.remove("active","running");
+   finishRuns(runs,label);
+   beginRecovery(label,runs,"None",quality,pendingBatAction?.foot||"NONE",true);
+  };
+  const finishDot=()=>{
+   if(resolved||phase12Finalized)return;
+   resolved=true;setHasBall(phase12Fielder,true);
+   beginRecovery("DOT BALL",0,"None",quality,pendingBatAction?.foot||"NONE");
+  };
+  const finishRunsAfterFielding=()=>{
+   if(resolved||phase12Finalized)return;
+   resolved=true;
+   const runs=runState.runs||0;
+   phase12RunsCommitted=runs;
+   setHasBall(phase12Fielder,true);
+   beginRecovery(runs?runs+" RUN"+(runs===1?"":"S")+" · SAFE":"DOT BALL",runs,"None",quality,pendingBatAction?.foot||"NONE");
+  };
+  const runOut=()=>{
+   if(resolved||phase12Finalized)return;
+   resolved=true;
+   const runs=runState.runs||0;
+   phase12RunsCommitted=runs;
+   inningsRuns+=runs;
+   phase12Counted=true;
+   inningsWickets++;inningsBalls++;ballsInOver=inningsBalls%6;strikerRuns+=runs;strikerBalls++;
+   lastOutcome="RUN OUT · "+runs;
+   updateScoreboard();
+   buildPayload(runs,"Run out",pendingBatAction?.foot||"NONE",quality);
+   setDeliveryStatus("RUN OUT · "+runs);
+   showToast("RUN OUT");
+   if(runBtn)runBtn.disabled=true;
+   fadeRecovery(true,"RUN OUT");
+   setTimeout(()=>{fadeRecovery(false);resetRunners();resetDelivery();phase12Finalized=false;phase12Counted=false;phase12Fielder=null;if(inningsWickets>=10)finishInningsAndSwitch();else if(matchPhase==="READY")setTimeout(()=>startDelivery(),250);},RECOVERY_MS);
+  };
+  const tick=now=>{
+   if(!phase12Active||phase12Finalized||resolved)return;
+   const dt=Math.min(.033,Math.max(.001,(now-phase12Last)/1000));phase12Last=now;
+   const p=Math.min(1,(now-started)/duration);
+   const e=p*p*(3-2*p);
+   ball.position.lerpVectors(start,target,e);
+   const lift=isLoft?3.25*Math.sin(Math.PI*e):.72*Math.sin(Math.PI*e);
+   ball.position.y=Math.max(.25,start.y+(target.y-start.y)*e+lift);
+   ball.rotation.x+=dt*10;ball.rotation.y+=dt*12;
+
+   moveFielder(phase12Fielder,dt);
+
+   const descending=ball.position.y<phase12PreviousY;
+   if(isLoft&&descending&&ball.position.y<=CATCH_ALTITUDE&&phase12PreviousY>CATCH_ALTITUDE&&phase12CatchWindowUntil<=now){
+    phase12CatchWindowUntil=now+CATCH_WINDOW_MS;
+    const fd=phase12Fielder?Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z):Infinity;
+    if(phase12Fielder&&fd<=CATCH_RADIUS){
+     const skill=phase12Fielder.userData.skill||.78;
+     if(Math.random()<skill){phase12ResolveCatch(quality,pendingBatAction?.foot||"NONE");return;}
+     showToast("CATCH DROPPED");setDeliveryStatus("CATCH DROPPED · BALL LIVE");
+    }
+   }
+   phase12PreviousY=ball.position.y;
+
+   const bm=boundaryMetric(ball.position);
+   if(bm>=1){
+    const aerial=ball.position.y>.34;
+    finishBoundary(aerial?6:4,aerial?"6 RUNS · OVER THE ROPE":"4 RUNS · BOUNDARY");
+    return;
+   }
+
+   if(!phase12Fielder?.userData.hasBall&&phase12Fielder){
+    const fd=Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z);
+    if(!isLoft&&fd<.85&&ball.position.y<=.6){
+     setHasBall(phase12Fielder,true);phase12Fielder.userData.target=null;
+     if(runState.active)phase12Throwing=true;
+     else finishDot();
+     if(runState.active&&runBtn)runBtn.disabled=true;
+    }
+   }
+
+   if(phase12Fielder?.userData.hasBall&&phase12Throwing&&!phase12Finalized){
+    if(!phase12ThrowStart){
+     phase12ThrowStart=now;phase12ThrowEnd=now+760+Math.min(380,Math.hypot(phase12Fielder.position.x,phase12Fielder.position.z)*10);
+     phase12ThrowTargetZ=(runState.runs%2===1)?-12.2:10.4;
+     setDeliveryStatus("FIELDER · THROWING");
+    }
+    const q=Math.min(1,(now-phase12ThrowStart)/(phase12ThrowEnd-phase12ThrowStart));
+    const sx=phase12Fielder.position.x,sz=phase12Fielder.position.z;
+    ball.position.x=sx*(1-q);ball.position.z=sz*(1-q)+phase12ThrowTargetZ*q;ball.position.y=.72+Math.sin(Math.PI*q)*1.15;
+    if(q>=1){
+     ball.position.set(0,.95,phase12ThrowTargetZ);
+     const runnerZ=batter.position.z;
+     if(runState.active&&Math.abs(runnerZ-phase12ThrowTargetZ)>1){runOut();return;}
+     if(runState.active){runState.runs++;runState.active=false;}
+     phase12Throwing=false;finishRunsAfterFielding();return;
+    }
+   }
+
+   if(runState.active&&!phase12Fielder?.userData.hasBall){
+    const runDistance=22.6,runSpeed=5.4;
+    runState.runnerProgress=Math.min(1,runState.runnerProgress+(runSpeed*dt)/runDistance);
+    const q=runState.runnerProgress;
+    batter.position.z=10.4-22.6*q;nonStriker.position.z=-12.2+22.6*q;
+    batter.rotation.y=q<.5?Math.PI:0;nonStriker.rotation.y=q<.5?0:Math.PI;
+    if(q>=1){
+     runState.runs++;runState.runnerProgress=0;runState.active=false;
+     batter.position.z=10.4;nonStriker.position.z=-12.2;
+     const oldB=batter;batter=nonStriker;nonStriker=oldB;
+     batter.position.z=10.4;nonStriker.position.z=-12.2;batter.rotation.set(0,Math.PI,0);nonStriker.rotation.set(0,0,0);
+     setDeliveryStatus(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
+     showToast(runState.runs+" RUN"+(runState.runs===1?"":"S")+" · SAFE");
+     if(runBtn){runBtn.classList.remove("running");runBtn.classList.add("active");runBtn.textContent=runState.runs<6?"RUN AGAIN":"BALL DEAD";}
+    }
+   }
+
+   if(p>=1&&!phase12Fielder?.userData.hasBall){
+    ball.position.copy(target);ball.position.y=.25;
+    if(!runState.active&&!runState.runs)setDeliveryStatus("BALL FIELDING · TAP RUN");
+   }
+   requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+ };
+
+ window.__cricket26Phase12={
+  sectors:SECTORS,
+  getPayload:()=>window.lastDeliveryPayload||null,
+  getHistory:()=>window.deliveryHistory||[]
+ };
+})();
+PHASE12
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('?v=64','?v=65')
+          s=s.replace('data-build="61"','data-build="65"')
+          p.write_text(s)
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game.js index.html
+          git commit -m "Implement Phase 12 scoring fielding and delivery payload" || exit 0
+          git push
+
+      - name: Remove one-shot patch workflow
+        if: success()
+        shell: bash
+        run: |
+          git rm .github/workflows/phase12-score-fielding.yml || true
+          git commit -m "Remove one-shot Phase 12 patch workflow" || true
+          git push || true
