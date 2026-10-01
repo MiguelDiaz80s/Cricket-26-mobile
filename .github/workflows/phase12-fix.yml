@@ -1,22 +1,8 @@
 name: Phase 12 correction
 on:
-  push:
-    branches: [main]
-permissions:
-  contents: write
+  workflow_dispatch:
 jobs:
-  fix:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Apply correction
-        run: python3 .github/phase12_fix.py
-      - name: JavaScript syntax check
-        run: node --check game.js
-      - name: Commit correction
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add game.js
-          git commit -m "Fix Phase 12 completed-run scoring" || true
-          git push || true
+      - run: echo "One-shot Phase 12 correction already completed"
