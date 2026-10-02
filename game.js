@@ -937,6 +937,30 @@ addBounceMarkerLabel();
 /* BOWLING TARGET PRESENTATION v67 */
 landingPreview.userData.bowlingLabel="BOUNCE HERE";
 
+const bowlingPreviewGeometry=new THREE.BufferGeometry();
+const bowlingPreviewPoints=Array.from({length:16},()=>new THREE.Vector3());
+bowlingPreviewGeometry.setFromPoints(bowlingPreviewPoints);
+const bowlingPreviewMaterial=new THREE.LineDashedMaterial({color:0xffffff,transparent:true,opacity:.62,dashSize:.18,gapSize:.12,depthWrite:false});
+const bowlingPreviewLine=new THREE.Line(bowlingPreviewGeometry,bowlingPreviewMaterial);
+bowlingPreviewLine.computeLineDistances();
+bowlingPreviewLine.frustumCulled=false;
+bowlingPreviewLine.visible=false;
+stadium.add(bowlingPreviewLine);
+
+function updateBowlingPreviewPath(){
+ const sx=releasePoint.x,sz=releasePoint.z,sy=releasePoint.y;
+ const bx=landingPreview.position.x,bz=landingPreview.position.z;
+ for(let i=0;i<bowlingPreviewPoints.length;i++){
+  const q=i/(bowlingPreviewPoints.length-1);
+  bowlingPreviewPoints[i].set(sx+(bx-sx)*q,sy+(.24-sy)*q+1.45*Math.sin(Math.PI*q),sz+(bz-sz)*q);
+ }
+ bowlingPreviewGeometry.setFromPoints(bowlingPreviewPoints);
+ bowlingPreviewLine.computeLineDistances();
+ bowlingPreviewLine.visible=controlMode==="BOWL"&&landingPreview.visible;
+}
+function setBowlingPreviewVisible(v){
+ bowlingPreviewLine.visible=!!v&&controlMode==="BOWL";
+}
 
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
