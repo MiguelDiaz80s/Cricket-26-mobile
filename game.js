@@ -10,13 +10,15 @@ loadCricketWasm().then(engine=>{
 });
 
 const canvas=document.querySelector("#scene");
+const isTabletDevice=/iPad|Tablet/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && Math.max(window.innerWidth,window.innerHeight)>=700);
 const isMobileDevice=window.innerWidth<900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobileDevice,powerPreference:"high-performance",failIfMajorPerformanceCaveat:false});
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobileDevice||isTabletDevice,powerPreference:"high-performance",failIfMajorPerformanceCaveat:false});
 const mobilePixelRatio=Math.min(devicePixelRatio||1,1);
-renderer.setPixelRatio(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35));
+const tabletPixelRatio=Math.min(devicePixelRatio||1.35,1.35);
+renderer.setPixelRatio(isTabletDevice?tabletPixelRatio:(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35)));
 renderer.setSize(innerWidth,innerHeight,false);
-renderer.shadowMap.enabled=window.innerWidth>=900;
-renderer.shadowMap.type=isMobileDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled=window.innerWidth>=700;
+renderer.shadowMap.type=isTabletDevice?THREE.PCFSoftShadowMap:(isMobileDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.12;
@@ -59,7 +61,7 @@ const playerTrim=[];
 
 const hemi=new THREE.HemisphereLight(0xa9c8e5,0x11170f,1.25);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe7bd,3.0);
-sun.position.set(-38,55,24);sun.castShadow=!isMobileDevice;sun.shadow.mapSize.set(isMobileDevice?256:1024,isMobileDevice?256:1024);
+sun.position.set(-38,55,24);sun.castShadow=!isMobileDevice;sun.shadow.mapSize.set(isTabletDevice?512:(isMobileDevice?256:1024),isTabletDevice?512:(isMobileDevice?256:1024));
 sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
 scene.add(sun);
 
@@ -205,7 +207,7 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  const segment=(a,b,r,mat)=>{
   const v=new THREE.Vector3().subVectors(b,a);
   const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
-  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),isMobileDevice?6:10,isMobileDevice?8:16),mat);
+  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),isMobileDevice&&!isTabletDevice?8:12,isMobileDevice&&!isTabletDevice?10:18),mat);
   m.position.copy(mid);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());
   m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
@@ -223,17 +225,17 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 
  // Main silhouette: one tapered torso, chest/waist transition, and hips.
  // The torso is deliberately larger than the limbs so the player reads as a human at distance.
- mesh(new THREE.CapsuleGeometry(.40,.72,12,24),shirt,[0,1.18,0],[1.13,1,.76]);
- mesh(new THREE.CapsuleGeometry(.32,.18,10,18),shirt,[0,.79,0],[1.18,1,.82]);
+ mesh(new THREE.CapsuleGeometry(.40,.72,16,30),shirt,[0,1.18,0],[1.13,1,.76]);
+ mesh(new THREE.CapsuleGeometry(.32,.18,14,22),shirt,[0,.79,0],[1.18,1,.82]);
 
  // Shoulder mass smoothly joins the torso instead of floating as separate balls.
- mesh(new THREE.CapsuleGeometry(.30,.24,10,18),shirt,[-.28,1.40,0],[1,.95,.82]);
+ mesh(new THREE.CapsuleGeometry(.30,.24,14,22),shirt,[-.28,1.40,0],[1,.95,.82]);
  mesh(new THREE.CapsuleGeometry(.30,.24,10,18),shirt,[.28,1.40,0],[1,.95,.82]);
 
  // Neck, head and hair.
  mesh(new THREE.CapsuleGeometry(.115,.20,10,18),skin,[0,1.70,0],[1,1,1]);
- mesh(new THREE.CapsuleGeometry(.29,.23,12,20),skin,[0,2.00,0],[.94,1.08,.94]);
- mesh(new THREE.SphereGeometry(.30,isMobileDevice?12:24,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.94,1,.94]);
+ mesh(new THREE.CapsuleGeometry(.29,.23,16,24),skin,[0,2.00,0],[.94,1.08,.94]);
+ mesh(new THREE.SphereGeometry(.30,isMobileDevice&&!isTabletDevice?18:28,isMobileDevice&&!isTabletDevice?14:20,0,Math.PI*2,0,Math.PI*.60),hair,[0,2.08,0],[.94,1,.94]);
  mesh(new THREE.SphereGeometry(.045,10,8),skin,[-.275,2.00,0]);
  mesh(new THREE.SphereGeometry(.045,10,8),skin,[.275,2.00,0]);
 
@@ -266,11 +268,11 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 
  // Helmet/headgear.
  if(role!=="keeper"){
-  mesh(new THREE.SphereGeometry(.38,isMobileDevice?14:28,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,.96,.98]);
+  mesh(new THREE.SphereGeometry(.38,isMobileDevice&&!isTabletDevice?18:32,isMobileDevice&&!isTabletDevice?14:20,0,Math.PI*2,0,Math.PI*.52),helmet,[0,2.15,0],[1,.96,.98]);
   const peak=mesh(new THREE.CapsuleGeometry(.055,.30,8,12),helmet,[0,2.06,-.33],[1,.65,.65]);
   peak.rotation.x=Math.PI/2;
  } else {
-  mesh(new THREE.SphereGeometry(.39,isMobileDevice?14:28,isMobileDevice?10:18,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,.98,.98]);
+  mesh(new THREE.SphereGeometry(.39,isMobileDevice&&!isTabletDevice?18:32,isMobileDevice&&!isTabletDevice?14:20,0,Math.PI*2,0,Math.PI*.60),helmet,[0,2.13,0],[1,.98,.98]);
   [-.18,0,.18].forEach((xx,i)=>{
    const bar=mesh(new THREE.CapsuleGeometry(.022,.45,6,10),seamMat,[xx,1.99,-.35],[1,1,.7]);
    bar.rotation.z=(i-1)*.08;
