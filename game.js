@@ -796,17 +796,22 @@ let deliveryLineX=0;
 let pitchMarkerCleared=false;
 let pitchMarkerShownAt=0;
 const landingPreview=new THREE.Group();
-const landingDisc=new THREE.Mesh(new THREE.RingGeometry(.32,.52,32),new THREE.MeshBasicMaterial({color:0xffd83d,transparent:true,opacity:.92,side:THREE.DoubleSide}));
+const landingDisc=new THREE.Mesh(new THREE.RingGeometry(.32,.52,32),new THREE.MeshBasicMaterial({color:0xffd83d,transparent:true,opacity:.96,side:THREE.DoubleSide}));
 landingDisc.rotation.x=-Math.PI/2;
-landingPreview.add(landingDisc);
-const landingDot=new THREE.Mesh(new THREE.CircleGeometry(.105,20),new THREE.MeshBasicMaterial({color:0xfff3a0,transparent:true,opacity:.95,side:THREE.DoubleSide}));
+const landingOuter=new THREE.Mesh(new THREE.RingGeometry(.72,.79,40),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.72,side:THREE.DoubleSide}));
+landingOuter.rotation.x=-Math.PI/2;
+const landingInner=new THREE.Mesh(new THREE.RingGeometry(.12,.17,24),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,side:THREE.DoubleSide}));
+landingInner.rotation.x=-Math.PI/2;
+const landingDot=new THREE.Mesh(new THREE.CircleGeometry(.105,20),new THREE.MeshBasicMaterial({color:0xfff3a0,transparent:true,opacity:1,side:THREE.DoubleSide}));
 landingDot.rotation.x=-Math.PI/2;
 landingDot.position.y=.012;
-landingPreview.add(landingDot);
-const landingCrossA=new THREE.Mesh(new THREE.BoxGeometry(.9,.025,.055),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9}));
+const landingCrossA=new THREE.Mesh(new THREE.BoxGeometry(1.05,.025,.055),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.92}));
 const landingCrossB=landingCrossA.clone();
 landingCrossB.rotation.y=Math.PI/2;
-landingPreview.add(landingCrossA,landingCrossB);
+const landingGlow=new THREE.Mesh(new THREE.CircleGeometry(.9,40),new THREE.MeshBasicMaterial({color:0xffd83d,transparent:true,opacity:.075,side:THREE.DoubleSide,depthWrite:false}));
+landingGlow.rotation.x=-Math.PI/2;
+landingGlow.position.y=-.002;
+landingPreview.add(landingGlow,landingOuter,landingDisc,landingInner,landingDot,landingCrossA,landingCrossB);
 landingPreview.position.y=.035;
 landingPreview.visible=false;
 stadium.add(landingPreview);
@@ -821,7 +826,10 @@ function predictBounceIntersection(position,velocity,targetY=.24){
 function setPitchMarkerColor(){
  const color=deliveryLength==="SHORT"?0xffcc00:(deliveryLength==="FULL"?0xff3333:0x33cc33);
  landingDisc.material.color.setHex(color);
- landingDot.material.color.setHex(color);
+ landingDot.material.color.setHex(0xffffff);
+ landingOuter.material.color.setHex(color);
+ landingInner.material.color.setHex(color);
+ landingGlow.material.color.setHex(color);
  landingPreview.scale.setScalar(deliveryLength==="SHORT"?1.08:deliveryLength==="FULL"?.94:1);
 }
 function calculateAndShowPitchMarker(){
@@ -1307,10 +1315,8 @@ function playShot(shot){
  selectedShot=shot;
  const elapsed=performance.now()-deliveryStart;
 
- // Batting is now release-timed: click just before/at release for the strongest hit.
- // The game accepts contacts from 575ms early through 575ms late.
- if(elapsed<1850||elapsed>3000)return;
-
+ // A valid batting input always makes contact. Timing controls
+ // contact quality and power instead of deciding whether contact happens.
  const timing=timingPower(elapsed);
  const quality=timingQuality(elapsed);
  const foot=selectedFoot||"";
@@ -1320,7 +1326,15 @@ function playShot(shot){
   resolveWicket("LEAVE · BOWLED");return;
  }
  if(foot==="SPECIAL"&&!specialAllowed){resolveWicket("SPECIAL · WRONG DELIVERY");return;}
- if(timing<=0){resolveWicket(quality);return;}
+ if(timing<=0){
+   const weakPower=.08;
+   const launch=shot==="LOFT"?10:shot==="STROKE"?4:2;
+   const weakDir=new THREE.Vector3(Math.max(-1,Math.min(1,hitDirection.x)),Math.sin(launch*Math.PI/180),-Math.max(-1,Math.min(1,hitDirection.y))).normalize();
+   setDeliveryStatus("CONTACT · VERY EARLY/LATE · WEAK");
+   showToast("WEAK CONTACT");
+   resolveBallFlight(ball.position.clone(),weakDir,8,shot,weakPower);
+   return;
+ }
  const shotMultiplier=shot==="LOFT"?1.12:shot==="STROKE"?1:.82;
  // Perfect timing gets full power; every millisecond away from release reduces power.
  const power=shotMultiplier*(0.48+0.52*timing);
@@ -1719,9 +1733,14 @@ function applyCleanBowlAim(){
  deliveryLine=deliveryLineX<-.42?"OUTSIDE_OFF":deliveryLineX>.42?"LEG":"ON_STUMPS";
  deliveryLength=bowlLength;
 
- // This marker is the exact point the flight code will aim for.
- bouncePoint.set(deliveryLineX,.24,deliveryBounceZ);
- landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);
+ // This marker is the exact point the released ball will reach at bounce,
+ // including the selected swing/cutter variation.
+ let predictedBounceX=deliveryLineX;
+ if(bowlTypeState==="OUT_SWING")predictedBounceX+=-.62;
+ if(bowlTypeState==="IN_SWING")predictedBounceX+=.62;
+ if(bowlTypeState==="REVERSE_SWING")predictedBounceX+=.48;
+ bouncePoint.set(predictedBounceX,.24,deliveryBounceZ);
+ landingPreview.position.set(predictedBounceX,.035,deliveryBounceZ);
  setPitchMarkerColor();
  landingPreview.visible=true;
 }
@@ -1820,11 +1839,15 @@ function updateBowlingDelivery(now){
   const variationX=deliveryLineX+swingOffset;
   const z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*e;
   const y=releasePoint.y+(bouncePoint.y-releasePoint.y)*e;
-  ball.position.set(variationX*Math.sin(Math.PI*e),y,z);
+  // The ball reaches the displayed bounce marker at the end of flight.
+  ball.position.set(variationX*e,y,z);
   bowler.rotation.x=.24+.10*Math.sin(Math.PI*e);
   bowler.rotation.z=-.02+.05*Math.sin(Math.PI*e);
   bowler.scale.y=1+.028*Math.sin(Math.PI*e);
-  if(p>=1){resolveBowlingDelivery();}
+  if(p>=1){
+   landingPreview.visible=false;
+   resolveBowlingDelivery();
+ }
   return;
  }
 }
