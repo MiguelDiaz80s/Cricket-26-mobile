@@ -321,7 +321,7 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 let batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
 let nonStriker=player({team:0,role:"batter",x:-.8,z:-12.2,scale:1.08});
 nonStriker.rotation.y=0;
-const keeper=player({team:1,role:"keeper",x:0,z:14.15,scale:1.08});
+const keeper=player({team:1,role:"keeper",x:0,z:13.35,scale:1.12});
 keeper.userData.lockedKeeper=true;
 keeper.rotation.y=Math.PI;
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
@@ -336,6 +336,9 @@ const REAL_FIELD_POSITIONS={
  "MID_OFF":{label:"Mid-off",x:-7.5,z:-8.5},
  "MID_ON":{label:"Mid-on",x:7.5,z:-8.5},
  "SQUARE_LEG":{label:"Square leg",x:14.5,z:3.8},
+ "MID_WICKET":{label:"Mid-wicket",x:12.2,z:-4.5},
+ "SHORT_LEG":{label:"Short leg",x:2.8,z:10.0},
+ "SILLY_POINT":{label:"Silly point",x:-2.8,z:9.4},
  "FINE_LEG":{label:"Fine leg",x:8.5,z:12.8},
  "THIRD_MAN":{label:"Third man",x:-20.0,z:13.0},
  "DEEP_POINT":{label:"Deep point",x:-22.0,z:1.5},
@@ -344,6 +347,7 @@ const REAL_FIELD_POSITIONS={
  "LONG_ON":{label:"Long on",x:12.0,z:-17.0},
  "LONG_OFF":{label:"Long off",x:-12.0,z:-17.0}
 };
+let shotFlightActive=false;
 let fieldAssignments=["SLIP_1","SLIP_2","GULLY","POINT","COVER","MID_OFF","MID_ON","SQUARE_LEG","FINE_LEG"];
 function applyFieldAssignments(){
  fielders.forEach((f,i)=>{
@@ -691,7 +695,7 @@ function animate(now){
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
  if(keeper.userData.lockedKeeper&&!shotFlightActive){
-   keeper.position.x=0;keeper.position.z=14.15;keeper.rotation.y=Math.PI;
+   keeper.position.x=0;keeper.position.z=13.35;keeper.rotation.y=Math.PI;
  }
  crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
  document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
@@ -825,7 +829,7 @@ const deliveryText=document.querySelector("#deliveryText");
 const ballSpeed=document.querySelector("#ballSpeed");
 
 let tossWinner="",tossComplete=false,battingFirst="",tossDecisionMade=false;
-let matchPhase="IDLE",deliveryActive=false,shotFlightActive=false,ballHit=false;
+let matchPhase="IDLE",deliveryActive=false,ballHit=false;
 let deliveryStart=0,deliveryDuration=1450,deliverySpeed=0;
 let deliveryLine="ON_STUMPS",deliveryLength="FULL";
 let inningsBalls=0,inningsRuns=0,inningsWickets=0,totalOvers=20,ballsInOver=0;
@@ -1005,7 +1009,14 @@ function setControlMode(mode){
  document.querySelector(".timing-meter")?.classList.toggle("hidden",bowling);
  document.querySelector(".control-foot")?.classList.toggle("hidden",bowling);
  document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=bowling);
- if(bowling){deliveryBtn.disabled=true;setDeliveryStatus("BOWLING · SET YOUR DELIVERY");timingLabel.textContent="CHOOSE LENGTH · LINE · PACE";}
+ if(bowling){
+  deliveryBtn.disabled=true;
+  applyCleanBowlAim?.();
+  landingPreview.visible=true;
+  updateBowlingPreviewPath?.();
+  setDeliveryStatus("BOWLING · SET YOUR DELIVERY");
+  timingLabel.textContent="CHOOSE LENGTH · LINE · PACE";
+}
  else {deliveryBtn.disabled=deliveryActive||shotFlightActive;setDeliveryStatus("BATTER · WAIT FOR THE BALL");timingLabel.textContent="WAIT FOR THE BALL";}
 }
 function resetDelivery(){
@@ -1063,6 +1074,7 @@ function startDelivery(){
     (Math.random()*2-1)*.55,(Math.random()*2-1)*.7,deliveryLength==="FULL"?1.05:deliveryLength==="GOOD"?1:.88);
  }
  landingPreview.visible=true;
+ updateBowlingPreviewPath();
  matchPhase="PREVIEW";
  setDeliveryStatus("LANDING SPOT");
  ballSpeed.textContent=Math.round(deliverySpeed)+" KPH";
@@ -1577,7 +1589,7 @@ setControlMode=function(mode){
  __cleanBaseSetControlMode(mode);setDefaultMatchCamera();
  if(mode==="BOWL"){
  applyFieldAssignments();
- keeper.position.set(0,.18,14.15);
+ keeper.position.set(0,.18,13.35);
  keeper.rotation.y=Math.PI;
  bowlAimLockedState=false;bowlAimState={x:0,y:0};bowlTypeState="STRAIGHT";bowlStage=0;
  document.querySelectorAll("[data-bowl-type]").forEach(b=>b.classList.toggle("active",b.dataset.bowlType==="STRAIGHT"));
@@ -1720,7 +1732,7 @@ function executeBatAction(foot){
  const elapsed=performance.now()-deliveryStart;
  // Any swing during the playable delivery window is valid contact intent.
  // Timing now controls quality/power; it does not decide whether the bat connects.
- if(elapsed<3800||elapsed>7600)return;
+ if(elapsed<3200||elapsed>8000)return;
  selectedFoot=foot;
  pendingBatAction={foot,shot:selectedDeliveryShot,requestedAt:performance.now()};
  startSwingAnimation(foot,selectedDeliveryShot);
@@ -1778,8 +1790,8 @@ function resolvePendingBatContact(a,contactMs){
    contactQuality=Math.max(.08,timing*.72);
    edgeToSlips=veryBadTiming || Math.random()<(.34-timing)*1.35;
  }
- const exitSpeed=(veryBadTiming?9:(badTiming?14:20)+deliverySpeed*.18+38*contactQuality)*powerMultiplier;
- const launch=shot==="LOFT"?(badTiming?18:48):shot==="STROKE"?(badTiming?10:24):(badTiming?4:10);
+ const exitSpeed=(veryBadTiming?7:(badTiming?11:20)+deliverySpeed*.18+38*contactQuality)*powerMultiplier;
+ const launch=shot==="LOFT"?(veryBadTiming?9:(badTiming?16:48)):shot==="STROKE"?(veryBadTiming?4:(badTiming?8:24)):(veryBadTiming?2:(badTiming?6:10));
  const ax=Math.max(-1,Math.min(1,hitDirection.x)),af=Math.max(-1,Math.min(1,hitDirection.y));
  let gx=ax,gz=-af;
  if(edgeToSlips){
@@ -1843,6 +1855,7 @@ function applyCleanBowlAim(){
  setPitchMarkerColor();
  landingPreview.userData.bounceLabel="BOUNCE HERE";
  landingPreview.visible=true;
+ updateBowlingPreviewPath();
 }
 function setupCleanBowlJoystick(){
  const j=document.querySelector("#bowlJoystick"),stick=document.querySelector("#bowlJoystickStick");if(!j||!stick)return;let dragging=false;
