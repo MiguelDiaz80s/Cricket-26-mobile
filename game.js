@@ -1,13 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
-import {loadCricketWasm} from "./engine/wasm-bridge.js";
-
 let wasmEngine=null;
 let wasmPhysicsActive=false;
-loadCricketWasm().then(engine=>{
-  wasmEngine=engine;
-  wasmPhysicsActive=false;
-  if(engine)console.info("Cricket C++ aerodynamics online.");
-});
 
 const canvas=document.querySelector("#scene");
 const isTabletDevice=/iPad|Tablet/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && Math.max(window.innerWidth,window.innerHeight)>=700);
@@ -328,7 +321,8 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 let batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
 let nonStriker=player({team:0,role:"batter",x:-.8,z:-12.2,scale:1.08});
 nonStriker.rotation.y=0;
-const keeper=player({team:1,role:"keeper",x:0,z:13.9,scale:1.02});
+const keeper=player({team:1,role:"keeper",x:0,z:14.15,scale:1.08});
+keeper.userData.lockedKeeper=true;
 keeper.rotation.y=Math.PI;
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
 const fielders=[[-3.2,11.6],[-5.2,10.9],[-8.2,7.8],[-15.0,3.5],[-12.5,-3.5],[-7.5,-8.5],[7.5,-8.5],[14.5,3.8],[8.5,12.8]].map(([x,z])=>player({team:1,x,z,scale:.9}));
@@ -696,6 +690,9 @@ function animate(now){
  const t=now*.001;
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
+ if(keeper.userData.lockedKeeper&&!shotFlightActive){
+   keeper.position.x=0;keeper.position.z=14.15;keeper.rotation.y=Math.PI;
+ }
  crowd.rotation.y+=dt*.0007;if(!deliveryActive&&!ballHit){ball.position.y=.63+Math.sin(t*2.4)*.018;}ball.rotation.y+=dt*1.8;
  document.querySelector("#scoreValue").textContent=displayRuns+" / "+displayWickets;
  document.querySelector("#oversValue").textContent=Math.floor(displayBalls/6)+"."+(displayBalls%6)+" OVERS";
@@ -933,6 +930,9 @@ function addBounceMarkerLabel(){
  landingPreview.add(sp);landingPreview.userData.labelSprite=sp;
 }
 addBounceMarkerLabel();
+/* BOWLING TARGET PRESENTATION v67 */
+landingPreview.userData.bowlingLabel="BOUNCE HERE";
+
 
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
@@ -1576,6 +1576,9 @@ const __cleanBaseSetControlMode=setControlMode;
 setControlMode=function(mode){
  __cleanBaseSetControlMode(mode);setDefaultMatchCamera();
  if(mode==="BOWL"){
+ applyFieldAssignments();
+ keeper.position.set(0,.18,14.15);
+ keeper.rotation.y=Math.PI;
  bowlAimLockedState=false;bowlAimState={x:0,y:0};bowlTypeState="STRAIGHT";bowlStage=0;
  document.querySelectorAll("[data-bowl-type]").forEach(b=>b.classList.toggle("active",b.dataset.bowlType==="STRAIGHT"));
 }
