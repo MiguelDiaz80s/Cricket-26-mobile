@@ -1652,14 +1652,35 @@ function resolvePendingBatContact(a,contactMs){
   return;
 }
  if(a.foot==="SPECIAL"&&!(deliveryLength==="SHORT"&&deliveryLine!=="ON_STUMPS")){startWicketPresentation("BOWLED");resolveWicket("SPECIAL · WRONG DELIVERY");return;}
- if(timing<=.08){startWicketPresentation("BOWLED");resolveWicket("MISSED · BOWLED");return;}
+ // A chosen batting action always makes contact. Timing controls the
+ // quality/power of that contact instead of deciding whether the bat can hit.
  const shot=a.shot||"STROKE";
  const powerMultiplier=SHOT_POWER_MODIFIERS[shot]||1.2;
- const exitSpeed=(20+deliverySpeed*.18+38*timing)*powerMultiplier;
- const launch=shot==="LOFT"?48:shot==="STROKE"?24:10;
- const ax=Math.max(-1,Math.min(1,hitDirection.x)),af=Math.max(-1,Math.min(1,hitDirection.y));let gx=ax,gz=-af;if(Math.hypot(gx,gz)<.12)gz=-1;const len=Math.hypot(gx,gz)||1;gx/=len;gz/=len;
- timingLabel.textContent="CONTACT · "+quality;setDeliveryStatus("BAT CONTACT · "+quality);showToast(shot+" · "+quality);
- resolveBallFlight(ball.position.clone(),new THREE.Vector3(gx,Math.sin(launch*Math.PI/180),gz),exitSpeed,shot,timing);
+ const badTiming=timing<.34;
+ const veryBadTiming=timing<.16;
+ let contactQuality=timing;
+ let edgeToSlips=false;
+ if(badTiming){
+   // Poor timing creates a weak/mis-hit ball rather than an automatic miss.
+   contactQuality=Math.max(.08,timing*.72);
+   edgeToSlips=veryBadTiming || Math.random()<(.34-timing)*1.35;
+ }
+ const exitSpeed=(veryBadTiming?9:(badTiming?14:20)+deliverySpeed*.18+38*contactQuality)*powerMultiplier;
+ const launch=shot==="LOFT"?(badTiming?18:48):shot==="STROKE"?(badTiming?10:24):(badTiming?4:10);
+ const ax=Math.max(-1,Math.min(1,hitDirection.x)),af=Math.max(-1,Math.min(1,hitDirection.y));
+ let gx=ax,gz=-af;
+ if(edgeToSlips){
+   // Edge/mishit is redirected toward the slip cord.
+   gx=-.32+(Math.random()*.64);
+   gz=-.94;
+ }
+ if(Math.hypot(gx,gz)<.12)gz=-1;
+ const len=Math.hypot(gx,gz)||1;gx/=len;gz/=len;
+ const finalQuality=veryBadTiming?"VERY LATE/VERY EARLY":badTiming?"POOR TIMING":quality;
+ timingLabel.textContent="CONTACT · "+finalQuality;
+ setDeliveryStatus(edgeToSlips?"BAT CONTACT · EDGE TO SLIPS":"BAT CONTACT · "+finalQuality);
+ showToast(edgeToSlips?"EDGE! · SLIPS":shot+" · "+finalQuality);
+ resolveBallFlight(ball.position.clone(),new THREE.Vector3(gx,Math.sin(launch*Math.PI/180),gz),exitSpeed,shot,contactQuality);
 }
 
 function resetRunners(){batter.position.copy(DEFAULT_BATTER_POS);nonStriker.position.copy(DEFAULT_NONSTRIKER_POS);batter.rotation.set(0,Math.PI,0);nonStriker.rotation.set(0,0,0);runState.runnerProgress=0;runState.active=false;runState.runs=0;runState.deliveryCounted=false;}
@@ -1700,6 +1721,7 @@ function applyCleanBowlAim(){
  // This marker is the exact point the flight code will aim for.
  bouncePoint.set(deliveryLineX,.24,deliveryBounceZ);
  landingPreview.position.set(deliveryLineX,.035,deliveryBounceZ);
+ setPitchMarkerColor();
  landingPreview.visible=true;
 }
 function setupCleanBowlJoystick(){
@@ -1737,7 +1759,10 @@ function startBowlingDelivery(){
  deliverySpeed=bowlSpeed;// Use the exact point selected by the joystick; do not re-snap it.
  bouncePoint.set(deliveryLineX,.24,deliveryBounceZ);
  applyCleanBowlAim();
- landingPreview.visible=false;
+ // Keep the bounce marker visible through the run-up and flight so the bowler
+ // can see the exact target that was locked before release.
+ setPitchMarkerColor();
+ landingPreview.visible=true;
  matchPhase="PREVIEW";
  bowlStage=3;refreshCleanBowlingUI();setDeliveryStatus("RUN-UP · "+bowlPace+" · "+bowlTypeState.replaceAll("_"," "));
 }
