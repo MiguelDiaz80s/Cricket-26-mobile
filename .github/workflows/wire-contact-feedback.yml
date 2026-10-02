@@ -1,0 +1,75 @@
+name: Wire perfect contact feedback
+
+on:
+  push:
+    paths:
+      - "game.js"
+      - "contact-feedback.js"
+      - ".github/workflows/wire-contact-feedback.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wire contact feedback into game.js
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('game.js')
+          s=p.read_text()
+
+          imp='import { createContactFeedback } from "./contact-feedback.js";'
+          if imp not in s:
+              marker='import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";'
+              if marker not in s:
+                  raise SystemExit('Three import not found')
+              s=s.replace(marker,marker+'\n'+imp,1)
+
+          anchor='ball.position.set(0,.63,6.5);ball.castShadow=true;stadium.add(ball);'
+          init='''\nconst contactFeedback=createContactFeedback(scene,camera,{\n  velocityThreshold:62,\n  shakeDuration:150,\n  shakeStrength:isMobileDevice?.045:.075,\n  tailDuration:520,\n  tailLength:isMobileDevice?10:14,\n  tailWidth:isMobileDevice?.13:.18\n});'''
+          if 'const contactFeedback=createContactFeedback' not in s:
+              if anchor not in s:
+                  raise SystemExit('ball anchor not found')
+              s=s.replace(anchor,anchor+init,1)
+
+          trigger='''  contactFeedback.triggerPerfectContact(ball,exitSpeed,shot);\n'''
+          speed_line='  const exitSpeed=20+deliverySpeed*.18+38*timing*power;'
+          if trigger.strip() not in s:
+              if speed_line not in s:
+                  raise SystemExit('exitSpeed line not found')
+              s=s.replace(speed_line,speed_line+'\n'+trigger.rstrip(),1)
+
+          render='  renderer.render(scene,camera);'
+          update='  contactFeedback.update(ball,performance.now());\n'+render
+          if 'contactFeedback.update(ball,performance.now());' not in s:
+              if render not in s:
+                  raise SystemExit('render line not found')
+              s=s.replace(render,update,1)
+
+          p.write_text(s)
+          PY
+
+      - name: Syntax check
+        run: node --check game.js
+
+      - name: Commit wiring
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No wiring changes needed"
+            exit 0
+          fi
+          git add game.js
+          git commit -m "Wire perfect contact feedback into batting"
+          git push
