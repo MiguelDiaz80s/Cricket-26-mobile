@@ -1465,7 +1465,7 @@ startMatchBtn.addEventListener("click",e=>{
 
 
 /* CONSOLIDATED GAMEPLAY CLEANUP */
-let selectedDeliveryShot=selectedShot||"STROKE",pendingBatAction=null,swingAnimation=null,wicketPresentation=null,catchCameraUntil=0,batRagdoll=null;
+let selectedDeliveryShot=selectedShot||"STROKE",pendingBatAction=null,swingAnimation=null,wicketPresentation=null,catchCameraUntil=0,batRagdoll=null,contactEdgeToSlips=false;
 const SHOT_POWER_MODIFIERS={LOFT:1.8,STROKE:1.2,PUSH:.6};
 let batCanHitBall=true;
 let completedRuns=0;
@@ -1676,6 +1676,7 @@ function resolvePendingBatContact(a,contactMs){
  }
  if(Math.hypot(gx,gz)<.12)gz=-1;
  const len=Math.hypot(gx,gz)||1;gx/=len;gz/=len;
+ contactEdgeToSlips=edgeToSlips;
  const finalQuality=veryBadTiming?"VERY LATE/VERY EARLY":badTiming?"POOR TIMING":quality;
  timingLabel.textContent="CONTACT · "+finalQuality;
  setDeliveryStatus(edgeToSlips?"BAT CONTACT · EDGE TO SLIPS":"BAT CONTACT · "+finalQuality);
@@ -2132,9 +2133,9 @@ updateScoreboard();
   phase12Active=true;phase12Finalized=false;phase12Counted=false;phase12RunsCommitted=0;phase12CatchWindowUntil=0;phase12Throwing=false;
   shotFlightActive=true;ballHit=true;deliveryActive=false;runState.runs=0;runState.active=false;runState.fielded=false;runState.throwActive=false;runState.deliveryCounted=false;runState.runnerProgress=0;
   const start=origin.clone(),velocity=direction.clone().normalize(),flat=new THREE.Vector3(velocity.x,0,velocity.z);if(flat.lengthSq()<.001)flat.set(0,0,-1);else flat.normalize();
-  const isLoft=shot==="LOFT",power=SHOT_POWER_MODIFIERS[shot]||1.2,distance=(isLoft?28:22)+Math.max(0,exitSpeed)*(.82*power),target=start.clone().add(flat.multiplyScalar(distance));target.y=.25;
-  const duration=Math.min(5000,2100+Math.max(0,exitSpeed)*34),sector=sectorForVelocity(flat);showSector(sector);
-  const catchPoint=start.clone().lerp(target,.86);catchPoint.y=1.05;phase12Fielder=chooseFielder(isLoft?catchPoint:target,sector);
+  const isLoft=shot==="LOFT",isEdge=contactEdgeToSlips,power=SHOT_POWER_MODIFIERS[shot]||1.2,distance=(isLoft?28:22)+Math.max(0,exitSpeed)*(.82*power),target=start.clone().add(flat.multiplyScalar(distance));target.y=.25;
+  const duration=Math.min(5000,2100+Math.max(0,exitSpeed)*34),sector=sectorForVelocity(flat);showSector(isEdge?"SLIPS":sector);
+  const catchPoint=start.clone().lerp(target,isEdge?.58:.86);catchPoint.y=isEdge?.72:1.05;phase12Fielder=chooseFielder(isLoft||isEdge?catchPoint:target,sector);
   if(runBtn){runBtn.disabled=false;runBtn.classList.add("active");runBtn.classList.remove("running");runBtn.textContent="RUN";}
   const started=performance.now();let previousY=start.y;let resolved=false;
   const finishBoundary=(runs,label)=>{if(resolved||phase12Finalized)return;resolved=true;phase12RunsCommitted=runs;shotFlightActive=false;ballHit=false;if(runBtn)runBtn.classList.remove("active","running");finishRuns(runs,label);beginRecovery(label,runs,"None",quality,pendingBatAction?.foot||"NONE",true);};
@@ -2144,7 +2145,9 @@ updateScoreboard();
   const tick=now=>{
    if(!phase12Active||phase12Finalized||resolved)return;const dt=Math.min(.033,Math.max(.001,(now-started)/1000));const p=Math.min(1,(now-started)/duration),e=p*p*(3-2*p);ball.position.lerpVectors(start,target,e);const lift=isLoft?3.25*Math.sin(Math.PI*e):.72*Math.sin(Math.PI*e);ball.position.y=Math.max(.25,start.y+(target.y-start.y)*e+lift);ball.rotation.x+=dt*10;ball.rotation.y+=dt*12;moveFielder(phase12Fielder,dt);
    const descending=ball.position.y<previousY;
-   if(isLoft&&descending&&ball.position.y<=CATCH_ALTITUDE&&previousY>CATCH_ALTITUDE&&phase12CatchWindowUntil<=now){phase12CatchWindowUntil=now+CATCH_WINDOW_MS;const fd=phase12Fielder?Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z):Infinity;if(phase12Fielder&&fd<=CATCH_RADIUS){const skill=phase12Fielder.userData.skill||.78;if(Math.random()<skill){phase12ResolveCatch(quality,pendingBatAction?.foot||"NONE");return;}showToast("CATCH DROPPED");setDeliveryStatus("CATCH DROPPED · BALL LIVE");}}
+   const catchableAerial=isLoft||isEdge;
+   const catchAltitude=isEdge?.72:CATCH_ALTITUDE;
+   if(catchableAerial&&descending&&ball.position.y<=catchAltitude&&previousY>catchAltitude&&phase12CatchWindowUntil<=now){phase12CatchWindowUntil=now+CATCH_WINDOW_MS;const fd=phase12Fielder?Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z):Infinity;if(phase12Fielder&&fd<=CATCH_RADIUS){const skill=phase12Fielder.userData.skill||.78;if(Math.random()<skill){phase12ResolveCatch(quality,pendingBatAction?.foot||"NONE");return;}showToast("CATCH DROPPED");setDeliveryStatus(isEdge?"EDGE · CATCH DROPPED · BALL LIVE":"CATCH DROPPED · BALL LIVE");}}
    previousY=ball.position.y;
    if(boundaryMetric(ball.position)>=1){finishBoundary(ball.position.y>.34?6:4,ball.position.y>.34?"6 RUNS · OVER THE ROPE":"4 RUNS · BOUNDARY");return;}
    if(phase12Fielder&&!phase12Fielder.userData.hasBall){const fd=Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z);if(!isLoft&&fd<.85&&ball.position.y<=.6){setHasBall(phase12Fielder,true);if(runState.active)phase12Throwing=true;else finishDot();if(runState.active&&runBtn)runBtn.disabled=true;}}
