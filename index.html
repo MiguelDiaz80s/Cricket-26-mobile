@@ -165,6 +165,12 @@
     <div id="bowlJoystick" class="bowl-joystick"><div class="bowl-joystick-ring"></div><div id="bowlJoystickStick" class="bowl-joystick-stick"></div><span class="bowl-label bowl-full">FULL</span><span class="bowl-label bowl-short">SHORT</span><span class="bowl-label bowl-off">OFF</span><span class="bowl-label bowl-leg">LEG</span></div>
     <div id="bowlVariation" class="bowl-variation hidden"><button data-bowl-type="STRAIGHT" class="active">STRAIGHT</button><button data-bowl-type="SLOWER">SLOW</button><button data-bowl-type="REVERSE_SWING">REVERSE SWING</button><button data-bowl-type="OUT_SWING">OUT SWING</button><button data-bowl-type="IN_SWING">IN SWING</button><button data-bowl-type="OFF_CUTTER">OFF CUTTER</button><button data-bowl-type="LEG_CUTTER">LEG CUTTER</button></div>
     <button id="bowlDeliver" class="bowl-deliver" type="button" disabled>BOWL</button>
+    <button id="fieldSetupBtn" class="field-setup-btn" type="button">FIELD SETUP</button>
+    <div id="fieldSetupPanel" class="field-setup-panel hidden">
+      <div class="field-setup-head"><b>FIELDING POSITIONS</b><span id="keeperLockedLabel">WICKET KEEPER · LOCKED BEHIND BATTER</span></div>
+      <div id="fieldSlots" class="field-slots"></div>
+      <button id="fieldSetupClose" class="field-setup-close" type="button">DONE</button>
+    </div>
   </div>
   
   <div class="timing-meter"><i id="timingBar"></i><b id="timingMarker"></b><span id="contactZone">CONTACT ZONE</span></div>
