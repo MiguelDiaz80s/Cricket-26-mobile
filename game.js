@@ -325,11 +325,12 @@ const keeper=player({team:1,role:"keeper",x:0,z:13.35,scale:1.12});
 keeper.userData.lockedKeeper=true;
 keeper.rotation.y=Math.PI;
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
-const fielders=[[-3.2,11.6],[-5.2,10.9],[-8.2,7.8],[-15.0,3.5],[-12.5,-3.5],[-7.5,-8.5],[7.5,-8.5],[14.5,3.8],[8.5,12.8]].map(([x,z])=>player({team:1,x,z,scale:.9}));
+const fielders=[[-3.2,11.6],[-5.2,10.9],[-7.1,10.2],[-15.0,3.5],[-12.5,-3.5],[-7.5,-8.5],[7.5,-8.5],[14.5,3.8],[8.5,12.8]].map(([x,z])=>player({team:1,x,z,scale:.9}));
 
 const REAL_FIELD_POSITIONS={
  "SLIP_1":{label:"1st Slip",x:-3.2,z:11.6},
  "SLIP_2":{label:"2nd Slip",x:-5.2,z:10.9},
+ "SLIP_3":{label:"3rd Slip",x:-7.1,z:10.2},
  "GULLY":{label:"Gully",x:-8.2,z:7.8},
  "POINT":{label:"Point",x:-15.0,z:3.5},
  "COVER":{label:"Cover",x:-12.5,z:-3.5},
@@ -2012,7 +2013,7 @@ animate=function(now){
   const pulse=1+Math.sin(now*.009)*.07;
   landingPreview.scale.setScalar((deliveryLength==="SHORT"?1.08:deliveryLength==="FULL"?.94:1)*pulse);
  }
- if(controlMode==="BOWL" && bowlStage===0 && !bowlAimLockedState && landingPreview.visible){
+ if(controlMode==="BOWL" && bowlStage<3 && landingPreview.visible){
   const pulse=1+Math.sin(now*.006)*.10;
   landingPreview.scale.set(pulse,pulse,pulse);
  }
