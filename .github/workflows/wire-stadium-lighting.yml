@@ -1,0 +1,118 @@
+name: Wire Stadium Lighting
+
+on:
+  push:
+    paths:
+      - "game.js"
+      - "lighting.js"
+      - "index.html"
+      - ".github/workflows/wire-stadium-lighting.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Wire lighting controller into game.js
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path("game.js")
+          s = p.read_text(encoding="utf-8")
+
+          if 'from "./lighting.js"' not in s:
+              s = s.replace(
+                  'import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";\n',
+                  'import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";\nimport { createStadiumLighting } from "./lighting.js";\n',
+                  1,
+              )
+
+          old_rig = re.compile(
+              r'const hemi=new THREE\.HemisphereLight\(0xa9c8e5,0x11170f,1\.25\);scene\.add\(hemi\);\n'
+              r'const sun=new THREE\.DirectionalLight\(0xffe7bd,3\.0\);\n'
+              r'sun\.position\.set\(-38,55,24\);sun\.castShadow=!isMobileDevice;sun\.shadow\.mapSize\.set\(isTabletDevice\?512:\(isMobileDevice\?256:1024\),isTabletDevice\?512:\(isMobileDevice\?256:1024\)\);\n'
+              r'sun\.shadow\.camera\.left=-65;sun\.shadow\.camera\.right=65;sun\.shadow\.camera\.top=65;sun\.shadow\.camera\.bottom=-65;\n'
+              r'scene\.add\(sun\);',
+          )
+          replacement = (
+              'const lighting=createStadiumLighting(scene,renderer,{mobile:isMobileDevice,tablet:isTabletDevice,transitionMs:1400});\n'
+              'const hemi=lighting.ambient;\n'
+              'const sun=lighting.sun;'
+          )
+          s, n = old_rig.subn(replacement, s, count=1)
+          if n != 1:
+              raise SystemExit("Could not find the original stadium lighting rig")
+
+          # The old four SpotLights are kept as visual tower fixtures, but their\n          # illumination is disabled so the new glTF-compatible PointLight rig\n          # is the authoritative night-session lighting.
+          s = s.replace(
+              'const l=new THREE.SpotLight(0xfff0c7,isMobileDevice?16:115,85,Math.PI/4,.5,1.25);',
+              'const l=new THREE.SpotLight(0xfff0c7,0,85,Math.PI/4,.5,1.25);',
+              1,
+          )
+
+          old_style = '''if(visualStyle==="bright"){renderer.toneMappingExposure=1.3;scene.fog.color.set(0x52786f);scene.fog.density=.004;sun.intensity=4;hemi.intensity=1.7}
+ else if(visualStyle==="cinematic"){renderer.toneMappingExposure=.98;scene.fog.color.set(0x050a09);scene.fog.density=.009;sun.intensity=2.3;hemi.intensity=1.05}
+ else{renderer.toneMappingExposure=1.12;scene.fog.color.set(0x07120f);scene.fog.density=.0068;sun.intensity=3;hemi.intensity=1.25}'''
+          new_style = '''if(visualStyle==="bright"){renderer.toneMappingExposure=1.3;scene.fog.color.set(0x52786f);scene.fog.density=.004}
+ else if(visualStyle==="cinematic"){renderer.toneMappingExposure=.98;scene.fog.color.set(0x050a09);scene.fog.density=.009}
+ else{renderer.toneMappingExposure=1.12;scene.fog.color.set(0x07120f);scene.fog.density=.0068}'''
+          if old_style in s:
+              s = s.replace(old_style,new_style,1)
+
+          format_handler = '''document.querySelectorAll("#formatChoices .setup-choice").forEach(b=>b.addEventListener("click",()=>{
+ selectedFormat=b.dataset.format;
+ document.querySelectorAll("#formatChoices .setup-choice").forEach(x=>x.classList.toggle("active",x===b));
+ document.querySelector("#conditionText").textContent=selectedFormat==="TEST"?"DAYLIGHT · FRESH PITCH":selectedFormat==="ODI"?"DAYLIGHT · HARD SURFACE":"NIGHT · FRESH PITCH";
+ showToast(selectedFormat+" FORMAT SELECTED");
+}));'''
+          new_format_handler = '''document.querySelectorAll("#formatChoices .setup-choice").forEach(b=>b.addEventListener("click",()=>{
+ selectedFormat=b.dataset.format;
+ document.querySelectorAll("#formatChoices .setup-choice").forEach(x=>x.classList.toggle("active",x===b));
+ const night=selectedFormat==="T20";
+ document.querySelector("#conditionText").textContent=selectedFormat==="TEST"?"DAYLIGHT · FRESH PITCH":selectedFormat==="ODI"?"DAYLIGHT · HARD SURFACE":"NIGHT · FRESH PITCH";
+ lighting.setGameState(night?"NIGHT SESSION":"DAYLIGHT");
+ showToast(selectedFormat+" FORMAT SELECTED");
+}));'''
+          if format_handler in s:
+              s = s.replace(format_handler,new_format_handler,1)
+
+          # Ensure the chosen format is applied when the match actually starts,\n          # even if the player never re-clicks the format button.
+          anchor = 'startMatchBtn.addEventListener("click",()=>{\n closePreMatch();'
+          if anchor in s and 'lighting.setGameState(selectedFormat==="T20"?"NIGHT SESSION":"DAYLIGHT");' not in s:
+              s = s.replace(anchor, 'startMatchBtn.addEventListener("click",()=>{\n lighting.setGameState(selectedFormat==="T20"?"NIGHT SESSION":"DAYLIGHT");\n closePreMatch();', 1)
+
+          # Drive the smooth transition every render frame and stop the legacy\n          # SpotLight animation from overwriting the new point-light controller.
+          s = s.replace(
+              'if(!isMobileDevice)lights.forEach((l,i)=>l.intensity=visualStyle==="bright"?75+Math.sin(t*1.3+i)*1:115+Math.sin(t*1.3+i)*2);',
+              'lighting.update(dt*1000);\n if(!isMobileDevice)lights.forEach(l=>l.intensity=0);',
+              1,
+          )
+
+          # Bump the cache-busting version if this file still contains the old import version.
+          p.write_text(s,encoding="utf-8")
+
+      - name: Validate JavaScript
+        run: node --check game.js
+
+      - name: Commit wired lighting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game.js
+          git diff --cached --quiet || git commit -m "Wire stadium day and night lighting controller"
+          git push
