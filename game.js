@@ -170,6 +170,14 @@ function floodlight(x,z){
 }
 (isMobileDevice?[[-48,-35],[48,35]]:[[-48,-35],[48,-35],[-48,35],[48,35]]).forEach(p=>floodlight(...p));
 
+// VISUAL POLISH v66 — presentation lighting and stadium depth.
+const rimLight=new THREE.DirectionalLight(0xb8d9ff,1.15);
+rimLight.position.set(34,28,-42);scene.add(rimLight);
+const fillLight=new THREE.DirectionalLight(0x8fbf9a,.65);
+fillLight.position.set(-12,18,-28);scene.add(fillLight);
+const stadiumGlow=new THREE.PointLight(0xf5c400,10,75,2);
+stadiumGlow.position.set(0,18,0);scene.add(stadiumGlow);
+
 function limbBetween(a,b,r,mat){
  const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
  const len=a.distanceTo(b);
@@ -320,9 +328,69 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
 let batter=player({team:0,role:"batter",x:.8,z:10.4,scale:1.12});batter.rotation.y=Math.PI;
 let nonStriker=player({team:0,role:"batter",x:-.8,z:-12.2,scale:1.08});
 nonStriker.rotation.y=0;
-const keeper=player({team:1,role:"keeper",x:-.5,z:-13.9,scale:1.02});
+const keeper=player({team:1,role:"keeper",x:0,z:13.9,scale:1.02});
+keeper.rotation.y=Math.PI;
 const bowler=player({team:1,x:0,z:-20.5,scale:1.08});
-const fielders=[[-16,-4],[17,-4],[-22,7],[22,8],[-18,22],[18,22],[-32,15],[31,15],[0,30],[0,-36]].slice(0,isMobileDevice?4:10).map(([x,z])=>player({team:1,x,z,scale:.9}));
+const fielders=[[-3.2,11.6],[-5.2,10.9],[-8.2,7.8],[-15.0,3.5],[-12.5,-3.5],[-7.5,-8.5],[7.5,-8.5],[14.5,3.8],[8.5,12.8]].map(([x,z])=>player({team:1,x,z,scale:.9}));
+
+const REAL_FIELD_POSITIONS={
+ "SLIP_1":{label:"1st Slip",x:-3.2,z:11.6},
+ "SLIP_2":{label:"2nd Slip",x:-5.2,z:10.9},
+ "GULLY":{label:"Gully",x:-8.2,z:7.8},
+ "POINT":{label:"Point",x:-15.0,z:3.5},
+ "COVER":{label:"Cover",x:-12.5,z:-3.5},
+ "MID_OFF":{label:"Mid-off",x:-7.5,z:-8.5},
+ "MID_ON":{label:"Mid-on",x:7.5,z:-8.5},
+ "SQUARE_LEG":{label:"Square leg",x:14.5,z:3.8},
+ "FINE_LEG":{label:"Fine leg",x:8.5,z:12.8},
+ "THIRD_MAN":{label:"Third man",x:-20.0,z:13.0},
+ "DEEP_POINT":{label:"Deep point",x:-22.0,z:1.5},
+ "DEEP_COVER":{label:"Deep cover",x:-18.0,z:-8.0},
+ "DEEP_MIDWICKET":{label:"Deep mid-wicket",x:19.0,z:-5.0},
+ "LONG_ON":{label:"Long on",x:12.0,z:-17.0},
+ "LONG_OFF":{label:"Long off",x:-12.0,z:-17.0}
+};
+let fieldAssignments=["SLIP_1","SLIP_2","GULLY","POINT","COVER","MID_OFF","MID_ON","SQUARE_LEG","FINE_LEG"];
+function applyFieldAssignments(){
+ fielders.forEach((f,i)=>{
+  const key=fieldAssignments[i],p=REAL_FIELD_POSITIONS[key];
+  if(!p)return;
+  f.userData.fieldPositionKey=key;
+  f.userData.fieldPositionLabel=p.label;
+  f.userData.base=new THREE.Vector3(p.x,.18,p.z);
+  if(!f.userData.running&&!f.userData.hasBall&&!shotFlightActive){
+   f.position.copy(f.userData.base);
+   f.rotation.y=Math.atan2(-p.x,Math.max(.001,-p.z));
+  }
+ });
+}
+function renderFieldSetup(){
+ const root=document.querySelector("#fieldSlots");if(!root)return;
+ root.innerHTML="";
+ fieldAssignments.forEach((key,i)=>{
+  const row=document.createElement("div");row.className="field-slot";
+  const label=document.createElement("span");label.textContent=(i+1)+" · "+(fielders[i]?.userData.fieldPositionLabel||REAL_FIELD_POSITIONS[key].label);
+  const select=document.createElement("select");select.dataset.fielder=String(i);
+  Object.entries(REAL_FIELD_POSITIONS).forEach(([k,p])=>{
+   const opt=document.createElement("option");opt.value=k;opt.textContent=p.label;
+   opt.selected=k===key;
+   if(k!==key&&fieldAssignments.some((v,j)=>j!==i&&v===k))opt.disabled=true;
+   select.appendChild(opt);
+  });
+  select.addEventListener("change",()=>{
+   const old=fieldAssignments[i],next=select.value;
+   const other=fieldAssignments.indexOf(next);
+   if(other>=0&&other!==i){fieldAssignments[other]=old;}
+   fieldAssignments[i]=next;
+   applyFieldAssignments();renderFieldSetup();
+   showToast("FIELDER "+(i+1)+" · "+REAL_FIELD_POSITIONS[next].label);
+  });
+  row.append(label,select);root.appendChild(row);
+ });
+ const keeperLabel=document.querySelector("#keeperLockedLabel");
+ if(keeperLabel)keeperLabel.textContent="WICKET KEEPER · LOCKED BEHIND BATTER";
+}
+applyFieldAssignments();
 
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.19,24,18),new THREE.MeshStandardMaterial({color:0x8d1119,roughness:.3,clearcoat:.35}));
 ball.position.set(0,.63,6.5);ball.castShadow=true;stadium.add(ball);
@@ -853,6 +921,19 @@ function clearPitchMarkerOnBounce(){
  landingPreview.visible=false;
 }
 
+function addBounceMarkerLabel(){
+ if(landingPreview.userData.labelSprite)return;
+ const c=document.createElement("canvas");c.width=256;c.height=64;
+ const x=c.getContext("2d");x.clearRect(0,0,256,64);
+ x.fillStyle="rgba(3,12,8,.86)";x.roundRect(4,8,248,48,14);x.fill();
+ x.strokeStyle="#ffffff";x.lineWidth=3;x.stroke();
+ x.fillStyle="#ffffff";x.font="900 24px Arial";x.textAlign="center";x.textBaseline="middle";x.fillText("BOUNCE HERE",128,32);
+ const tex=new THREE.CanvasTexture(c);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+ const sp=new THREE.Sprite(mat);sp.scale.set(2.5,.62,1);sp.position.set(0,1.05,0);
+ landingPreview.add(sp);landingPreview.userData.labelSprite=sp;
+}
+addBounceMarkerLabel();
+
 function updateScoreboard(){
  displayRuns=inningsRuns;displayBalls=inningsBalls;displayWickets=inningsWickets;
  const team=document.querySelector("#scorecardTeam"),runs=document.querySelector("#scorecardRuns"),scorecardOvers=document.querySelector("#scorecardOvers"),inn=document.querySelector("#scorecardInnings");
@@ -877,6 +958,7 @@ function updateScoreboard(){
 function setDeliveryStatus(text){if(deliveryText)deliveryText.textContent=text;}
 
 function resetFielders(){
+ applyFieldAssignments();
  fielders.forEach(p=>{
   if(!p.userData.base)p.userData.base=p.position.clone();
   p.position.copy(p.userData.base);p.userData.target=null;p.userData.running=false;
@@ -1633,10 +1715,14 @@ function updateCatchCamera(now){if(cameraMode==="drs")return;if(cameraMode!=="ca
 function executeBatAction(foot){
  if(controlMode!=="BAT"||!deliveryActive||ballHit)return;
  const elapsed=performance.now()-deliveryStart;
- // Action is available only when the ball is genuinely approaching the batter.
- if(elapsed<5000||elapsed>6650)return;
- selectedFoot=foot;pendingBatAction={foot,shot:selectedDeliveryShot,requestedAt:performance.now()};startSwingAnimation(foot,selectedDeliveryShot);
- timingLabel.textContent="SWING · "+foot;setDeliveryStatus(foot==="LEAVE"?"LEAVE · WATCH THE BALL":"SWING · WAIT FOR CONTACT");
+ // Any swing during the playable delivery window is valid contact intent.
+ // Timing now controls quality/power; it does not decide whether the bat connects.
+ if(elapsed<3800||elapsed>7600)return;
+ selectedFoot=foot;
+ pendingBatAction={foot,shot:selectedDeliveryShot,requestedAt:performance.now()};
+ startSwingAnimation(foot,selectedDeliveryShot);
+ timingLabel.textContent="SWING · "+foot;
+ setDeliveryStatus(foot==="LEAVE"?"LEAVE · WATCH THE BALL":"SWING · TIMING SET");
 }
 document.querySelectorAll("[data-foot]").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();executeBatAction(b.dataset.foot);}));
 
@@ -1652,11 +1738,19 @@ function updateBatDelivery(now){
  ball.position.set(deliveryLineX*Math.sin(Math.PI*fp),y,z);
  if(fp>=bounceT)clearPitchMarkerOnBounce();
  timingBar.style.width=Math.round(fp*100)+"%";
- if(elapsed>=contactMs){if(pendingBatAction){const a=pendingBatAction;pendingBatAction=null;resolvePendingBatContact(a,contactMs);}else resolveDot();return;}
+ if(elapsed>=contactMs){
+   if(pendingBatAction){
+    const a=pendingBatAction;pendingBatAction=null;resolvePendingBatContact(a,contactMs);
+    return;
+   }
+   if(elapsed>=7350){resolveDot();return;}
+ }
  if(elapsed>=4700){timingLabel.textContent=timingQuality(elapsed)+" · SWING NOW";document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=false);}
 }
 function resolvePendingBatContact(a,contactMs){
- const elapsed=performance.now()-deliveryStart,timing=Math.max(0,1-Math.abs(elapsed-contactMs)/900),quality=elapsed<contactMs?(timing>.82?"EARLY · GOOD":"EARLY"):(timing>.82?"LATE · GOOD":"LATE");
+ const elapsed=performance.now()-deliveryStart;
+ const timing=Math.max(.04,1-Math.abs(elapsed-contactMs)/1150);
+ const quality=timing>.82?"PERFECT":timing>.62?(elapsed<contactMs?"EARLY · GOOD":"LATE · GOOD"):timing>.34?(elapsed<contactMs?"EARLY":"LATE"):"VERY LATE / VERY EARLY";
  if(a.foot==="LEAVE"){
   batCanHitBall=false;
   if(Math.abs(deliveryLineX)<.42){
@@ -1744,6 +1838,7 @@ function applyCleanBowlAim(){
  bouncePoint.set(predictedBounceX,.24,deliveryBounceZ);
  landingPreview.position.set(predictedBounceX,.035,deliveryBounceZ);
  setPitchMarkerColor();
+ landingPreview.userData.bounceLabel="BOUNCE HERE";
  landingPreview.visible=true;
 }
 function setupCleanBowlJoystick(){
@@ -1761,6 +1856,12 @@ function refreshCleanBowlingUI(){
  if(bowlDeliver){bowlDeliver.classList.toggle("hidden",!active||bowlStage!==2);bowlDeliver.disabled=!active||bowlStage!==2||deliveryActive;}
 
 }
+const fieldSetupBtn=document.querySelector("#fieldSetupBtn"),fieldSetupPanel=document.querySelector("#fieldSetupPanel"),fieldSetupClose=document.querySelector("#fieldSetupClose");
+fieldSetupBtn?.addEventListener("click",()=>{
+ if(controlMode!=="BOWL")return;
+ renderFieldSetup();fieldSetupPanel?.classList.remove("hidden");fieldSetupPanel?.classList.add("open");
+});
+fieldSetupClose?.addEventListener("click",()=>fieldSetupPanel?.classList.remove("open"));
 setupCleanBowlJoystick();
 document.querySelectorAll("[data-bowl-type]").forEach(b=>b.addEventListener("click",()=>{
  if(controlMode!=="BOWL"||!bowlAimLockedState)return;
