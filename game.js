@@ -832,7 +832,7 @@ const ballSpeed=document.querySelector("#ballSpeed");
 let tossWinner="",tossComplete=false,battingFirst="",tossDecisionMade=false;
 let matchPhase="IDLE",deliveryActive=false,ballHit=false;
 let deliveryStart=0,deliveryDuration=1450,deliverySpeed=0;
-let deliveryLine="ON_STUMPS",deliveryLength="FULL";
+let deliveryLine="ON_STUMPS",deliveryLength="FULL",deliveryVariation="FAST";
 let inningsBalls=0,inningsRuns=0,inningsWickets=0,totalOvers=20,ballsInOver=0;
 let strikerRuns=0,strikerBalls=0,lastOutcome="";
 let controlMode="BAT";
@@ -1767,25 +1767,26 @@ function executeBatAction(foot){
 document.querySelectorAll("[data-foot]").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();executeBatAction(b.dataset.foot);}));
 
 function updateBatDelivery(now){
- if(!deliveryActive)return;
- const elapsed=now-deliveryStart,contactMs=6800;
- if(elapsed<700){matchPhase="PREVIEW";bowler.position.copy(runUpStart);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));setDeliveryStatus("LANDING SPOT");timingLabel.textContent="READ THE LANDING SPOT";document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=true);return;}
- if(elapsed<5000){matchPhase="RUN_UP";const p=(elapsed-850)/4150,e=p*p*(3-2*p);bowler.position.lerpVectors(runUpStart,bowlerRelease,e);bowler.rotation.z=Math.sin(p*Math.PI)*.06;setDeliveryStatus("BOWLER RUN-UP");timingLabel.textContent="GET READY";document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=true);return;}
- if(elapsed<5350){matchPhase="RELEASE";const p=(elapsed-5000)/350;bowler.position.z=-16-p*.8;ball.position.set(0,1.95,-16);if(!pitchMarkerShownAt)calculateAndShowPitchMarker();setDeliveryStatus("RELEASE · BALL AWAY");document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=false);return;}
- matchPhase="FLIGHT";const fp=Math.min(1,Math.max(0,(elapsed-5350)/1450)),bounceT=.58;bowler.rotation.x=.08;bowler.rotation.z=0;let z,y;
- if(fp<=bounceT){const q=fp/bounceT;z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*q;y=releasePoint.y+(bouncePoint.y-releasePoint.y)*q+1.55*Math.sin(Math.PI*q);}
- else{const q=(fp-bounceT)/(1-bounceT);z=deliveryBounceZ+(10.05-deliveryBounceZ)*q;y=.24+.78*Math.sin(Math.PI*q);}
- ball.position.set(deliveryLineX*Math.sin(Math.PI*fp),y,z);
- if(fp>=bounceT)clearPitchMarkerOnBounce();
- timingBar.style.width=Math.round(fp*100)+"%";
- if(elapsed>=contactMs){
-   if(pendingBatAction){
-    const a=pendingBatAction;pendingBatAction=null;resolvePendingBatContact(a,contactMs);
-    return;
-   }
-   if(elapsed>=7350){resolveDot();return;}
- }
- if(elapsed>=4700){timingLabel.textContent=timingQuality(elapsed)+" · SWING NOW";document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=false);}
+  if(!deliveryActive)return;
+  const elapsed=now-deliveryStart,previewEnd=1000,runUpEnd=5200,releaseEnd=5550,contactMs=6800,flightDuration=1250;
+  if(elapsed<previewEnd){matchPhase="PREVIEW";bowler.position.copy(runUpStart);ball.position.copy(bowlerRelease).add(new THREE.Vector3(0,.05,0));landingPreview.visible=true;setDeliveryStatus("LANDING SPOT · "+deliveryVariation);timingLabel.textContent="READ THE LANDING SPOT";deliveryText.textContent=deliveryVariation+" · "+deliveryLength+" · "+deliveryLine;document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=true);return;}
+  if(elapsed<runUpEnd){matchPhase="RUN_UP";const p=(elapsed-previewEnd)/(runUpEnd-previewEnd),e=p*p*(3-2*p);bowler.position.lerpVectors(runUpStart,bowlerRelease,e);bowler.rotation.z=Math.sin(p*Math.PI)*.06;setDeliveryStatus("BOWLER RUN-UP · "+deliveryVariation);timingLabel.textContent="WATCH THE BALL";document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=true);return;}
+  if(elapsed<releaseEnd){matchPhase="RELEASE";const p=(elapsed-runUpEnd)/(releaseEnd-runUpEnd);bowler.position.z=-16-p*.8;ball.position.set(0,1.95,-16);landingPreview.visible=true;if(!pitchMarkerShownAt)calculateAndShowPitchMarker();setDeliveryStatus(deliveryVariation+" · BALL RELEASE");timingLabel.textContent="GET READY";document.querySelectorAll("[data-foot]").forEach(b=>b.disabled=false);return;}
+  matchPhase="FLIGHT";landingPreview.visible=true;const fp=Math.min(1,Math.max(0,(elapsed-releaseEnd)/flightDuration)),bounceT=.58;bowler.rotation.x=.08;bowler.rotation.z=0;let z,y;
+  if(fp<=bounceT){const q=fp/bounceT;z=releasePoint.z+(deliveryBounceZ-releasePoint.z)*q;y=releasePoint.y+(bouncePoint.y-releasePoint.y)*q+1.55*Math.sin(Math.PI*q);}
+  else{const q=(fp-bounceT)/(1-bounceT);z=deliveryBounceZ+(10.05-deliveryBounceZ)*q;y=.24+.78*Math.sin(Math.PI*q);}
+  const movement=deliveryVariation==="SWING"?.075:deliveryVariation==="SEAM"?.045:0;
+  ball.position.set(deliveryLineX*Math.sin(Math.PI*fp)+movement*Math.sin(Math.PI*fp*1.35),y,z);
+  if(fp>=bounceT)clearPitchMarkerOnBounce();
+  timingBar.style.width=Math.round(fp*100)+"%";
+  if(elapsed>=contactMs){
+    if(pendingBatAction){
+     const a=pendingBatAction;pendingBatAction=null;resolvePendingBatContact(a,contactMs);
+     return;
+    }
+    if(elapsed>=7350){resolveDot();return;}
+  }
+  if(elapsed>=4700){timingLabel.textContent=timingQuality(elapsed)+" · SWING NOW";document.querySelectorAll("[data-shot],[data-foot]").forEach(b=>b.disabled=false);}
 }
 function resolvePendingBatContact(a,contactMs){
  const elapsed=performance.now()-deliveryStart;
