@@ -1083,8 +1083,9 @@ function startDelivery(){
  if(replayActive||controlMode!=="BAT")return;
  if(deliveryActive||shotFlightActive||inningsWickets>=10)return;
  deliveryActive=true;ballHit=false;shotFlightActive=false;deliveryStart=performance.now();
+ // Keep the visual delivery readable on mobile while still giving pace variety.
  deliveryDuration=3250;
- deliverySpeed=118+Math.random()*29;
+ deliverySpeed=112+Math.random()*30;
  deliveryLine=["ON_STUMPS","OUTSIDE_OFF","LEG"][Math.floor(Math.random()*3)];
  deliveryLength=["FULL","GOOD","SHORT"][Math.floor(Math.random()*3)];
  deliveryLineX = deliveryLine === "OUTSIDE_OFF" ? -0.72 : (deliveryLine === "LEG" ? 0.72 : 0);
@@ -1134,25 +1135,30 @@ function footChoice(foot){
 }
 document.querySelectorAll("[data-foot]").forEach(b=>b.addEventListener("click",()=>footChoice(b.dataset.foot)));
 
+function battingContactPointMs(){
+ // The batter meets the ball near the end of the visible flight, not at deliveryStart.
+ // Full balls arrive slightly earlier; short balls arrive slightly later.
+ if(deliveryLength==="FULL")return 6425;
+ if(deliveryLength==="SHORT")return 6760;
+ return 6600;
+}
 function calculateTiming(elapsed){
- // The real contact point is the instant just around the bowler's release.
- // 0ms = perfect release timing. Early and late contacts still work, but lose power.
- const releaseContactMs=2425;
- const contactWindowMs=575;
- return Math.max(0,1-Math.abs(elapsed-releaseContactMs)/contactWindowMs);
+ const contactMs=battingContactPointMs();
+ const contactWindowMs=520;
+ return Math.max(0,1-Math.abs(elapsed-contactMs)/contactWindowMs);
 }
 function timingQuality(elapsed){
- const delta=elapsed-2425;
+ const delta=elapsed-battingContactPointMs();
  const abs=Math.abs(delta);
- if(abs<=75)return "PERFECT";
- if(abs<=190)return delta<0?"EARLY · GOOD":"LATE · GOOD";
- if(abs<=380)return delta<0?"EARLY":"LATE";
+ if(abs<=70)return "PERFECT";
+ if(abs<=165)return delta<0?"EARLY · GOOD":"LATE · GOOD";
+ if(abs<=330)return delta<0?"EARLY":"LATE";
  return delta<0?"TOO EARLY":"TOO LATE";
 }
 function timingPower(elapsed){
- const releaseContactMs=2425;
- const contactWindowMs=575;
- return Math.max(0,1-Math.abs(elapsed-releaseContactMs)/contactWindowMs);
+ const contactMs=battingContactPointMs();
+ const contactWindowMs=520;
+ return Math.max(0,1-Math.abs(elapsed-contactMs)/contactWindowMs);
 }
 
 function resolveWicket(reason){
