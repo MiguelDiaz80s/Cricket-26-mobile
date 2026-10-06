@@ -2333,3 +2333,58 @@ updateScoreboard();
  };
  window.__cricket26Phase12={sectors:SECTORS,getPayload:()=>window.lastDeliveryPayload||null,getHistory:()=>window.deliveryHistory||[]};
 })();
+
+
+/* C26 NEXT-GEN CORE BRIDGE v1.000 */
+window.C26Core={
+ get batter(){return batter},
+ get ball(){return ball},
+ get fielders(){return fielders},
+ get keeper(){return keeper},
+ get bowler(){return bowler},
+ get scene(){return scene},
+ get camera(){return camera},
+ get cameraMode(){return cameraMode},
+ get controlMode(){return controlMode},
+ get selectedCountry(){return selectedCountry},
+ get selectedFormat(){return selectedFormat},
+ get deliveryActive(){return deliveryActive},
+ get shotFlightActive(){return shotFlightActive},
+ get matchPhase(){return matchPhase},
+ get deliveryLength(){return deliveryLength},
+ get deliveryLine(){return deliveryLine},
+ get deliverySpeed(){return deliverySpeed},
+ get bowlType(){return bowlTypeState},
+ get wind(){return window.__c26WindState||null},
+ showToast:(m)=>typeof showToast==="function"&&showToast(m),
+ setCamera:(m)=>typeof setCamera==="function"&&setCamera(m),
+ setControlMode:(m)=>typeof setControlMode==="function"&&setControlMode(m),
+ startDelivery:()=>typeof startDelivery==="function"&&startDelivery(),
+ startBowlingDelivery:()=>typeof startBowlingDelivery==="function"&&startBowlingDelivery(),
+ getScore:()=>({runs:inningsRuns,balls:inningsBalls,wickets:inningsWickets,strikerRuns,strikerBalls}),
+ saveDelivery:(d)=>window.dispatchEvent(new CustomEvent("cricket26:delivery",{detail:d}))
+};
+
+
+/* C26 ADVANCED BATTING HOOK */
+window.__c26AdvancedShot="REVERSE_SCOOP";
+const __c26OriginalExecuteBatAction=executeBatAction;
+executeBatAction=function(foot){
+ if(foot!=="SPECIAL"||!window.__c26AdvancedShot)return __c26OriginalExecuteBatAction(foot);
+ if(controlMode!=="BAT"||!deliveryActive||ballHit)return;
+ const presets={
+  REVERSE_SCOOP:{x:-.82,y:-.48},
+  RAMP:{x:.75,y:-.55},
+  SWEEP:{x:.88,y:.05},
+  CUT:{x:-.92,y:-.05}
+ };
+ const q=presets[window.__c26AdvancedShot]||presets.REVERSE_SCOOP;
+ hitDirection.x=q.x;hitDirection.y=q.y;
+ selectedDeliveryShot="STROKE";selectedShot="STROKE";selectedFoot="SPECIAL";
+ pendingBatAction={foot:"SPECIAL",shot:"STROKE",requestedAt:performance.now(),advanced:window.__c26AdvancedShot};
+ startSwingAnimation("SPECIAL","STROKE");
+ timingLabel.textContent=window.__c26AdvancedShot.replaceAll("_"," ")+" · SWING";
+ setDeliveryStatus(window.__c26AdvancedShot.replaceAll("_"," ")+" · HIGH RISK");
+};
+window.C26Core.setAdvancedShot=(name)=>{window.__c26AdvancedShot=name};
+window.C26Core.specialShot=()=>executeBatAction("SPECIAL");
