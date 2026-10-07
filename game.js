@@ -2061,9 +2061,6 @@ function resolveBowlingDelivery(){
  const contactChance=Math.max(.16,Math.min(.94,.82-deliveryQuality*.52+batterSkill*.18));
  const contact=Math.random()<contactChance;
 
- inningsBalls++;
- ballsInOver=inningsBalls%6;
-
  if(!contact){
   const wicketChance=Math.max(.08,Math.min(.52,
    .11+deliveryQuality*.44+(bowlLine==="STUMPS"?.08:0)+(bowlLength==="FULL"?.06:0)
@@ -2105,8 +2102,6 @@ function resolveBowlingDelivery(){
 
  const exitSpeed=17+pace*.16+28*missTiming;
  const automatedRuns=missTiming>.72?1:(missTiming>.56&&Math.random()<.35?1:0);
- runState.active=automatedRuns>0;
- runState.runs=0;
  selectedShot=shot;
  selectedDeliveryShot=shot;
  selectedFoot=foot;
@@ -2117,9 +2112,14 @@ function resolveBowlingDelivery(){
 
  // The AI can call a run immediately after a clean contact.
  if(automatedRuns){
-  runState.active=true;
-  runState.startedAt=performance.now();
-  setDeliveryStatus("AI BATTER · RUNNING");
+  setTimeout(()=>{
+   if(shotFlightActive&&!runState.fielded&&!runState.deliveryCounted){
+    runState.active=true;
+    runState.startedAt=performance.now();
+    runState.runnerProgress=0;
+    setDeliveryStatus("AI BATTER · RUNNING");
+   }
+  },180);
  }
 }\n\nconst __cleanBaseAnimate=animate;
 animate=function(now){
