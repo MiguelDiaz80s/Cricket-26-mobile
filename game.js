@@ -2121,7 +2121,9 @@ function resolveBowlingDelivery(){
    }
   },180);
  }
-}\n\nconst __cleanBaseAnimate=animate;
+}
+
+const __cleanBaseAnimate=animate;
 animate=function(now){
  if(controlMode==="BAT" && deliveryActive && landingPreview.visible && !pitchMarkerCleared){
   const pulse=1+Math.sin(now*.009)*.07;
