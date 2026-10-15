@@ -10,8 +10,9 @@ const mobilePixelRatio=Math.min(devicePixelRatio||1,1);
 const tabletPixelRatio=Math.min(devicePixelRatio||1.35,1.35);
 renderer.setPixelRatio(isTabletDevice?tabletPixelRatio:(isMobileDevice?mobilePixelRatio:Math.min(devicePixelRatio||1,1.35)));
 renderer.setSize(innerWidth,innerHeight,false);
-renderer.shadowMap.enabled=window.innerWidth>=700;
-renderer.shadowMap.type=isTabletDevice?THREE.PCFSoftShadowMap:(isMobileDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap);
+// Adaptive real-time shadow pipeline: keep shadows on for phones, but cap cost.
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=isMobileDevice&&!isTabletDevice?THREE.BasicShadowMap:THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.12;
@@ -19,6 +20,23 @@ renderer.toneMappingExposure=1.12;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x07120f);
 scene.fog=new THREE.FogExp2(0x07120f,.0068);
+
+// Procedural HDR-like studio environment for physically based material reflections.
+// This is an environment-lighting approximation, not full ray-traced global illumination.
+const envCanvas=document.createElement("canvas");
+envCanvas.width=512;envCanvas.height=256;
+const envCtx=envCanvas.getContext("2d");
+const envGrad=envCtx.createLinearGradient(0,0,0,256);
+envGrad.addColorStop(0,"#9db8d0");
+envGrad.addColorStop(.32,"#536b78");
+envGrad.addColorStop(.58,"#263d35");
+envGrad.addColorStop(1,"#101712");
+envCtx.fillStyle=envGrad;envCtx.fillRect(0,0,512,256);
+for(let i=0;i<9;i++){envCtx.fillStyle=i%2?"rgba(255,225,165,.20)":"rgba(210,230,255,.12)";envCtx.fillRect(i*61,38+(i%3)*9,28,5);}
+const stadiumEnvironment=new THREE.CanvasTexture(envCanvas);
+stadiumEnvironment.mapping=THREE.EquirectangularReflectionMapping;
+stadiumEnvironment.colorSpace=THREE.SRGBColorSpace;
+scene.environment=stadiumEnvironment;
 
 const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,1000);
 camera.position.set(30,12,30);
@@ -39,7 +57,15 @@ let visualStyle="broadcast";
 let theme=countries[selectedCountry];
 
 function hex(h){return new THREE.Color(h)}
-function material(c,r=.75,m=0){return new THREE.MeshStandardMaterial({color:hex(c),roughness:r,metalness:m})}
+// Shared PBR material factory: roughness and metalness remain per-surface controls.
+function material(c,r=.75,m=0){
+ return new THREE.MeshPhysicalMaterial({
+  color:hex(c),roughness:r,metalness:m,
+  envMapIntensity:.72,
+  clearcoat:m>.2?.16:.035,
+  clearcoatRoughness:Math.min(1,r+.12)
+ });
+}
 function meshBox(w,h,d,m,x=0,y=0,z=0){
  const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;return o;
 }
@@ -54,8 +80,12 @@ const playerTrim=[];
 
 const hemi=new THREE.HemisphereLight(0xa9c8e5,0x11170f,1.25);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe7bd,3.0);
-sun.position.set(-38,55,24);sun.castShadow=!isMobileDevice;sun.shadow.mapSize.set(isTabletDevice?512:(isMobileDevice?256:1024),isTabletDevice?512:(isMobileDevice?256:1024));
+sun.position.set(-38,55,24);sun.castShadow=true;
+const sunShadowResolution=isMobileDevice&&!isTabletDevice?512:(isTabletDevice?768:1536);
+sun.shadow.mapSize.set(sunShadowResolution,sunShadowResolution);
+sun.shadow.camera.near=1;sun.shadow.camera.far=150;
 sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;
+sun.shadow.bias=-0.00018;sun.shadow.normalBias=.025;sun.shadow.radius=isMobileDevice&&!isTabletDevice?2:4;
 scene.add(sun);
 
 function canvasTexture(width,height,draw,repeatX=1,repeatY=1){
@@ -158,7 +188,14 @@ function floodlight(x,z){
   bulb.position.set(-2.25+(i%6)*.9,24.4+Math.floor(i/6)*.85,-.42);g.add(bulb);
  }
  const l=new THREE.SpotLight(0xfff0c7,isMobileDevice?16:115,85,Math.PI/4,.5,1.25);
- l.position.set(0,24,0);l.target.position.set(0,0,0);g.add(l,l.target);lights.push(l);
+ l.position.set(0,24,0);l.target.position.set(0,0,0);
+ // Real floodlight shadows on desktop/tablet; mobile keeps the key sun shadow for performance.
+ l.castShadow=!isMobileDevice||isTabletDevice;
+ if(l.castShadow){
+  l.shadow.mapSize.set(isTabletDevice?512:1024,isTabletDevice?512:1024);
+  l.shadow.bias=-0.00025;l.shadow.normalBias=.035;
+ }
+ g.add(l,l.target);lights.push(l);
  stadium.add(g);
 }
 (isMobileDevice?[[-48,-35],[48,35]]:[[-48,-35],[48,-35],[-48,35],[48,35]]).forEach(p=>floodlight(...p));
@@ -194,7 +231,13 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  const shirt=material(shirtColor,.55); playerShirts.push(shirt);
  const trim=material(trimColor,.48,.06); playerTrim.push(trim);
  const pants=material(pantsColor,.72);
- const skin=material(skinColor,.8);
+ // Skin uses a physical surface with a restrained warm emissive lift to suggest subsurface light scatter.
+ // WebGL's standard material pipeline does not provide true skin SSS; this is a mobile-safe approximation.
+ const skin=new THREE.MeshPhysicalMaterial({
+  color:hex(skinColor),roughness:.68,metalness:0,
+  envMapIntensity:.48,clearcoat:.025,clearcoatRoughness:.9,
+  emissive:hex(skinColor),emissiveIntensity:.035
+ });
  const hair=material("#241a15",.9);
  const shoe=material("#111516",.3,.18);
  const helmet=material(team===0?theme.a:"#dce2df",.34,.28);
