@@ -1,4 +1,5 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import { createPlayerSurfaceSet, applyPlayerSurface } from "./player-art-pipeline.js?v=20261015art1";
 let wasmEngine=null;
 let wasmPhysicsActive=false;
 
@@ -228,30 +229,34 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
  const pantsColor=team===0?theme.a:"#f2f3ed";
  const skinColor=team===0?"#9b6849":"#8a573d";
 
- const shirt=material(shirtColor,.55); playerShirts.push(shirt);
+ const surfaceSet=createPlayerSurfaceSet();
+ const shirt=applyPlayerSurface(material(shirtColor,.62),surfaceSet.fabric); playerShirts.push(shirt);
  const trim=material(trimColor,.48,.06); playerTrim.push(trim);
- const pants=material(pantsColor,.72);
- // Skin uses a physical surface with a restrained warm emissive lift to suggest subsurface light scatter.
- // WebGL's standard material pipeline does not provide true skin SSS; this is a mobile-safe approximation.
- const skin=new THREE.MeshPhysicalMaterial({
-  color:hex(skinColor),roughness:.68,metalness:0,
+ const pants=applyPlayerSurface(material(pantsColor,.76),surfaceSet.fabric);
+ const skin=applyPlayerSurface(new THREE.MeshPhysicalMaterial({
+  color:hex(skinColor),roughness:.72,metalness:0,
   envMapIntensity:.48,clearcoat:.025,clearcoatRoughness:.9,
-  emissive:hex(skinColor),emissiveIntensity:.035
- });
+  emissive:hex(skinColor),emissiveIntensity:.025
+ }),surfaceSet.skin);
+ if(!g.userData.skinMaterials)g.userData.skinMaterials=[];
+ g.userData.skinMaterials.push(skin);
  const hair=material("#241a15",.9);
  const shoe=material("#111516",.3,.18);
  const helmet=material(team===0?theme.a:"#dce2df",.34,.28);
  const seamMat=material(team===0?theme.b:"#bfc8c4",.38,.1);
 
  const mesh=(geometry,mat,pos,scale=[1,1,1])=>{
-  const m=new THREE.Mesh(geometry,mat);
+  if(geometry.attributes.uv&&!geometry.attributes.uv2)geometry.setAttribute("uv2",geometry.attributes.uv);
+   const m=new THREE.Mesh(geometry,mat);
   m.position.set(...pos);m.scale.set(...scale);
   m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
  };
  const segment=(a,b,r,mat)=>{
   const v=new THREE.Vector3().subVectors(b,a);
   const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
-  const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),isMobileDevice&&!isTabletDevice?8:12,isMobileDevice&&!isTabletDevice?10:18),mat);
+  const geometry=new THREE.CapsuleGeometry(r,Math.max(.08,v.length()-r*2),isMobileDevice&&!isTabletDevice?8:12,isMobileDevice&&!isTabletDevice?10:18);
+   if(geometry.attributes.uv&&!geometry.attributes.uv2)geometry.setAttribute("uv2",geometry.attributes.uv);
+   const m=new THREE.Mesh(geometry,mat);
   m.position.copy(mid);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());
   m.castShadow=true;m.receiveShadow=true;g.add(m);return m;
@@ -736,6 +741,15 @@ function animate(now){
  const rawDt=(now-last)/1000; last=now;
  const dt=Number.isFinite(rawDt)?Math.min(Math.max(rawDt,0),.05):0;
  const t=now*.001;
+  // Sweat response ramps gently with overs: smoother skin highlights, never mirror-gloss.
+  const sweat=Math.min(displayBalls/180,1);
+  for(const p of [batter,nonStriker,keeper,bowler,...fielders]){
+   for(const skinMat of (p.userData.skinMaterials||[])){
+    skinMat.roughness=.72-sweat*.12;
+    skinMat.clearcoat=.025+sweat*.12;
+    skinMat.clearcoatRoughness=.9-sweat*.18;
+   }
+  }
  batter.position.y=.18+Math.sin(t*2)*.012;keeper.position.y=.18+Math.sin(t*2.5+.8)*.01;bowler.position.y=.18+Math.sin(t*1.8+.4)*.01;
  fielders.forEach((p,i)=>p.position.y=.18+Math.sin(t*1.5+i)*.007);
  if(keeper.userData.lockedKeeper&&!shotFlightActive){
