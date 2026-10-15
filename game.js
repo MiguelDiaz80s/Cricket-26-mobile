@@ -1,5 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import { createPlayerSurfaceSet, applyPlayerSurface } from "./player-art-pipeline.js?v=20261015art1";
+import { attachRiggedPlayerModel, updateRiggedPlayerModel } from "./player-model-loader.js?v=20261015rig1";
 let wasmEngine=null;
 let wasmPhysicsActive=false;
 
@@ -361,8 +362,11 @@ function player({team=0,role="fielder",x=0,z=0,scale=.95}={}) {
   mesh(new THREE.CapsuleGeometry(.14,.48,10,18),pad,[.21,.53,-.16],[1.15,1,.72]);
  }
 
- g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.userData.proceduralFallback=true}});
  stadium.add(g);
+ // A licensed, rigged GLB can be enabled by setting window.CRICKET_PLAYER_MODEL_URL.
+ // Keep the procedural player visible when no model is configured or loading fails.
+ attachRiggedPlayerModel(g,{url:window.CRICKET_PLAYER_MODEL_URL,role});
  return g;
 }
 
@@ -743,6 +747,7 @@ function animate(now){
  const t=now*.001;
   // Sweat response ramps gently with overs: smoother skin highlights, never mirror-gloss.
   const sweat=Math.min(displayBalls/180,1);
+  for(const p of [batter,nonStriker,keeper,bowler,...fielders])updateRiggedPlayerModel(p,dt);
   for(const p of [batter,nonStriker,keeper,bowler,...fielders]){
    for(const skinMat of (p.userData.skinMaterials||[])){
     skinMat.roughness=.72-sweat*.12;
