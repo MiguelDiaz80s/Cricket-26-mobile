@@ -1,6 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import { createPlayerSurfaceSet, applyPlayerSurface } from "./player-art-pipeline.js?v=20261015art1";
-import { attachRiggedPlayerModel, updateRiggedPlayerModel } from "./player-model-loader.js?v=20261015rig1";
+import { attachRiggedPlayerModel, updateRiggedPlayerModel } from "./player-model-loader.js?v=20261103rig2";
 let wasmEngine=null;
 let wasmPhysicsActive=false;
 
