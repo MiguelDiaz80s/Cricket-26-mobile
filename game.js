@@ -134,12 +134,42 @@ function addCreaseMarkings(){
 addCreaseMarkings();
 
 
-const wood=material("#f2d9a5",.42);
+// Detailed procedural 3D wicket set: tapered willow stumps, grain, turned collars and separate bails.
+const wicketWoodTexture=canvasTexture(256,512,(x,w,h)=>{
+ x.fillStyle="#d6b47a";x.fillRect(0,0,w,h);
+ for(let i=0;i<95;i++){
+  const xx=Math.random()*w,alpha=.035+Math.random()*.11;
+  x.strokeStyle=i%5===0?`rgba(105,65,27,${alpha})`:`rgba(255,239,190,${alpha})`;
+  x.lineWidth=.5+Math.random()*2;x.beginPath();x.moveTo(xx,0);x.bezierCurveTo(xx+(Math.random()-.5)*12,h*.3,xx+(Math.random()-.5)*12,h*.7,xx+(Math.random()-.5)*8,h);x.stroke();
+ }
+ for(let i=0;i<18;i++){x.fillStyle="rgba(105,70,35,.09)";x.fillRect(0,Math.random()*h,w,1+Math.random()*2)}
+},1,1);
+const wood= new THREE.MeshPhysicalMaterial({color:"#f1d9a8",map:wicketWoodTexture,roughness:.34,clearcoat:.22,clearcoatRoughness:.3});
+const bailWood= new THREE.MeshPhysicalMaterial({color:"#e8c991",map:wicketWoodTexture,roughness:.3,clearcoat:.28});
+const wicketDark=material("#9a713f",.48);
 const wicketGroups=[];
 function makeWicket(z){
  const g=new THREE.Group();
- [-.34,0,.34].forEach(x=>g.add(meshCyl(.075,2.25,wood,x,.98,0,18)));
- g.add(meshBox(.82,.09,.13,wood,0,2.08,0),meshBox(.82,.09,.13,wood,0,2.17,0));
+ [-.34,0,.34].forEach((x,index)=>{
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.064,.082,2.25,32,1),wood);
+  shaft.position.set(x,1.125,0);shaft.castShadow=true;shaft.receiveShadow=true;g.add(shaft);
+  // Fine turned rings just below the top and near the foot.
+  [0.12,2.02,2.10].forEach((y,j)=>{
+   const ring=new THREE.Mesh(new THREE.TorusGeometry(j===0?.078:.066,.009,8,32),j===0?wicketDark:bailWood);
+   ring.position.set(x,y,0);ring.rotation.x=Math.PI/2;ring.castShadow=true;g.add(ring);
+  });
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.066,.066,.035,32),bailWood);
+  cap.position.set(x,2.255,0);cap.castShadow=true;g.add(cap);
+ });
+ // Two individual rounded bails bridging the three stumps.
+ [-.17,.17].forEach(x=>{
+  const bail=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.34,20),bailWood);
+  bail.rotation.z=Math.PI/2;bail.position.set(x,2.29,0);bail.castShadow=true;bail.receiveShadow=true;g.add(bail);
+  [-.135,.135].forEach(dx=>{
+   const tip=new THREE.Mesh(new THREE.SphereGeometry(.035,12,8),bailWood);
+   tip.position.set(x+dx,2.29,0);tip.castShadow=true;g.add(tip);
+  });
+ });
  g.children.forEach(m=>{m.userData.home={position:m.position.clone(),rotation:m.rotation.clone()};});
  g.position.z=z;stadium.add(g);wicketGroups.push(g);
 }
