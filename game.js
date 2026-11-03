@@ -2480,7 +2480,7 @@ updateScoreboard();
   const start=origin.clone(),velocity=direction.clone().normalize(),flat=new THREE.Vector3(velocity.x,0,velocity.z);if(flat.lengthSq()<.001)flat.set(0,0,-1);else flat.normalize();
   const isLoft=shot==="LOFT",isEdge=contactEdgeToSlips,power=SHOT_POWER_MODIFIERS[shot]||1.2,distance=(isLoft?12:5)+Math.max(0,exitSpeed)*(isLoft?.16:.12)*Math.min(power,1.5),target=start.clone().add(flat.multiplyScalar(distance));target.y=.25;
   const duration=Math.min(5000,2100+Math.max(0,exitSpeed)*34),sector=sectorForVelocity(flat);showSector(isEdge?"SLIPS":sector);
-  const catchPoint=start.clone().lerp(target,isEdge?.58:.86);catchPoint.y=isEdge?.72:1.05;phase12Fielder=chooseFielder(isLoft||isEdge?catchPoint:target,sector);
+  const catchPoint=start.clone().lerp(target,isEdge?.58:.86);catchPoint.y=isEdge?.72:(isLoft?1.05:.55);phase12Fielder=chooseFielder(catchPoint,sector);
   if(runBtn){runBtn.disabled=false;runBtn.classList.add("active");runBtn.classList.remove("running");runBtn.textContent="RUN";}
   const started=performance.now();let previousY=start.y;let resolved=false;
   const finishBoundary=(runs,label)=>{if(resolved||phase12Finalized)return;resolved=true;phase12RunsCommitted=runs;shotFlightActive=false;ballHit=false;if(runBtn)runBtn.classList.remove("active","running");finishRuns(runs,label);beginRecovery(label,runs,"None",quality,pendingBatAction?.foot||"NONE",true);};
@@ -2490,8 +2490,9 @@ updateScoreboard();
   const tick=now=>{
    if(!phase12Active||phase12Finalized||resolved)return;const dt=Math.min(.033,Math.max(.001,(now-started)/1000));const p=Math.min(1,(now-started)/duration),e=p*p*(3-2*p);ball.position.lerpVectors(start,target,e);const lift=isLoft?3.25*Math.sin(Math.PI*e):.72*Math.sin(Math.PI*e);ball.position.y=Math.max(.25,start.y+(target.y-start.y)*e+lift);ball.rotation.x+=dt*10;ball.rotation.y+=dt*12;moveFielder(phase12Fielder,dt);
    const descending=ball.position.y<previousY;
-   const catchableAerial=isLoft||isEdge;
-   const catchAltitude=isEdge?.72:CATCH_ALTITUDE;
+   const catchableAerial=true;
+   // Any shot can carry to a fielder: lofts are caught higher, while drives and pushes allow low catches.
+   const catchAltitude=isEdge?.72:(isLoft?CATCH_ALTITUDE:.55);
    if(catchableAerial&&descending&&ball.position.y<=catchAltitude&&previousY>catchAltitude&&phase12CatchWindowUntil<=now){phase12CatchWindowUntil=now+CATCH_WINDOW_MS;const fd=phase12Fielder?Math.hypot(phase12Fielder.position.x-ball.position.x,phase12Fielder.position.z-ball.position.z):Infinity;if(phase12Fielder&&fd<=CATCH_RADIUS){const skill=phase12Fielder.userData.skill||.78;if(Math.random()<skill){phase12ResolveCatch(quality,pendingBatAction?.foot||"NONE");return;}showToast("CATCH DROPPED");setDeliveryStatus(isEdge?"EDGE · CATCH DROPPED · BALL LIVE":"CATCH DROPPED · BALL LIVE");}}
    previousY=ball.position.y;
    if(boundaryMetric(ball.position)>=1){const six=isLoft&&ball.position.y>.34;finishBoundary(six?6:4,six?"6 RUNS · OVER THE ROPE":"4 RUNS · BOUNDARY");return;}
