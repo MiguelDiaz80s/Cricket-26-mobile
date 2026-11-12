@@ -864,16 +864,17 @@ startMatchBtn.addEventListener("click",()=>{
 document.querySelectorAll(".top-nav span").forEach(item=>item.addEventListener("click",()=>{
  const name=item.textContent.trim();
  if(name==="HOME"){cover.classList.remove("hidden");hud.classList.add("hidden");preMatch.classList.remove("open");showToast("HOME")}
- else if(name==="CAREER"){playerHub.classList.add("open");showToast("CAREER HUB")}
+ else if(name==="CAREER"){window.C26NextGen?.career?.classList.add("open");showToast("CAREER HUB")}
  else if(name==="PLAY"){openPreMatch()}
- else if(name==="MY CRICKETER"){playerHub.classList.add("open");showToast("MY CRICKETER")}
+ else if(name==="MY CRICKETER"){window.C26NextGen?.academy?.classList.add("open");showToast("MY CRICKETER")}
 }));
 
 document.querySelectorAll(".mode-card").forEach(card=>card.addEventListener("click",()=>{
  const title=card.querySelector("strong")?.textContent||"MODE";
  if(title==="QUICK MATCH")openPreMatch();
- if(title==="CREATE PLAYER"||title==="CAREER")playerHub.classList.add("open");
- if(title==="TOURNAMENTS")showToast("TOURNAMENT HUB · COMING NEXT");
+ if(title==="CREATE PLAYER")window.C26NextGen?.academy?.classList.add("open");
+ if(title==="CAREER")window.C26NextGen?.career?.classList.add("open");
+ if(title==="TOURNAMENTS")window.C26NextGen?.tournament?.classList.add("open");
 }));
 playerHubClose.addEventListener("click",()=>playerHub.classList.remove("open"));
 playerHub.addEventListener("click",e=>{if(e.target===playerHub)playerHub.classList.remove("open")});
@@ -2356,8 +2357,8 @@ resolveBallFlight=function(origin,direction,exitSpeed,shot,quality){
 };
 
 /* Functional mode menus — single delegated controller. */
-function closeCleanPanels(){["#careerPanel","#tournamentPanel","#playerHub"].forEach(id=>document.querySelector(id)?.classList.remove("open"));}
-function openCleanPanel(id){closeCleanPanels();const panel=document.querySelector(id);if(panel){panel.classList.add("open");panel.style.pointerEvents="auto";panel.removeAttribute("hidden");}menuPanel?.classList.remove("open");document.querySelectorAll(".top-nav span").forEach(x=>x.classList.toggle("nav-active",x.textContent.trim()==="HOME"));}
+function closeCleanPanels(){["#careerPanel","#tournamentPanel","#playerHub"].forEach(id=>document.querySelector(id)?.classList.remove("open"));[window.C26NextGen?.career,window.C26NextGen?.academy,window.C26NextGen?.tournament].forEach(panel=>panel?.classList.remove("open"));}
+function openCleanPanel(id){closeCleanPanels();const nextGenPanel=id==="#careerPanel"?window.C26NextGen?.career:id==="#tournamentPanel"?window.C26NextGen?.tournament:id==="#playerHub"?window.C26NextGen?.academy:null;const panel=nextGenPanel||document.querySelector(id);if(panel){panel.classList.add("open");panel.style.pointerEvents="auto";panel.removeAttribute("hidden");}menuPanel?.classList.remove("open");document.querySelectorAll(".top-nav span").forEach(x=>x.classList.toggle("nav-active",x.textContent.trim()==="HOME"));}
 document.querySelector(".top-nav")?.addEventListener("click",e=>{const item=e.target.closest("span");if(!item)return;const n=item.textContent.trim();if(n==="CAREER")openCleanPanel("#careerPanel");else if(n==="MY CRICKETER")openCleanPanel("#playerHub");else if(n==="PLAY")openPreMatch();});
 document.querySelector(".menu-inner")?.addEventListener("click",e=>{const card=e.target.closest(".mode-card");if(card){const n=card.querySelector("strong")?.textContent.trim();if(n==="QUICK MATCH")openPreMatch();else if(n==="CAREER")openCleanPanel("#careerPanel");else if(n==="TOURNAMENTS")openCleanPanel("#tournamentPanel");else if(n==="CREATE PLAYER")openCleanPanel("#playerHub");return;}const b=e.target.closest(".menu-grid button");if(!b)return;const n=b.textContent.trim();if(n==="MY CRICKETER")openCleanPanel("#playerHub");else if(n==="STADIUMS"||n==="TEAMS")showToast(n+" · HUB READY");});
 document.querySelectorAll(".game-panel-close").forEach(b=>b.addEventListener("click",closeCleanPanels));
