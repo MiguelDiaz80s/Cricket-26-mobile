@@ -12,6 +12,7 @@ function persist(){try{localStorage.setItem(SAVE,JSON.stringify(save))}catch(e){
 const st=document.createElement("style");st.textContent=
 '.c26x{position:fixed;inset:0;z-index:9800000;display:none;align-items:center;justify-content:center;background:#020b07cc;backdrop-filter:blur(10px);padding:14px;font-family:system-ui,sans-serif}.c26x.open{display:flex}.c26xcard{width:min(760px,calc(100vw - 20px));max-height:88dvh;overflow:auto;padding:18px;border-radius:20px;background:linear-gradient(#10281b,#06120b);border:1px solid #ffffff24;color:#fff;box-shadow:0 25px 90px #000b}.c26xhead{display:flex;justify-content:space-between;align-items:flex-start}.c26xhead h2{margin:3px 0;font-size:clamp(25px,6vw,42px)}.c26xhead small,.c26xlabel{color:#aab9b1;font-size:10px;font-weight:900;letter-spacing:.12em}.c26xclose{background:#ffffff0b;color:#fff;border:1px solid #ffffff25;border-radius:9px;font-size:22px;width:40px;height:40px}.c26xgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.c26xgrid.two{grid-template-columns:repeat(2,1fr)}.c26xstat{padding:11px;border:1px solid #ffffff17;border-radius:11px;background:#ffffff06}.c26xstat b{display:block;font-size:23px}.c26xstat small{color:#aab9b1;font-weight:800}.c26x button:not(.c26xclose){padding:11px 9px;border:1px solid #ffffff20;border-radius:10px;background:#12321f;color:#fff;font-weight:900}.c26x button.active{outline:2px solid var(--accent,#f5c400)}.c26xsection{margin-top:16px}.c26xrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #ffffff12}.c26xbar{height:7px;background:#ffffff13;border-radius:9px;overflow:hidden;margin-top:6px}.c26xbar i{display:block;height:100%;background:var(--accent,#f5c400)}.c26advanced{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);z-index:9100;display:none;gap:4px;padding:4px;background:#03130ce8;border:1px solid #ffffff20;border-radius:11px}.c26advanced.open{display:flex}.c26advanced button{font-size:8px;padding:7px;border:1px solid #ffffff20;border-radius:7px;background:#102b1d;color:#fff;font-weight:1000}.c26wind{position:fixed;right:9px;top:82px;z-index:9100;padding:7px 9px;border-radius:9px;background:#03130cdd;border:1px solid #ffffff20;color:#fff;font:900 9px system-ui;letter-spacing:.08em}.c26broadcast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:9800001;opacity:0;pointer-events:none;padding:8px 14px;border-radius:999px;background:#03130ce8;border:1px solid #ffffff25;color:#fff;font:1000 11px system-ui;letter-spacing:.1em;transition:.2s}.c26broadcast.on{opacity:1}.c26replay{position:fixed;right:9px;top:116px;z-index:9100}.c26replay button{background:#03130cdd;color:#fff;border:1px solid #ffffff22;border-radius:9px;padding:7px;font-size:9px;font-weight:1000}.c26audio{position:fixed;left:9px;top:82px;z-index:9100;padding:7px 9px;border-radius:9px;background:#03130cdd;color:#fff;border:1px solid #ffffff20;font:900 9px system-ui}.c26audio.on{outline:1px solid #f5c400}';
 document.head.appendChild(st);
+st.textContent += "\n/* C26 v1.001 — progressive disclosure for small touch screens */\n.c26-more-controls{display:flex;align-items:center;justify-content:center;width:100%;min-height:34px;margin-top:5px;padding:5px 8px;border:1px solid #ffffff35;border-radius:9px;background:#0b2619;color:#f5c400;font:900 9px system-ui;letter-spacing:.08em;touch-action:manipulation}\n.foot-four[hidden]{display:none!important}\n.foot-four:not([hidden]){display:grid!important}\n@media(max-width:700px){.c26-more-controls{min-height:32px;font-size:8px}}\n";
 
 function panel(id,title,kicker){const p=document.createElement("div");p.id=id;p.className="c26x";p.innerHTML='<div class="c26xcard"><div class="c26xhead"><div><span class="c26xlabel">'+kicker+'</span><h2>'+title+'</h2></div><button class="c26xclose">×</button></div><div class="c26xbody"></div></div>';p.addEventListener("click",e=>{if(e.target===p||e.target.closest(".c26xclose"))p.classList.remove("open")});document.body.appendChild(p);return p}
 const career=panel("c26xCareer","CAREER","WORLD PATH"),academy=panel("c26xAcademy","MY CRICKETER","PLAYER CREATOR"),tour=panel("c26xTour","TOURNAMENTS","WORLD CRICKET");
@@ -26,6 +27,23 @@ $$(".top-nav span").forEach(n=>n.addEventListener("click",()=>{const t=n.textCon
 $$(".mode-card").forEach(c=>c.addEventListener("click",()=>{const t=c.querySelector("strong")?.textContent?.trim();if(t==="CAREER"){careerRender();career.classList.add("open")}if(t==="CREATE PLAYER"){academyRender();academy.classList.add("open")}if(t==="TOURNAMENTS"){tourRender();tour.classList.add("open")}}));
 
 /* Advanced shot selector — SPECIAL now has real contextual choices. */
+/* Compact batting controls: keep the first screen clean, reveal footwork on demand. */
+const battingButtons=$(".batting-buttons");
+const moreControls=document.createElement("button");
+moreControls.type="button";moreControls.className="c26-more-controls";moreControls.textContent="MORE CONTROLS +";
+moreControls.setAttribute("aria-expanded","false");
+const footControls=$(".foot-four");
+if(battingButtons&&footControls){
+  footControls.hidden=true;
+  battingButtons.insertBefore(moreControls,footControls);
+  moreControls.addEventListener("click",()=>{
+    const expanded=moreControls.getAttribute("aria-expanded")==="true";
+    moreControls.setAttribute("aria-expanded",String(!expanded));
+    footControls.hidden=expanded;
+    moreControls.textContent=expanded?"MORE CONTROLS +":"LESS CONTROLS −";
+  });
+}
+
 const adv=document.createElement("div");adv.className="c26advanced";adv.innerHTML='<button data-adv="REVERSE_SCOOP">REVERSE SCOOP</button><button data-adv="RAMP">RAMP</button><button data-adv="SWEEP">SWEEP</button><button data-adv="CUT">CUT</button>';document.body.appendChild(adv);
 adv.querySelectorAll("[data-adv]").forEach(b=>b.onclick=()=>{window.__c26AdvancedShot=b.dataset.adv;core().setAdvancedShot(b.dataset.adv);core().showToast(b.dataset.adv.replaceAll("_"," ")+" SELECTED")});
 document.addEventListener("pointerdown",e=>{if(e.target.closest('[data-foot="SPECIAL"]'))adv.classList.add("open")},{capture:true});
